@@ -1,9 +1,9 @@
 <?php
-namespace Horizon\Services\Base;
+namespace {{ namespace }}\Services\Base;
 
 use Zenderator\Abstracts\Service as AbstractService;
-use Horizon\TableGateways\{{ class_name }}TableGateway;
-use Horizon\Models\{{ class_name }}Model;
+use {{ namespace }}\TableGateways\{{ class_name }}TableGateway;
+use {{ namespace }}\Models\{{ class_name }}Model;
 use Zend\Db\ResultSet\ResultSet;
 
 abstract class Base{{ class_name }}Service extends AbstractService

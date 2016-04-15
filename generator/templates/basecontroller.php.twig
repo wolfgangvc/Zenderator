@@ -1,5 +1,5 @@
 <?php
-namespace Horizon\Controllers\Base;
+namespace {{ namespace }}\Controllers\Base;
 
 use Zenderator\Abstracts\Controller;
 
@@ -9,7 +9,7 @@ abstract class Base{{ class_name }}Controller extends AbstractController
 
     public function __construct(\Slim\Container $container)
     {
-        $this->service = $container->get(\Horizon\Services\{{ class_name }}Service::class);
+        $this->service = $container->get(\{{ namespace }}\Services\{{ class_name }}Service::class);
         parent::__construct($container);
     }
 }

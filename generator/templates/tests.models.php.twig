@@ -1,9 +1,9 @@
 <?php
-namespace Horizon\Test\Models;
+namespace {{ namespace }}\Test\Models;
 
-use \Horizon\TableGateways\{{ class_name }}TableGateway;
-use \Horizon\Models\{{ class_name }}Model;
-use \Horizon\Models;
+use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
+use \{{ namespace }}\Models\{{ class_name }}Model;
+use \{{ namespace }}\Models;
 
 class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
 {
@@ -38,7 +38,7 @@ $this->testInstance = new {{ class_name }}Model($data);
     public function testGetRandom()
     {
         /** @var {{ class_name|lower }}TableGateway $table */
-        $table = $this->getDIContainer()->get(\Horizon\TableGateways\{{ class_name }}TableGateway::class);
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 
         // If there is no data in the table, create some.
         if($table->getCount() == 0){
@@ -59,7 +59,7 @@ $this->testInstance = new {{ class_name }}Model($data);
     public function testGetById({{ class_name }}Model ${{ class_name|lower }})
     {
         /** @var {{ class_name|lower }}TableGateway $table */
-        $table = $this->getDIContainer()->get(\Horizon\TableGateways\{{ class_name }}TableGateway::class);
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
         $results = $table->select(['id' => ${{ class_name|lower }}->getId()]);
         ${{ class_name|lower }}Row = $results->current();
         $this->assertTrue(${{ class_name|lower }}Row instanceof {{ class_name }}Model);

@@ -1,7 +1,7 @@
 <?php
-namespace Horizon\TableGateways\Base;
+namespace {{ namespace }}\TableGateways\Base;
 use \Zenderator\Abstracts\TableGateway as AbstractTableGateway;
-use \Horizon\TableGateways;
+use \{{ namespace }}\TableGateways;
 
 abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {
@@ -14,7 +14,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% for column in columns %}
 {% if 'constraints' in column|keys %}
       /** @var TableGateways\{{ column.constraints.remote_model_class }}TableGateway ${{ column.constraints.remote_model_class }}TableGateway */
-      ${{ column.constraints.remote_model_class }}TableGateway = $this->container->get(\Horizon\TableGateways\{{ column.constraints.remote_model_class }}TableGateway::class);
+      ${{ column.constraints.remote_model_class }}TableGateway = $this->container->get(\{{ namespace }}\TableGateways\{{ column.constraints.remote_model_class }}TableGateway::class);
       ${{ column.constraints.remote_model_class }}ExampleObject = ${{ column.constraints.remote_model_class }}TableGateway->getNewMockModelInstance();
       ${{ column.constraints.remote_model_class }}TableGateway->save(${{ column.constraints.remote_model_class }}ExampleObject);
 
