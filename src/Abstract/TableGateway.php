@@ -31,12 +31,12 @@ abstract class TableGateway extends ZendTableGateway
     }
 
     /**
-     * @param AbstractModel $model
+     * @param Model $model
      *
      * @return array|\ArrayObject|null
      * @throws TableGatewayException
      */
-    public function save(AbstractModel $model)
+    public function save(Model $model)
     {
         $pk = $model->getPrimaryKeys();
 
@@ -48,7 +48,7 @@ abstract class TableGateway extends ZendTableGateway
         }
 
         try {
-            /** @var AbstractModel $oldModel */
+            /** @var Model $oldModel */
             $oldModel = $this->select($pk)->current();
             if ($pkIsBlank || !$oldModel) {
                 $pk = $this->saveInsert($model);
@@ -71,11 +71,11 @@ abstract class TableGateway extends ZendTableGateway
     }
 
     /**
-     * @param AbstractModel $model
+     * @param Model $model
      *
      * @return int|null
      */
-    public function saveInsert(AbstractModel $model)
+    public function saveInsert(Model $model)
     {
         $data = $model->__toArray();
         $this->insert($data);
@@ -89,12 +89,12 @@ abstract class TableGateway extends ZendTableGateway
 
 
     /**
-     * @param AbstractModel $model
-     * @param AbstractModel $oldModel
+     * @param Model $model
+     * @param Model $oldModel
      *
      * @return int
      */
-    public function saveUpdate(AbstractModel $model, AbstractModel $oldModel)
+    public function saveUpdate(Model $model, Model $oldModel)
     {
         return $this->update(
             $model->__toArray(),
@@ -118,7 +118,7 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param array $data
      * @param null $where
-     * @param array|AbstractModel $oldData
+     * @param array|Model $oldData
      *
      * @return int
      */
@@ -184,7 +184,7 @@ abstract class TableGateway extends ZendTableGateway
      * @param array|string $order
      * @param int $offset
      *
-     * @return array|\ArrayObject|null|AbstractModel
+     * @return array|\ArrayObject|null|Model
      * @throws TableGatewayException
      */
     public function fetchRow($where = null, $order = null, $offset = null)
@@ -226,7 +226,7 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param $id
      *
-     * @return AbstractModel
+     * @return Model
      * @throws TableGatewayException
      */
     public function getById($id)
@@ -270,7 +270,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param array $data
-     * @return AbstractModel
+     * @return Model
      */
     public function getNewModelInstance(array $data = [])
     {
@@ -280,7 +280,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param Select $select
-     * @return AbstractModel[]
+     * @return Model[]
      */
     public function getBySelect(Select $select)
     {
@@ -294,7 +294,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param Select $select
-     * @return AbstractModel[]
+     * @return Model[]
      */
     public function getBySelectRaw(Select $select)
     {
