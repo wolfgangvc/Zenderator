@@ -1,0 +1,182 @@
+<?php
+
+namespace Horizon\Test\Api\Generated;
+
+use Horizon\Test\RoutesTestCase;
+use Horizon\TableGateways;
+use Horizon\Exceptions\TableGatewayException;
+
+class {{ class_name }}EndpointTest extends RoutesTestCase
+{
+
+    const MODEL_NAME = '{{ class_name }}';
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test{{ class_name }}Create()
+    {
+        try{
+            $this->waypoint("Begin");
+            $new{{ class_name }} = $this->getApp()->getContainer()->get('{{ class_name }}MockModel');
+            $this->waypoint("Initialise Mock Model");
+            $response = $this->request("PUT", "/v1/{{ controller_route}}", $new{{ class_name }}->__toArray());
+            $this->waypoint("API PUT REST REQUEST");
+            $this->assertEquals(200, $response->getStatusCode());
+            $body = (string) $response->getBody();
+            $this->waypoint("Get & Parse Response");
+            $this->assertNotNull(
+                json_decode((string) $body),
+                "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}->__toArray()) . "\""
+            );
+            $responseJson = json_decode($body, true);
+            $this->waypoint("JSON DECODE");
+            $this->assertArrayHasKey('Status', $responseJson);
+            $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to PUT /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+            $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
+            $this->waypoint("Some assertions");
+            $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
+            $this->waypoint("Validate Object Response");
+            //TODO: Make this respect primary key field instead of assuming ID.
+            if(!isset($responseJson['{{ class_name }}']['Id'])){
+                $this->markTestIncomplete("Skipped test... {{ class_name }} response object doesn't have an ID field.");
+            }
+            return $responseJson['{{ class_name }}']['Id'];
+        } catch ( TableGatewayException $tge ) {
+            $this->fail("Skipped test due to: {$tge->getMessage()}");
+        }
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test{{ class_name }}CreateFails()
+    {
+        $this->markTestSkipped("This test makes phpunit sad because closures cannot be serialised");
+        $this->waypoint("Begin");
+
+        $new{{ class_name }} = [
+{% for column in columns %}
+            '{{ column.field }}' => null,
+{% endfor %}
+        ];
+        $response = $this->request("PUT", "/v1/{{ controller_route}}", $new{{ class_name }});
+        $this->waypoint("API PUT REST REQUEST");
+        $this->assertEquals(200, $response->getStatusCode());
+        $body = $response->getBody();
+        $this->waypoint("Get & Parse Response");
+        $this->assertNotNull(
+            json_decode((string) $body),
+            "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}) . "\""
+        );
+        $responseJson = json_decode((string)$body, true);
+        $this->waypoint("JSON DECODE");
+        $this->assertArrayHasKey('Status', $responseJson);
+        $this->assertEquals("FAIL", $responseJson['Status'], "Object was created, when failure was expected.");
+        $this->waypoint("Some assertions");
+    }
+
+    /**
+     * @depends test{{ class_name }}Create
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test{{ class_name }}Get($id)
+    {
+        $this->waypoint("Begin");
+        $response = $this->request("GET", "/v1/{{ controller_route}}/{$id}");
+        $this->waypoint("API GET REST REQUEST");
+        $this->assertEquals(200, $response->getStatusCode());
+        $body = $response->getBody();
+        $this->waypoint("Get & Parse Response");
+        $this->assertNotNull(
+            json_decode((string) $body),
+            "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
+        );
+        $responseJson = json_decode((string)$body, true);
+        $this->waypoint("JSON DECODE");
+        $this->assertArrayHasKey('Status', $responseJson);
+        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to GET /v1/{{ controller_route }}/{$id} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
+        $this->waypoint("Some assertions");
+
+        $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
+        $this->waypoint("Validate Object Response");
+    }
+
+    /**
+     * @depends test{{ class_name }}Create
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test{{ class_name }}List()
+    {
+        $this->waypoint("Begin");
+        $response = $this->request("GET", "/v1/{{ controller_route}}");
+        $this->waypoint("API REST REQUEST");
+        $this->assertEquals(200, $response->getStatusCode());
+        $body = $response->getBody();
+        $this->waypoint("Get & Parse Response");
+        $this->assertNotNull(
+            json_decode((string) $body),
+            "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
+        );
+        $responseJson = json_decode((string)$body, true);
+        $this->waypoint("JSON DECODE");
+        $this->assertArrayHasKey('Status', $responseJson);
+        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to GET /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertArrayHasKey('{{ object_name_plural }}', $responseJson);
+        $this->waypoint("Some assertions");
+        $this->validate{{ class_name }}Object(reset($responseJson['{{ object_name_plural }}']));
+        $this->waypoint("Validate Object Response");
+
+    }
+
+    /**
+     * @depends test{{ class_name }}Create
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test{{ class_name }}Delete($id)
+    {
+        $response = $this->request("DELETE", "/v1/{{ controller_route}}/{$id}");
+        $this->assertEquals(200, $response->getStatusCode());
+        $body = $response->getBody();
+        $this->assertNotNull(
+            json_decode((string) $body),
+            "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
+        );
+        $responseJson = json_decode((string)$body, true);
+        $this->assertArrayHasKey('Status', $responseJson);
+        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to DELETE /v1/{{ controller_route }}/{$id} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
+        $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
+        return $id;
+    }
+
+    /**
+     * @depends test{{ class_name }}Delete
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test{{ class_name }}DeleteVerify($id)
+    {
+        $response = $this->request("GET", "/v1/{{ controller_route}}/{$id}");
+        $body = $response->getBody();
+        $this->assertNotNull(
+            json_decode((string) $body),
+            "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
+        );
+        $responseJson = json_decode((string)$body, true);
+        $this->assertEquals("FAIL", $responseJson['Status']);
+    }
+
+    private function validate{{ class_name }}Object(${{ class_name }}Object)
+    {
+{% for column in columns %}
+        $this->assertArrayHasKey('{{ column.field }}', ${{ class_name }}Object);
+{% endfor %}
+    }
+}

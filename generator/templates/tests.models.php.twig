@@ -1,0 +1,107 @@
+<?php
+namespace Horizon\Test\Models;
+
+use \Horizon\TableGateways\{{ class_name }}TableGateway;
+use \Horizon\Models\{{ class_name }}Model;
+use \Horizon\Models;
+use \Horizon\Test\BaseTestCase;
+
+class {{ class_name }}Test extends BaseTestCase
+{
+    protected $testInstance;
+
+    public function __setUp()
+    {
+        parent::__setUp();
+    }
+
+    public function __tearDown()
+    {
+        parent::__tearDown();
+    }
+
+    public function testExchangeArray()
+    {
+        $data = [];
+{% for column in columns %}
+{% if column.phptype == 'int' or column.phptype == 'float' %}
+        $data['{{ column.field|lower }}'] = self::getFaker()->randomDigitNotNull;
+{% else %}
+        $data['{{ column.field|lower }}'] = self::getFaker()->word;
+{% endif %}
+{% endfor %}
+$this->testInstance = new {{ class_name }}Model($data);
+{% for column in columns %}
+    $this->assertEquals($data['{{ column.field|lower }}'], $this->testInstance->get{{ column.field }}());
+{% endfor %}
+    }
+
+    public function testGetRandom()
+    {
+        /** @var {{ class_name|lower }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\Horizon\TableGateways\{{ class_name }}TableGateway::class);
+
+        // If there is no data in the table, create some.
+        if($table->getCount() == 0){
+            $dummyObject = $table->getNewMockModelInstance();
+            $table->save($dummyObject);
+        }
+
+        ${{ class_name|lower }} = $table->fetchRandom();
+        $this->assertTrue(${{ class_name|lower }} instanceof {{ class_name }}Model, "Make sure that \"" . get_class(${{ class_name|lower }}) . "\" matches \"{{ class_name }}Model\"") ;
+
+        return ${{ class_name|lower }};
+    }
+
+{% if columns.id is defined %}
+    /**
+     * @depends testGetRandom
+     */
+    public function testGetById({{ class_name }}Model ${{ class_name|lower }})
+    {
+        /** @var {{ class_name|lower }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\Horizon\TableGateways\{{ class_name }}TableGateway::class);
+        $results = $table->select(['id' => ${{ class_name|lower }}->getId()]);
+        ${{ class_name|lower }}Row = $results->current();
+        $this->assertTrue(${{ class_name|lower }}Row instanceof {{ class_name }}Model);
+    }
+{% endif %}
+
+    /**
+     * @depends testGetRandom
+     */
+    public function testSettersAndGetters({{ class_name }}Model ${{ class_name|lower }})
+    {
+{% for column in columns %}
+        $this->assertTrue(method_exists(${{ class_name|lower }}, "get{{ column.field }}"));
+        $this->assertTrue(method_exists(${{ class_name|lower }}, "set{{ column.field }}"));
+{% endfor %}
+
+        $test{{ class_name }} = new {{ class_name }}Model();
+{% for column in columns %}
+        {% if column.phptype == 'int' or column.phptype == 'float' %}
+        $input = self::getFaker()->randomDigitNotNull;
+        {% else %}
+        $input = self::getFaker()->word;
+        {% endif %}
+        $test{{ class_name }}->set{{ column.field }}($input);
+        $this->assertEquals($input, $test{{ class_name }}->get{{ column.field }}());
+{% endfor %}
+    }
+
+{% for column in columns %}
+{% if 'constraints' in column|keys %}
+    /**
+    * @depends testGetRandom
+    */
+    public function testFetch{{ column.field }}Object({{ class_name }}Model ${{ class_name|lower }})
+    {
+        $this->assertTrue(method_exists(${{ class_name|lower }}, "fetch{{ column.field }}Object"));
+
+        ${{ column.field }}Object = ${{ class_name|lower }}->fetch{{ column.field }}Object();
+        $this->assertEquals(Models\{{ column.constraints.remote_model_class }}Model::class, get_class(${{ column.field }}Object));
+    }
+{% endif %}
+{% endfor %}
+
+}

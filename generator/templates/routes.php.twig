@@ -1,0 +1,5 @@
+<?php
+$app = \Horizon\Horizon::Instance()->getApp();
+{% for model in models %}
+require_once(APP_ROOT . "/src/Routes/{{ model.class_name }}Route.php");
+{% endfor %}

@@ -1,0 +1,116 @@
+<?php
+namespace Horizon\Services\Base;
+
+use Zenderator\Abstracts\Service as AbstractService;
+use Horizon\TableGateways\{{ class_name }}TableGateway;
+use Horizon\Models\{{ class_name }}Model;
+use Zend\Db\ResultSet\ResultSet;
+
+abstract class Base{{ class_name }}Service extends AbstractService
+{
+    protected $container;
+
+    public function __construct(\Slim\Container $container)
+    {
+        $this->container = $container;
+    }
+
+    public function getNewTableGatewayInstance() : {{ class_name }}TableGateway
+    {
+        return $this->container->get({{ class_name }}TableGateway::class);
+    }
+    
+    public function getNewModelInstance($dataExchange = []) : {{ class_name }}Model
+    {
+        return new {{ class_name }}Model($dataExchange);
+    }
+
+    /**
+     * @return {{ class_name }}Model[]
+     */
+    public function getAll()
+    {
+        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
+        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll();
+        $return = [];
+
+        if ($all{{ class_name }}s instanceof ResultSet) {
+            foreach ($all{{ class_name }}s as ${{ class_name }}) {
+                $return[] = ${{ class_name }};
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param int $id
+     * @return {{ class_name }}Model
+     * @throws \Horizon\Exceptions\TableGatewayException
+     */
+    public function getById($id)
+    {
+        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ class_name }}Table->getById($id);
+    }
+
+    /**
+     * @param string $field
+     * @param $value
+     * @return {{ class_name }}Model
+     * @throws \Horizon\Exceptions\TableGatewayException
+     */
+    public function getByField(string $field, $value)
+    {
+        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ class_name }}Table->getByField($field, $value);
+    }
+
+    /**
+     * @return {{ class_name }}Model
+     * @throws \Horizon\Exceptions\TableGatewayException
+     */
+    public function getRandom()
+    {
+        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ class_name }}Table->fetchRandom();
+    }
+
+    /**
+     * @param $dataExchange
+     * @return array|\ArrayObject|null
+     */
+    public function createFromArray($dataExchange)
+    {
+        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
+        ${{ class_name }} = $this->getNewModelInstance($dataExchange);
+        return ${{ class_name }}Table->save(${{ class_name }});
+    }
+
+    /**
+     * @param int $id
+     * @return int
+     */
+    public function deleteByID($id) : int
+    {
+        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ class_name }}Table->delete(['id' => $id]);
+    }
+
+    public function getTermPlural() : string
+    {
+        return '{{ object_name_plural }}';
+    }
+
+    public function getTermSingular() : string
+    {
+        return '{{ object_name_singular }}';
+    }
+
+    /**
+     * @returns {{ class_name }}Model
+     */
+    public function getMockObject()
+    {
+        return $this->getNewTableGatewayInstance()->getNewMockModelInstance();
+    }
+}

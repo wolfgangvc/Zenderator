@@ -1,0 +1,250 @@
+#!/usr/bin/php
+<?php
+
+require_once(__DIR__ . "/../../../../bootstrap.php");
+
+use Camel\CaseTransformer;
+use Camel\Format;
+use Zend\Db\Adapter\Adapter as DbAdaptor;
+use Zend\Db\Metadata\Metadata;
+use \Thru\Inflection\Inflect;
+
+$loader = new Twig_Loader_Filesystem(__DIR__ . "/templates");
+$twig = new Twig_Environment($loader);
+
+$ignoredTables = [
+    'tbl_migration',
+];
+
+$transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+$transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+$transSnake2Camel  = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+$transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+$transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+
+$databaseConfiguration = require(__DIR__ . "/../config/mysql.php");
+
+$adapter  = new DbAdaptor($databaseConfiguration);
+$metadata = new Metadata($adapter);
+$adapter->query('set global innodb_stats_on_metadata=0;');
+/**
+ * @var $tables \Zend\Db\Metadata\Object\TableObject[]
+ */
+$tables = $metadata->getTables();
+
+echo "Collecting " . count($tables) . " entities data.\n";
+
+$models = [];
+foreach ($tables as $table) {
+    if (in_array($table->getName(), $ignoredTables)) {
+        continue;
+    }
+    if(isset($argv[1]) && strtolower($table->getName()) != strtolower($argv[1])){
+        continue;
+    }
+    $constraints = [];
+    foreach($table->getConstraints() as $constraint){
+        /** @var \Zend\Db\Metadata\Object\ConstraintObject $constraint */
+        if($constraint->getType() == "FOREIGN KEY") {
+            $columnAffected = $constraint->getColumns()[0];
+            $constraints[$columnAffected] = $constraint;
+        }
+    }
+
+    /**
+     * @var integer $i
+     * @var \Zend\Db\Metadata\Object\ColumnObject $column
+     */
+    foreach ($table->getColumns() as $i => $column) {
+        
+
+        
+        $typeFragments = explode(" ", $column->getDataType());
+
+        /**
+         * Get field properties
+         */
+        $models[$table->getName()]['columns'][$column->getName()] = [
+            'field' => $transCamel2Studly->transform($column->getName()),
+            'type' => reset($typeFragments),
+            'permitted_values' => $column->getErrata('permitted_values'),
+        ];
+
+        /**
+         * Calculate Max Length for field
+         */
+        if(in_array($column->getDataType(), ['int','bigint','tinyint'])){
+            $maxLength = $column->getNumericPrecision();
+        }else{
+            $maxLength = $column->getCharacterMaximumLength();
+        }
+        switch($column->getDataType()) {
+            case 'bigint':
+                $maxFieldLength = 9223372036854775807;
+                break;
+            case 'int':
+                $maxFieldLength = 2147483647;
+                break;
+            case 'mediumint':
+                $maxFieldLength = 8388607;
+                break;
+            case 'smallint':
+                $maxFieldLength = 32767;
+                break;
+            case 'tinyint':
+                $maxFieldLength = 127;
+                break;
+            default:
+                $maxFieldLength = null;
+        }
+
+        $models[$table->getName()]['columns'][$column->getName()]['max_length'] = $maxLength;
+        if($maxFieldLength != null) {
+            $models[$table->getName()]['columns'][$column->getName()]['max_field_length'] = $maxFieldLength;
+        }
+
+        /**
+         * Get relationship constraints
+         */
+        if(isset($constraints[$column->getName()])) {
+            /** @var \Zend\Db\Metadata\Object\ConstraintObject $zendConstraint */
+            $zendConstraint = $constraints[$column->getName()];
+            $models[$table->getName()]['columns'][$column->getName()]['constraints'] = [
+                'zend_constraint' => $zendConstraint,
+                'remote_model_class' => str_replace("ld", "", $zendConstraint->getReferencedTableName()),
+                'remote_model_key' => $zendConstraint->getReferencedColumns()[0],
+                'remote_model_key_get_function' => $transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
+                'local_model_key' => $zendConstraint->getColumns()[0],
+            ];
+        }
+        $models[$table->getName()]['table'] = $table;
+
+        /**
+         * Get Primary Keys
+         */
+        $primaryKeys = [];
+        foreach($table->getConstraints() as $constraint){
+            if($constraint->getType() == 'PRIMARY KEY'){
+                $primaryKeys = $constraint->getColumns();
+            }
+        }
+        $models[$table->getName()]['primary_keys'] = $primaryKeys;
+        
+
+        #\Kint::dump($models[$table->getName()]);
+    }
+}
+
+echo "Generating " . count($tables) . " models.\n";
+
+$renderData = [];
+foreach($models as $modelName => $modelData){
+
+    if(isset($argv[1]) && strtolower($modelName) != strtolower($argv[1])){
+        continue;
+    }
+    
+    echo " > {$modelName}";
+    $className = str_replace("ld", "", $modelName);
+    $outputPath = APP_ROOT . "/src/";
+
+    // Decide on column types.
+    $columns = [];
+    foreach($modelData['columns'] as $key => $value){
+        switch($value['type']){
+            case 'float':
+            case 'decimal':
+                $value['phptype'] = 'float';
+                break;
+            case 'int':
+            case 'bigint':
+            case 'tinyint':
+                $value['phptype'] = 'int';
+                break;
+            case 'varchar':
+            case 'smallblob':
+            case 'blob':
+            case 'longblob':
+            case 'smalltext':
+            case 'text':
+            case 'longtext':
+                $value['phptype'] = 'string';
+                break;
+            case 'enum':
+                $value['phptype'] = 'string';
+                break;
+            case 'datetime':
+                $value['phptype'] = 'string';
+                break;
+            default:
+                echo " > Type not translated: {$value['type']}\n";
+        }
+
+        $columns[$key] = $value;
+    }
+
+    $renderData[$modelName] = [
+        'class_name'           => $className,
+        'name'                 => $modelName,
+        'object_name_plural'   => pluraliseClassName($className),
+        'object_name_singular' => $className,
+        'controller_route'     => $transCamel2Snake->transform(Inflect::pluralize($className)),
+        'namespace_model'      => "Horizon\\Models\\{$className}Model",
+        'columns'              => $columns,
+        'table'                => $modelName,
+        'primary_keys'         => $modelData['primary_keys'],
+    ];
+
+    #\Kint::dump($renderData);exit;
+
+    renderToFile($twig, true,  APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "basemodel.php.twig", $renderData[$modelName]);
+    renderToFile($twig, false, APP_ROOT . "/src/Models/{$className}Model.php", "model.php.twig", $renderData[$modelName]);
+    renderToFile($twig, true,  APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "tests.models.php.twig", $renderData[$modelName]);
+    renderToFile($twig, true,  APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "basetable.php.twig", $renderData[$modelName]);
+    renderToFile($twig, false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "table.php.twig", $renderData[$modelName]);
+    renderToFile($twig, true,  APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
+    renderToFile($twig, false, APP_ROOT . "/src/Services/{$className}Service.php", "service.php.twig", $renderData[$modelName]);
+    //renderToFile($twig, true,  APP_ROOT . "/src/Controllers/Base/Base{$className}Controller.php", "basecontroller.php.twig", $renderData[$modelName]);
+    //renderToFile($twig, false, APP_ROOT . "/src/Controllers/{$className}Controller.php", "controller.php.twig", $renderData[$modelName]);
+    //renderToFile($twig, true,  APP_ROOT . "/tests/Api/Generated/{$className}EndpointTest.php", "tests.endpoints.php.twig", $renderData[$modelName]);
+    //renderToFile($twig, true,  APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
+
+    echo " [DONE]\n";
+
+}
+
+echo "Generating App Container:";
+renderToFile($twig, true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $renderData]);
+echo " [DONE]\n";
+#echo "Generating Router:";
+#renderToFile($twig, true, APP_ROOT . "/src/Routes.php", "routes.php.twig", ['models' => $renderData]);
+#echo " [DONE]\n";
+
+require('phpcsfixerfier.php');
+require('psr2ifier.php');
+require('composer-optimise.php');
+
+
+
+
+
+
+function renderToFile(Twig_Environment $twig, bool $overwrite, string $path, string $template, array $data){
+    $output = $twig->render($template, $data);
+    if(!file_exists(dirname($path))){
+        mkdir(dirname($path), 0777, true);
+    }
+    if(!file_exists($path) || $overwrite) {
+        file_put_contents($path, $output);
+    }
+}
+
+function pluraliseClassName($className){
+    $transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+    $transSnake2Studly= new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+    $words = explode("_", $transCamel2Snake->transform($className));
+    $words[count($words) - 1] = Inflect::pluralize($words[count($words) - 1]);
+    $output = $transSnake2Studly->transform(implode("_", $words));
+    #\Kint::dump($className, $words, $output);
+    return $output;
+}

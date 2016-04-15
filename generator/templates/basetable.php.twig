@@ -1,0 +1,59 @@
+<?php
+namespace Horizon\TableGateways\Base;
+use \Zenderator\Abstracts\TableGateway as AbstractTableGateway;
+use \Horizon\TableGateways;
+
+abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
+{
+    protected $table = '{{ table }}';
+
+    protected $model = '{{ namespace_model }}';
+
+    public function getNewMockModelInstance()
+    {
+{% for column in columns %}
+{% if 'constraints' in column|keys %}
+      /** @var TableGateways\{{ column.constraints.remote_model_class }}TableGateway ${{ column.constraints.remote_model_class }}TableGateway */
+      ${{ column.constraints.remote_model_class }}TableGateway = $this->container->get(\Horizon\TableGateways\{{ column.constraints.remote_model_class }}TableGateway::class);
+      ${{ column.constraints.remote_model_class }}ExampleObject = ${{ column.constraints.remote_model_class }}TableGateway->getNewMockModelInstance();
+      ${{ column.constraints.remote_model_class }}TableGateway->save(${{ column.constraints.remote_model_class }}ExampleObject);
+
+{% endif %}
+{% endfor %}
+      $faker = $this->container->get("Faker");
+
+      $new{{ class_name }}Data = [
+{% for column in columns %}
+      // Type = {{ column.type }} PHPType = {{ column.phptype }}
+{% if 'constraints' in column|keys %}
+      '{{ column.field|lower }}' => ${{ column.constraints.remote_model_class }}TableGateway->fetchRandom()->get{{ column.constraints.remote_model_key_get_function }}(),
+{% elseif column.phptype == 'int' and 'max_field_length' in column|keys %}
+      '{{ column.field|lower }}' => $faker->numberBetween(1, {{ 10 ** column.max_length - 1 < column.max_field_length ? 10 ** column.max_length - 1 : column.max_field_length}}),
+{% elseif column.phptype == 'int' %}
+      '{{ column.field|lower }}' => $faker->numberBetween(1, {{ 10 ** column.max_length - 2 }}),
+{% elseif column.type == 'enum' and column.phptype == 'string' %}
+      '{{ column.field|lower }}' => '{{ column.permitted_values[0] }}',
+{% elseif column.type == 'datetime' and column.phptype == 'string' %}
+      '{{ column.field|lower }}' => $faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings.
+{% elseif column.phptype == 'float' %}
+      '{{ column.field|lower }}' => $faker->randomFloat(3, -5, 5),
+{% elseif column.max_length %}
+      '{{ column.field|lower }}' => substr($faker->text({{ column.max_length }} >= 5 ? {{ column.max_length }} : 5), 0, {{ column.max_length }}),
+{% else %}
+      '{{ column.field|lower }}' => $faker->word,
+{% endif %}
+{% endfor %}
+      ];
+      $new{{ class_name }} = $this->getNewModelInstance($new{{ class_name }}Data);
+      return $new{{ class_name }};
+    }
+
+      /**
+       * @param array $data
+       * @return {{ class_name }}Model
+       */
+      public function getNewModelInstance(array $data = [])
+      {
+            return parent::getNewModelInstance($data);
+      }
+}

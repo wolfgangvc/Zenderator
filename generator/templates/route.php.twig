@@ -1,0 +1,10 @@
+<?php
+
+$app->group("/v1", function () {
+  $this->group("/{{ controller_route }}", function() {
+    $this->get("",            \Horizon\Controllers\{{ class_name }}Controller::class . ':listRequest')   ->setName("{{ class_name }} List");
+    $this->put("",            \Horizon\Controllers\{{ class_name }}Controller::class . ':createRequest') ->setName("{{ class_name }} Create");
+    $this->get("/{id}",       \Horizon\Controllers\{{ class_name }}Controller::class . ':getRequest')    ->setName("{{ class_name }} Get");
+    $this->delete("/{id}",    \Horizon\Controllers\{{ class_name }}Controller::class . ':deleteRequest') ->setName("{{ class_name }} Delete");
+  });
+});
