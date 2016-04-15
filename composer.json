@@ -6,6 +6,9 @@
             "email": "matthew@baggett.me"
         }
     ],
+    "bin": [
+        "generator/zenderator"
+    ],
     "require": {
         "slim/slim": "^3.2",
         "raveren/kint": "^1.0",
