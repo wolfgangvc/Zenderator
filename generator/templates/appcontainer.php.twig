@@ -1,27 +1,27 @@
 <?php
 
 {% for model in models %}
-$this->container[\{{ namespace }}\Services\{{ model.class_name }}Service::class] = function (Slim\Container $c) {
-    return new \{{ namespace }}\Services\{{ model.class_name }}Service($c);
+$this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::class] = function (Slim\Container $c) {
+    return new \{{ model.namespace }}\Services\{{ model.class_name }}Service($c);
 };
 {% endfor %}
 
 {% for model in models %}
-$this->container[\{{ namespace }}\Controllers\{{ model.class_name }}Controller::class] = function (Slim\Container $c) {
-    return new \{{ namespace }}\Controllers\{{ model.class_name }}Controller($c);
+$this->container[\{{ model.namespace }}\Controllers\{{ model.class_name }}Controller::class] = function (Slim\Container $c) {
+    return new \{{ model.namespace }}\Controllers\{{ model.class_name }}Controller($c);
 };
 {% endfor %}
 
 {% for model in models %}
-$this->container[\{{ namespace }}\TableGateways\{{ model.class_name }}TableGateway::class] = function (Slim\Container $c) {
-    return new \{{ namespace }}\TableGateways\{{ model.class_name }}TableGateway($c, $c->get('DatabaseInstance'));
+$this->container[\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class] = function (Slim\Container $c) {
+    return new \{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway($c, $c->get('DatabaseInstance'));
 };
 {% endfor %}
 
 {% for model in models %}
 $this->container['{{ model.class_name }}MockModel'] = function (Slim\Container $c) {
-    /** @var {{ namespace }}\TableGateways\{{ model.class_name }}TableGateway ${{ model.class_name }}TableGateway */
-    ${{ model.class_name }}TableGateway = $c->get(\{{ namespace }}\TableGateways\{{ model.class_name }}TableGateway::class);
+    /** @var {{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway ${{ model.class_name }}TableGateway */
+    ${{ model.class_name }}TableGateway = $c->get(\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class);
     $new{{ model.class_name }}Object = ${{ model.class_name }}TableGateway->getNewMockModelInstance();
     return $new{{ model.class_name }}Object;
 };
