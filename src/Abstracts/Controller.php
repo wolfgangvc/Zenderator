@@ -3,7 +3,7 @@ namespace Zenderator\Abstracts;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Horizon\Exceptions\TableGatewayException;
+use Zenderator\Exceptions\TableGatewayException;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 
 abstract class Controller

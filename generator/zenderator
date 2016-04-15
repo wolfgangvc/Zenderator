@@ -2,7 +2,6 @@
 <?php
 
 require_once(__DIR__ . "/../../../../bootstrap.php");
-
 use Camel\CaseTransformer;
 use Camel\Format;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
@@ -22,7 +21,6 @@ $transSnake2Camel  = new CaseTransformer(new Format\SnakeCase(), new Format\Came
 $transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
 $transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
-$databaseConfiguration = require(__DIR__ . "/../config/mysql.php");
 
 $adapter  = new DbAdaptor($databaseConfiguration);
 $metadata = new Metadata($adapter);

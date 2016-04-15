@@ -45,7 +45,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
     /**
      * @param int $id
      * @return {{ class_name }}Model
-     * @throws \Horizon\Exceptions\TableGatewayException
+     * @throws \Zenderator\Exceptions\TableGatewayException
      */
     public function getById($id)
     {
@@ -57,7 +57,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
      * @param string $field
      * @param $value
      * @return {{ class_name }}Model
-     * @throws \Horizon\Exceptions\TableGatewayException
+     * @throws \Zenderator\Exception\TableGatewayException
      */
     public function getByField(string $field, $value)
     {
@@ -67,7 +67,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
 
     /**
      * @return {{ class_name }}Model
-     * @throws \Horizon\Exceptions\TableGatewayException
+     * @throws \Zenderator\Exception\TableGatewayException
      */
     public function getRandom()
     {
