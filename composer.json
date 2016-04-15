@@ -17,5 +17,24 @@
         "mattketmo/camel": "^1.1",
         "thru.io/uuid": "^2.0",
         "thru.io/inflection": "^1.0"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "dev-master",
+        "fabpot/php-cs-fixer": "^2.0@dev",
+        "johnkary/phpunit-speedtrap": "~1.0@dev",
+        "lstrojny/phpunit-clever-and-smart": "0.*",
+        "brianium/paratest": "dev-master",
+        "fzaninotto/Faker": "dev-master",
+        "phpunit/phpunit": "5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zenderator\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Zenderator\\Test\\": "tests/"
+        }
     }
 }
