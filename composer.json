@@ -1,0 +1,10 @@
+{
+    "name": "segura/zenderator",
+    "authors": [
+        {
+            "name": "Matthew Baggett",
+            "email": "matthew@baggett.me"
+        }
+    ],
+    "require": {}
+}
