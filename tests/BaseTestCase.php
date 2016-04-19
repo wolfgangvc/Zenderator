@@ -1,10 +1,9 @@
 <?php
 namespace Zenderator\Test;
 
-use Faker\Factory as FackerFactory;
+use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Faker\Provider;
-use Horizon\Horizon;
 
 abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
 {
@@ -110,7 +109,7 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
     public function getFaker()
     {
         if (!self::$faker) {
-            self::$faker = FackerFactory::create();
+            self::$faker = FakerFactory::create();
             self::$faker->addProvider(new Provider\Base(self::$faker));
             self::$faker->addProvider(new Provider\DateTime(self::$faker));
             self::$faker->addProvider(new Provider\Lorem(self::$faker));
