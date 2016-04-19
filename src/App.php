@@ -1,6 +1,10 @@
 <?php
 namespace Zenderator;
 
+use Monolog\Handler\RedisHandler;
+use Monolog\Handler\SlackHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Slim;
 use Faker\Provider;
 use Faker\Factory as FakerFactory;
@@ -15,6 +19,8 @@ class App
     protected $app;
     /** @var \Interop\Container\ContainerInterface */
     protected $container;
+    /** @var Logger*/
+    protected $monolog;
 
     /**
      * @return App
@@ -51,6 +57,11 @@ class App
 
     public function __construct()
     {
+        // Check defined config
+        if(!defined("APP_NAME")){
+            throw new \Exception("APP_NAME must be defined in /bootstrap.php");
+        }
+        
         // Create Slim app
         $this->app = new \Slim\App(
             [
@@ -120,6 +131,41 @@ class App
         };
 
         require(APP_ROOT . "/src/AppContainer.php");
+
+        // Get environment variables.
+        $environment = $this->getContainer()->get('Environment');
+        
+        // Set up Redis.
+        $redisConfig = parse_url($environment['REDIS_PORT']);
+        if(isset($environment['REDIS_OVERRIDE_HOST'])){
+            $redisConfig['host'] = $environment['REDIS_OVERRIDE_HOST'];
+        }
+        if(isset($environment['REDIS_OVERRIDE_PORT'])){
+            $redisConfig['port'] = $environment['REDIS_OVERRIDE_PORT'];
+        }
+        $this->redis = new \Predis\Client($redisConfig);
+        
+        // Set up Monolog
+        $this->monolog = new Logger(APP_NAME);
+        $this->monolog->pushHandler(new StreamHandler("logs/" . APP_NAME . "." . date("Y-m-d") . ".log", Logger::WARNING));
+        $this->monolog->pushHandler(new RedisHandler($this->redis, "Logs", Logger::DEBUG));
+        if(isset($environment['SLACK_TOKEN']) && isset($environment['SLACK_CHANNEL'])) {
+            $this->monolog->pushHandler(
+                new SlackHandler(
+                    $environment['SLACK_TOKEN'],
+                    $environment['SLACK_CHANNEL'],
+                    APP_NAME,
+                    true,
+                    null,
+                    Logger::CRITICAL
+                )
+            );
+        }
+    }
+
+    static public function Log(int $level = Logger::DEBUG, $message)
+    {
+        return self::Instance()->monolog->log($level, $message);
     }
 
     public function loadAllRoutes()
