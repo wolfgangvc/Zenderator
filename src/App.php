@@ -22,7 +22,8 @@ class App
     public static function Instance($doNotUseStaticInstance = false)
     {
         if (!self::$instance || $doNotUseStaticInstance === true) {
-            self::$instance = new self();
+            $calledClass = get_called_class();
+            self::$instance = new $calledClass();
         }
         return self::$instance;
     }
@@ -50,7 +51,6 @@ class App
 
     public function __construct()
     {
-
         // Create Slim app
         $this->app = new \Slim\App(
             [
@@ -111,6 +111,12 @@ class App
             $faker->addProvider(new Provider\en_US\PhoneNumber($faker));
             $faker->addProvider(new Provider\en_US\Company($faker));
             return $faker;
+        };
+
+        $this->container['Environment'] = function (Slim\Container $c) {
+            $environment = array_merge($_ENV, $_SERVER);
+            ksort($environment);
+            return $environment;
         };
 
         require(APP_ROOT . "/src/AppContainer.php");

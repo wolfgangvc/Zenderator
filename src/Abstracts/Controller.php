@@ -3,93 +3,69 @@ namespace Zenderator\Abstracts;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Zenderator\Exceptions\TableGatewayException;
-use Zend\Db\Adapter\Exception\InvalidQueryException;
 
 abstract class Controller
 {
 
     /** @var \Slim\Container */
     protected $container;
-    /** @var AbstractService */
+    /** @var Service */
     protected $service;
+    /** @var bool */
+    protected $apiExplorerEnabled = true;
+
+    /**
+     * @return \Slim\Container
+     */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    /**
+     * @param \Slim\Container $container
+     */
+    public function setContainer($container)
+    {
+        $this->container = $container;
+    }
+
+    /**
+     * @return Service
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
+
+    /**
+     * @param Service $service
+     */
+    public function setService($service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isApiExplorerEnabled()
+    {
+        return $this->apiExplorerEnabled;
+    }
+
+    /**
+     * @param boolean $apiExplorerEnabled
+     */
+    public function setApiExplorerEnabled(bool $apiExplorerEnabled)
+    {
+        $this->apiExplorerEnabled = $apiExplorerEnabled;
+    }
 
 
     public function __construct(\Slim\Container $container)
     {
         $this->container = $container;
-        $this->model = $this->service->getNewModelInstance();
-    }
-
-    public function listRequest(Request $request, Response $response, $args)
-    {
-        $objects = [];
-        foreach ($this->service->getAll() as $object) {
-            $objects[] = $object->__toArray();
-        }
-
-        return $this->jsonResponse(
-            [
-                'Status' => 'OKAY',
-                $this->service->getTermPlural() => $objects,
-            ],
-            $request,
-            $response
-        );
-    }
-
-    public function getRequest(Request $request, Response $response, $args)
-    {
-        try {
-            $object = $this->service->getById($args['id'])->__toArray();
-
-            return $this->jsonResponse(
-                [
-                    'Status' => 'OKAY',
-                    $this->service->getTermSingular() => $object,
-                ],
-                $request,
-                $response
-            );
-        } catch (TableGatewayException $tge) {
-            return $this->jsonResponseException($tge, $request, $response);
-        }
-    }
-
-    public function createRequest(Request $request, Response $response, $args)
-    {
-        $newObjectArray = $request->getParsedBody();
-        try {
-            $object = $this->service->createFromArray($newObjectArray);
-            return $this->jsonResponse(
-                [
-                    'Status' => 'OKAY',
-                    $this->service->getTermSingular() => $object->__toArray(),
-                ],
-                $request,
-                $response
-            );
-        } catch (InvalidQueryException $iqe) {
-            return $this->jsonResponseException($iqe, $request, $response);
-        }
-    }
-
-    public function deleteRequest(Request $request, Response $response, $args)
-    {
-        try {
-            $object = $this->service->getById($args['id'])->__toArray();
-            $this->service->deleteByID($args['id']);
-            return $this->jsonResponse(
-                [
-                    'Status' => 'OKAY',
-                    $this->service->getTermSingular() => $object,
-                ],
-                $request,
-                $response
-            );
-        } catch (TableGatewayException $tge) {
-            return $this->jsonResponseException($tge, $request, $response);
-        }
     }
 
     public function jsonResponse($json, Request $request, Response $response)
@@ -102,7 +78,7 @@ abstract class Controller
         $json['Extra']['Hostname'] = gethostname();
         $json['Extra']['Version'] = phpversion();
         $json['Extra']['TimeExec'] = microtime(true) - APP_START;
-        if ($request->hasHeader('Content-type') && $request->getHeader('Content-type')[0] == 'application/json') {
+        if (($request->hasHeader('Content-type') && $request->getHeader('Content-type')[0] == 'application/json') || $this->isApiExplorerEnabled() === false)  {
             $response = $response->withJson($json);
             return $response;
         } else {

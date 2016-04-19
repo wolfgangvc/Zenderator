@@ -1,9 +1,9 @@
 <?php
 namespace {{ namespace }}\Controllers\Base;
 
-use Zenderator\Abstracts\Controller;
+use Zenderator\Abstracts\CrudController as AbstractCrudController;
 
-abstract class Base{{ class_name }}Controller extends AbstractController
+abstract class Base{{ class_name }}Controller extends AbstractCrudController
 {
     const RESPONSIBLE_MODEL = '{{ class_name }}';
 

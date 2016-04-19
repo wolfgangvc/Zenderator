@@ -20,7 +20,7 @@ abstract class Model
      */
     public function getDIContainer()
     {
-        return Horizon::Container();
+        return Schengen::Container();
     }
 
     /**
