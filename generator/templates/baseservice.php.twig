@@ -10,11 +10,6 @@ abstract class Base{{ class_name }}Service extends AbstractService
 {
     protected $container;
 
-    public function __construct(\Slim\Container $container)
-    {
-        $this->container = $container;
-    }
-
     public function getNewTableGatewayInstance() : {{ class_name }}TableGateway
     {
         return $this->container->get({{ class_name }}TableGateway::class);
