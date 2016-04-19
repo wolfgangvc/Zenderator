@@ -33,7 +33,11 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
         /**
          * @var \Slim\App $app
          */
-        $app = Horizon::Instance();
+        if(!defined("APP_CORE_NAME")){
+            throw new \Exception("You must define AppCoreName in bootstrap.php. This must be the same as the core app container in /src");
+        }
+        $coreAppName = APP_CORE_NAME;
+        $app = $coreAppName::Instance();
         $this->container = $app->getContainer();
         $this->container['TestAppInstance'] = function (\Slim\Container $c) use ($app){
             return $app;
