@@ -137,13 +137,17 @@ class App
         
         // Set up Redis.
         $redisConfig = parse_url($environment['REDIS_PORT']);
+        $redisOptions = [];
         if(isset($environment['REDIS_OVERRIDE_HOST'])){
             $redisConfig['host'] = $environment['REDIS_OVERRIDE_HOST'];
         }
         if(isset($environment['REDIS_OVERRIDE_PORT'])){
             $redisConfig['port'] = $environment['REDIS_OVERRIDE_PORT'];
         }
-        $this->redis = new \Predis\Client($redisConfig);
+        if(isset($environment['REDIS_PREFIX'])){
+            $redisOptions['prefix'] = $environment['REDIS_PREFIX'];
+        }
+        $this->redis = new \Predis\Client($redisConfig, $redisOptions);
         
         // Set up Monolog
         $this->monolog = new Logger(APP_NAME);
