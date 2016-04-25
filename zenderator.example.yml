@@ -1,0 +1,6 @@
+templates:
+  - Models
+  - Services
+  - Controllers
+  - Endpoints
+  - Routes

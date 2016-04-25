@@ -9,6 +9,12 @@ use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
 use \Thru\Inflection\Inflect;
 
+if(!file_exists($rootOfApp . "/zenderator.yml")){
+    die("Missing Zenderator config /zenderator.yml\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
+}
+$config = file_get_contents($rootOfApp . "/zenderator.yml");
+$config = \Symfony\Component\Yaml\Yaml::parse($config);
+
 $composer = json_decode(file_get_contents($rootOfApp . "/composer.json"));
 $namespaces = array_keys((array) $composer->autoload->{'psr-4'});
 $namespace = rtrim($namespaces[0], '\\');
@@ -59,9 +65,7 @@ foreach ($tables as $table) {
      * @var \Zend\Db\Metadata\Object\ColumnObject $column
      */
     foreach ($table->getColumns() as $i => $column) {
-        
 
-        
         $typeFragments = explode(" ", $column->getDataType());
 
         /**
@@ -188,6 +192,7 @@ foreach($models as $modelName => $modelData){
 
     $renderData[$modelName] = [
         'namespace'            => $namespace,
+        'app_container'        => APP_CORE_NAME,
         'class_name'           => $className,
         'name'                 => $modelName,
         'object_name_plural'   => pluraliseClassName($className),
@@ -198,20 +203,39 @@ foreach($models as $modelName => $modelData){
         'table'                => $modelName,
         'primary_keys'         => $modelData['primary_keys'],
     ];
+    
+    #\Kint::dump($renderData[$modelName]);exit;
 
-    #\Kint::dump($renderData);exit;
+    // "Model" suite
+    if(in_array("Models", $config['templates'])) {
+        renderToFile($twig, true, APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "basemodel.php.twig", $renderData[$modelName]);
+        renderToFile($twig, false, APP_ROOT . "/src/Models/{$className}Model.php", "model.php.twig", $renderData[$modelName]);
+        renderToFile($twig, true, APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "tests.models.php.twig", $renderData[$modelName]);
+        renderToFile($twig, true, APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "basetable.php.twig", $renderData[$modelName]);
+        renderToFile($twig, false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "table.php.twig", $renderData[$modelName]);
+    }
 
-    renderToFile($twig, true,  APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "basemodel.php.twig", $renderData[$modelName]);
-    renderToFile($twig, false, APP_ROOT . "/src/Models/{$className}Model.php", "model.php.twig", $renderData[$modelName]);
-    renderToFile($twig, true,  APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "tests.models.php.twig", $renderData[$modelName]);
-    renderToFile($twig, true,  APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "basetable.php.twig", $renderData[$modelName]);
-    renderToFile($twig, false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "table.php.twig", $renderData[$modelName]);
-    renderToFile($twig, true,  APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
-    renderToFile($twig, false, APP_ROOT . "/src/Services/{$className}Service.php", "service.php.twig", $renderData[$modelName]);
-    //renderToFile($twig, true,  APP_ROOT . "/src/Controllers/Base/Base{$className}Controller.php", "basecontroller.php.twig", $renderData[$modelName]);
-    //renderToFile($twig, false, APP_ROOT . "/src/Controllers/{$className}Controller.php", "controller.php.twig", $renderData[$modelName]);
-    //renderToFile($twig, true,  APP_ROOT . "/tests/Api/Generated/{$className}EndpointTest.php", "tests.endpoints.php.twig", $renderData[$modelName]);
-    //renderToFile($twig, true,  APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
+    // "Service" suite
+    if(in_array("Services", $config['templates'])) {
+        renderToFile($twig, true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
+        renderToFile($twig, false, APP_ROOT . "/src/Services/{$className}Service.php", "service.php.twig", $renderData[$modelName]);
+    }
+    
+    // "Controller" suite
+    if(in_array("Controllers", $config['templates'])) {
+        renderToFile($twig, true, APP_ROOT . "/src/Controllers/Base/Base{$className}Controller.php", "basecontroller.php.twig", $renderData[$modelName]);
+        renderToFile($twig, false, APP_ROOT . "/src/Controllers/{$className}Controller.php", "controller.php.twig", $renderData[$modelName]);
+    }
+    
+    // "Endpoint" test suite
+    if(in_array("Endpoints", $config['templates'])) {
+        renderToFile($twig, true, APP_ROOT . "/tests/Api/Generated/{$className}EndpointTest.php", "tests.endpoints.php.twig", $renderData[$modelName]);
+    }
+
+    // "Routes" suit
+    if(in_array("Routes", $config['templates'])) {
+        renderToFile($twig, true, APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
+    }
 
     echo " [DONE]\n";
 
@@ -220,9 +244,16 @@ foreach($models as $modelName => $modelData){
 echo "Generating App Container:";
 renderToFile($twig, true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $renderData]);
 echo " [DONE]\n";
-#echo "Generating Router:";
-#renderToFile($twig, true, APP_ROOT . "/src/Routes.php", "routes.php.twig", ['models' => $renderData]);
-#echo " [DONE]\n";
+
+// "Routes" suit
+if(in_array("Routes", $config['templates'])) {
+    echo "Generating Router:";
+    renderToFile($twig, true, APP_ROOT . "/src/Routes.php", "routes.php.twig", [
+        'models' => $renderData,
+        'app_container' => APP_CORE_NAME,
+    ]);
+    echo " [DONE]\n";
+}
 
 require('phpcsfixerfier.php');
 require('psr2ifier.php');

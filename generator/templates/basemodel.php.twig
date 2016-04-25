@@ -31,7 +31,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 
     public function fetch{{ column.field }}Object() : Models\{{ column.constraints.remote_model_class }}Model
     {
-        ${{ column.constraints.remote_model_class }}Service = {{ namespace }}::Container()->get(Services\{{ column.constraints.remote_model_class }}Service::class);
+        ${{ column.constraints.remote_model_class }}Service = \{{ app_container }}::Container()->get(Services\{{ column.constraints.remote_model_class }}Service::class);
         #${{ column.constraints.remote_model_class }}Service = new Services\{{ column.constraints.remote_model_class }}Service();
 {% if column.constraints.remote_model_key == 'id' %}
         return ${{ column.constraints.remote_model_class }}Service->getById($this->get{{ column.field }}());
