@@ -187,6 +187,9 @@ class App
     public function loadAllRoutes()
     {
         require(APP_ROOT . "/src/Routes.php");
+        if(file_exists(APP_ROOT . "/src/RoutesExtra.php")) {
+            require(APP_ROOT . "/src/RoutesExtra.php");
+        }
         return $this;
     }
 }
