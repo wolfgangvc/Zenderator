@@ -18,7 +18,7 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
     {
         try{
             $this->waypoint("Begin");
-            $new{{ class_name }} = $this->getApp()->getContainer()->get('{{ class_name }}MockModel');
+            $new{{ class_name }} = $this->getDIContainer()->get('{{ class_name }}MockModel');
             $this->waypoint("Initialise Mock Model");
             $response = $this->request("PUT", "/v1/{{ controller_route}}", $new{{ class_name }}->__toArray());
             $this->waypoint("API PUT REST REQUEST");
