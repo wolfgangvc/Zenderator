@@ -130,41 +130,53 @@ class App
             return $environment;
         };
 
-        require(APP_ROOT . "/src/AppContainer.php");
+        $this->container['Redis'] = function (Slim\Container $c) {
+            // Get environment variables.
+            $environment = $this->getContainer()->get('Environment');
 
-        // Get environment variables.
-        $environment = $this->getContainer()->get('Environment');
+            // Set up Redis.
+            if(!isset($environment['REDIS_PORT'])){
+                throw new \Exception("No REDIS_PORT defined in environment variables, cannot connect to Redis!");
+            }
+            $redisConfig = parse_url($environment['REDIS_PORT']);
+            $redisOptions = [];
+            if(isset($environment['REDIS_OVERRIDE_HOST'])){
+                $redisConfig['host'] = $environment['REDIS_OVERRIDE_HOST'];
+            }
+            if(isset($environment['REDIS_OVERRIDE_PORT'])){
+                $redisConfig['port'] = $environment['REDIS_OVERRIDE_PORT'];
+            }
+            if(isset($environment['REDIS_PREFIX'])){
+                $redisOptions['prefix'] = $environment['REDIS_PREFIX'];
+            }
+            return new \Predis\Client($redisConfig, $redisOptions);
+        };
         
-        // Set up Redis.
-        $redisConfig = parse_url($environment['REDIS_PORT']);
-        $redisOptions = [];
-        if(isset($environment['REDIS_OVERRIDE_HOST'])){
-            $redisConfig['host'] = $environment['REDIS_OVERRIDE_HOST'];
-        }
-        if(isset($environment['REDIS_OVERRIDE_PORT'])){
-            $redisConfig['port'] = $environment['REDIS_OVERRIDE_PORT'];
-        }
-        if(isset($environment['REDIS_PREFIX'])){
-            $redisOptions['prefix'] = $environment['REDIS_PREFIX'];
-        }
-        $this->redis = new \Predis\Client($redisConfig, $redisOptions);
+        $this->container['MonoLog'] = function (Slim\Container $c){
+            $environment = $this->getContainer()->get('Environment');
+            // Set up Monolog
+            $monolog = new Logger(APP_NAME);
+            $monolog->pushHandler(new StreamHandler("logs/" . APP_NAME . "." . date("Y-m-d") . ".log", Logger::WARNING));
+            $monolog->pushHandler(new RedisHandler($this->getContainer()->get('Redis'), "Logs", Logger::DEBUG));
+            if(isset($environment['SLACK_TOKEN']) && isset($environment['SLACK_CHANNEL'])) {
+                $monolog->pushHandler(
+                    new SlackHandler(
+                        $environment['SLACK_TOKEN'],
+                        $environment['SLACK_CHANNEL'],
+                        APP_NAME,
+                        true,
+                        null,
+                        Logger::CRITICAL
+                    )
+                );
+            }
+            return $monolog;
+        };
+
+        require(APP_ROOT . "/src/AppContainer.php");
         
-        // Set up Monolog
-        $this->monolog = new Logger(APP_NAME);
-        $this->monolog->pushHandler(new StreamHandler("logs/" . APP_NAME . "." . date("Y-m-d") . ".log", Logger::WARNING));
-        $this->monolog->pushHandler(new RedisHandler($this->redis, "Logs", Logger::DEBUG));
-        if(isset($environment['SLACK_TOKEN']) && isset($environment['SLACK_CHANNEL'])) {
-            $this->monolog->pushHandler(
-                new SlackHandler(
-                    $environment['SLACK_TOKEN'],
-                    $environment['SLACK_CHANNEL'],
-                    APP_NAME,
-                    true,
-                    null,
-                    Logger::CRITICAL
-                )
-            );
-        }
+        $this->monolog = $this->getContainer()->get('MonoLog');
+        
     }
 
     static public function Log(int $level = Logger::DEBUG, $message)
