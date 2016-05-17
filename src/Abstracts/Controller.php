@@ -76,7 +76,10 @@ abstract class Controller
             $response = $response->withStatus(200);
         }
         $json['Extra']['Hostname'] = gethostname();
-        $json['Extra']['Version'] = phpversion();
+        $json['Extra']['PHPVersion'] = phpversion();
+        if(file_exists(APP_ROOT . "/version.txt")){
+            $json['Extra']['GitVersion'] = file_get_contents(APP_ROOT . "/version.txt");
+        }
         $json['Extra']['TimeExec'] = microtime(true) - APP_START;
         if (($request->hasHeader('Content-type') && $request->getHeader('Content-type')[0] == 'application/json') || $this->isApiExplorerEnabled() === false)  {
             $response = $response->withJson($json);
