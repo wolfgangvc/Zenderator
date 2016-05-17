@@ -82,7 +82,7 @@ abstract class Controller
         }
         $json['Extra']['TimeExec'] = microtime(true) - APP_START;
         if (($request->hasHeader('Content-type') && $request->getHeader('Content-type')[0] == 'application/json') || $this->isApiExplorerEnabled() === false)  {
-            $response = $response->withJson($json);
+            $response = $response->withJson($json, null, JSON_PRETTY_PRINT);
             return $response;
         } else {
             $loader = new \Twig_Loader_Filesystem(APP_ROOT .  "/views");
