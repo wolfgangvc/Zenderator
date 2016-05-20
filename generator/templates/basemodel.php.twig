@@ -15,7 +15,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endif %}
 
 {% for column in columns %}
-    private ${{ column.field }};
+    protected ${{ column.field }};
 {% endfor %}
 
 {% for column in columns %}
