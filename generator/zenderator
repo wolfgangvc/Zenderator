@@ -236,9 +236,21 @@ foreach($models as $modelName => $modelData){
     if(in_array("Routes", $config['templates'])) {
         renderToFile($twig, true, APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
     }
-
     echo " [DONE]\n";
+}
 
+// "JS" suit
+if(in_array("JsLib", $config['templates'])) {
+    echo "Generating JS Lib...";
+    renderToFile($twig, true, APP_ROOT . "/public/jslib/api.js", "jslib.js.twig", [
+        'models' => $renderData,
+        'date_generated' => date("Y-m-d H:i:s")
+    ]);
+    echo "\n > Wrote to " . APP_ROOT . "/public/jslib/api.js";
+    echo " [DONE]\n";
+    copy(APP_ROOT . "/public/jslib/api.js", APP_ROOT . "/other/api_js_testrig/api.js");
+    echo " > Copied to " . APP_ROOT . "/public/jslib/api.js";
+    echo " [DONE]\n\n";
 }
 
 echo "Generating App Container:";
@@ -255,14 +267,13 @@ if(in_array("Routes", $config['templates'])) {
     echo " [DONE]\n";
 }
 
-require('phpcsfixerfier.php');
-require('psr2ifier.php');
+if(isset($config['formatting']['clean'])) {
+    require('phpcsfixerfier.php');
+}
+if(isset($config['formatting']['psr2'])) {
+    require('psr2ifier.php');
+}
 require('composer-optimise.php');
-
-
-
-
-
 
 function renderToFile(Twig_Environment $twig, bool $overwrite, string $path, string $template, array $data){
     $output = $twig->render($template, $data);
