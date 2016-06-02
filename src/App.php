@@ -61,13 +61,14 @@ class App
         if(!defined("APP_NAME")){
             throw new \Exception("APP_NAME must be defined in /bootstrap.php");
         }
-        
+
         // Create Slim app
         $this->app = new \Slim\App(
             [
                 'settings' => [
                     'debug' => true,
                     'displayErrorDetails' => true,
+                    'determineRouteBeforeAppMiddleware' => true,
                 ]
             ]
         );
@@ -151,7 +152,7 @@ class App
             }
             return new \Predis\Client($redisConfig, $redisOptions);
         };
-        
+
         $this->container['MonoLog'] = function (Slim\Container $c){
             $environment = $this->getContainer()->get('Environment');
             // Set up Monolog
@@ -174,9 +175,9 @@ class App
         };
 
         require(APP_ROOT . "/src/AppContainer.php");
-        
+
         $this->monolog = $this->getContainer()->get('MonoLog');
-        
+
     }
 
     static public function Log(int $level = Logger::DEBUG, $message)

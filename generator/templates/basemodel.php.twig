@@ -1,9 +1,11 @@
 <?php
 namespace {{ namespace }}\Models\Base;
+use \{{ app_container }} as App;
 use \{{ namespace }}\{{ namespace }};
 use \Zenderator\Abstracts\Model as AbstractModel;
 use \{{ namespace }}\Services;
 use \{{ namespace }}\Models;
+use \{{ namespace }}\TableGateways;
 
 abstract class Base{{ class_name }}Model extends AbstractModel
 {
@@ -13,7 +15,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endif %}
 
 {% for column in columns %}
-    private ${{ column.field }};
+    protected ${{ column.field }};
 {% endfor %}
 
 {% for column in columns %}
@@ -31,7 +33,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 
     public function fetch{{ column.field }}Object() : Models\{{ column.constraints.remote_model_class }}Model
     {
-        ${{ column.constraints.remote_model_class }}Service = \{{ app_container }}::Container()->get(Services\{{ column.constraints.remote_model_class }}Service::class);
+        ${{ column.constraints.remote_model_class }}Service = App::Container()->get(Services\{{ column.constraints.remote_model_class }}Service::class);
         #${{ column.constraints.remote_model_class }}Service = new Services\{{ column.constraints.remote_model_class }}Service();
 {% if column.constraints.remote_model_key == 'id' %}
         return ${{ column.constraints.remote_model_class }}Service->getById($this->get{{ column.field }}());
@@ -43,10 +45,10 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 
 {% endfor %}
 
-    // TODO: Write a lazy convenience function here that gets the correct
-    // TableGateway out of DI and saves $this through it.
-    #public function save()
-    #{
-    #
-    #}
+    public function save()
+    {
+        /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
+        $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
+        return $tableGateway->save($this);
+    }
 }
