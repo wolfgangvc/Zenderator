@@ -26,18 +26,21 @@ abstract class Model
     /**
      * @param array $data
      *
-     * @return AbstractModel $this
+     * @return Model $this
      */
     public function exchangeArray(array $data)
     {
         $transformer = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
         foreach ($data as $key => $value) {
             $method = 'set' . ucfirst($transformer->transform($key));
+            $originalKey = "original_" . $transformer->transform($key);
+            // @todo Query $this->getListOfProperties() instead of methods list..
             if (method_exists($this, $method)) {
                 if (is_numeric($value)) {
                     $value = doubleval($value);
                 }
                 $this->$method($value);
+                $this->$originalKey = $value;
             }
         }
 
@@ -53,7 +56,7 @@ abstract class Model
 
         $transformer = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
 
-        foreach($this->fetchListOfProperties() as $property){
+        foreach($this->getListOfProperties() as $property){
             $getFunction = "get{$property}";
             $currentValue = $this->$getFunction();
             $array[$transformer->transform($property)] = $currentValue;
@@ -96,5 +99,36 @@ abstract class Model
     protected function getProtectedMethods()
     {
         return ['getPrimaryKeys', 'getProtectedMethods', 'getDIContainer'];
+    }
+    
+    public function getListOfProperties()
+    {
+        throw new \Exception("getListOfProperties in Abstract Model should never be used.");
+    }
+
+    /**
+     * Returns whether or not the data has been modified inside this model.
+     */
+    public function hasDirtyProperties()
+    {
+        return count($this->getListOfDirtyProperties()) > 0;
+    }
+
+    /**
+     * Returns an array of dirty properties
+     */
+    public function getListOfDirtyProperties()
+    {
+        $dirtyProperties = [];
+        foreach($this->getListOfProperties() as $property){
+            $originalProperty = "original_" . $property;
+            if($this->$property != $this->$originalProperty){
+                $dirtyProperties[$property] = [
+                    'before' => $this->$originalProperty,
+                    'after' => $this->$property,
+                ];
+            }
+        }
+        return $dirtyProperties;
     }
 }

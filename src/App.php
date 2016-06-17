@@ -5,9 +5,12 @@ use Monolog\Handler\RedisHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use SebastianBergmann\Diff\Differ;
+use Segura\Session\Session;
 use Slim;
 use Faker\Provider;
 use Faker\Factory as FakerFactory;
+use Zenderator\Services\EventLoggerService;
 use Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware;
 
 class App
@@ -172,6 +175,24 @@ class App
                 );
             }
             return $monolog;
+        };
+
+        $this->container["TimeAgo"] = function(Slim\Container $container){
+            return new \TimeAgo();
+        };
+
+        $this->container[EventLoggerService::class] = function (Slim\Container $container){
+            return new EventLoggerService(
+                $container->get("MonoLog"),
+                $container->get("Redis"),
+                $container->get(Session::class),
+                $container->get("TimeAgo"),
+                $container->get("Differ")
+            );
+        };
+
+        $this->container["Differ"] = function (Slim\Container $container){
+            return new Differ();
         };
 
         require(APP_ROOT . "/src/AppContainer.php");

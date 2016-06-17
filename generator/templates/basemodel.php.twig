@@ -19,6 +19,10 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endfor %}
 
 {% for column in columns %}
+    protected $original_{{ column.field }};
+{% endfor %}
+
+{% for column in columns %}
     public function get{{ column.field }}() {% if column.phptype %}/* Sadly can't use this until nullable return types turns up. : {{ column.phptype }} */{% endif %}
     {
         return $this->{{ column.field }};
@@ -42,7 +46,6 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endif %}
     }
 {% endif %}
-
 {% endfor %}
 
     public function save()
@@ -50,5 +53,18 @@ abstract class Base{{ class_name }}Model extends AbstractModel
         /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
         $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
         return $tableGateway->save($this);
+    }
+
+    /**
+     * Provides an array of all properties in this model.
+     * @returns array
+     */
+    public function getListOfProperties()
+    {
+        return [
+{% for column in columns %}
+            '{{ column.field }}',
+{% endfor %}
+        ];
     }
 }
