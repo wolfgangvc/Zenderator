@@ -2,6 +2,7 @@
 namespace {{ namespace }}\TableGateways\Base;
 use \Zenderator\Abstracts\TableGateway as AbstractTableGateway;
 use \{{ namespace }}\TableGateways;
+use \{{ namespace }}\Models;
 
 abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {
@@ -48,12 +49,21 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
       return $new{{ class_name }};
     }
 
-      /**
-       * @param array $data
-       * @return {{ class_name }}Model
-       */
-      public function getNewModelInstance(array $data = [])
-      {
-            return parent::getNewModelInstance($data);
-      }
+    /**
+     * @param array $data
+     * @return Models\{{ class_name }}Model
+     */
+    public function getNewModelInstance(array $data = [])
+    {
+        return parent::getNewModelInstance($data);
+    }
+
+    /**
+     * @param Models\{{ class_name }}Model $model
+     * @return Models\{{ class_name }}Model
+     */
+    public function save(Models\{{ class_name }}Model $model)
+    {
+        return parent::save($model);
+    }
 }
