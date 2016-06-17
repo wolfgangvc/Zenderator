@@ -52,11 +52,11 @@ abstract class Model
         $array = [];
 
         $transformer = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-        foreach (get_class_methods($this) as $key => $value) {
-            if (0 === strpos($value, 'get') && !in_array($value, $this->getProtectedMethods())) {
-                $currentValue = $this->$value();
-                $array[$transformer->transform(substr($value, 3))] = $currentValue;
-            }
+
+        foreach($this->fetchListOfProperties() as $property){
+            $getFunction = "get{$property}";
+            $currentValue = $this->$getFunction();
+            $array[$transformer->transform($property)] = $currentValue;
         }
 
         return array_merge($array);
