@@ -9,6 +9,12 @@
     "bin": [
         "generator/zenderator"
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:segurasystems/LibSessions.git"
+        }
+    ],
     "require": {
         "slim/slim": "^3.2",
         "raveren/kint": "^1.0",
