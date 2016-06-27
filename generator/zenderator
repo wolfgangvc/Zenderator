@@ -105,9 +105,19 @@ foreach ($tables as $table) {
                 $maxFieldLength = null;
         }
 
+        /**
+         * Max field lengths.
+         */
         $models[$table->getName()]['columns'][$column->getName()]['max_length'] = $maxLength;
         if($maxFieldLength != null) {
             $models[$table->getName()]['columns'][$column->getName()]['max_field_length'] = $maxFieldLength;
+        }
+
+        /**
+         * If there is a default set in the schema, use it.
+         */
+        if($column->getColumnDefault()) {
+            $models[$table->getName()]['columns'][$column->getName()]['default_value'] = $column->getColumnDefault();
         }
 
         /**

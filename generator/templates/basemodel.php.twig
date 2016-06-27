@@ -15,7 +15,11 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endif %}
 
 {% for column in columns %}
+{% if column.default_value %}
+    protected ${{ column.field }} = '{{ column.default_value }}';
+{% else %}
     protected ${{ column.field }};
+{% endif %}
 {% endfor %}
 
 {% for column in columns %}
