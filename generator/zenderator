@@ -291,11 +291,12 @@ if(in_array("Routes", $config['templates'])) {
     ]);
     echo " [DONE]\n";
 }
-
-if(isset($config['formatting']['clean'])) {
+if(isset($config['formatting']) && in_array("clean", $config['formatting'])) {
+    echo "Running PHP-CS-Fix-ifier...\n";
     require('phpcsfixerfier.php');
 }
-if(isset($config['formatting']['psr2'])) {
+if(isset($config['formatting']) && in_array("psr2", $config['formatting'])) {
+    echo "Running PSR2ifier...\n";
     require('psr2ifier.php');
 }
 require('composer-optimise.php');
