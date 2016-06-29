@@ -2,26 +2,54 @@
 namespace {{ namespace }}\Services\Base;
 
 use Zenderator\Abstracts\Service as AbstractService;
-use {{ namespace }}\TableGateways\{{ class_name }}TableGateway;
-use {{ namespace }}\Models\{{ class_name }}Model;
+use \{{ namespace }}\TableGateways;
+use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
 
 abstract class Base{{ class_name }}Service extends AbstractService
 {
-    protected $container;
 
-    public function getNewTableGatewayInstance() : {{ class_name }}TableGateway
+{% for object in related_objects|sort %}
+    /** @var TableGateways\{{ object.remote_model_class }}TableGateway */
+    protected ${{ object.remote_model_variable }}TableGateway;
+{% endfor %}
+
+    /** @var TableGateways\{{ class_name }}TableGateway */
+    protected ${{ variable_name }}TableGateway;
+
+    /**
+     * Constructor.
+     *
+{% for object in related_objects|sort %}
+     * @param TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway
+{% endfor %}
+     * @param TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
+     */
+    public function __construct(
+{% for object in related_objects|sort %}
+        TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
+{% endfor %}
+        TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
+    )
     {
-        return $this->container->get({{ class_name }}TableGateway::class);
+{% for object in related_objects|sort %}
+        $this->{{ object.remote_model_variable }}TableGateway = ${{ object.remote_model_variable }}TableGateway;
+{% endfor %}
+        $this->{{ variable_name }}TableGateway = ${{ variable_name }}TableGateway;
+    }
+
+    public function getNewTableGatewayInstance() : TableGateways\{{ class_name }}TableGateway
+    {
+        return $this->{{ variable_name }}TableGateway;
     }
     
-    public function getNewModelInstance($dataExchange = []) : {{ class_name }}Model
+    public function getNewModelInstance($dataExchange = []) : Models\{{ class_name }}Model
     {
-        return new {{ class_name }}Model($dataExchange);
+        return $this->{{ variable_name }}TableGateway->getNewModelInstance($dataExchange);
     }
 
     /**
-     * @return {{ class_name }}Model[]
+     * @return Models\{{ class_name }}Model[]
      */
     public function getAll()
     {
@@ -39,7 +67,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
 
     /**
      * @param int $id
-     * @return {{ class_name }}Model
+     * @return Models\{{ class_name }}Model
      * @throws \Zenderator\Exceptions\TableGatewayException
      */
     public function getById($id)
@@ -51,8 +79,8 @@ abstract class Base{{ class_name }}Service extends AbstractService
     /**
      * @param string $field
      * @param $value
-     * @return {{ class_name }}Model
-     * @throws \Zenderator\Exception\TableGatewayException
+     * @return Models\{{ class_name }}Model
+     * @throws \Zenderator\Exceptions\TableGatewayException
      */
     public function getByField(string $field, $value)
     {
@@ -61,8 +89,8 @@ abstract class Base{{ class_name }}Service extends AbstractService
     }
 
     /**
-     * @return {{ class_name }}Model
-     * @throws \Zenderator\Exception\TableGatewayException
+     * @return Models\{{ class_name }}Model
+     * @throws \Zenderator\Exceptions\TableGatewayException
      */
     public function getRandom()
     {
@@ -102,7 +130,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
     }
 
     /**
-     * @returns {{ class_name }}Model
+     * @returns Models\{{ class_name }}Model
      */
     public function getMockObject()
     {

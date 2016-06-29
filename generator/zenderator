@@ -217,6 +217,7 @@ foreach($models as $modelName => $modelData){
         'namespace'            => $namespace,
         'app_container'        => APP_CORE_NAME,
         'class_name'           => $className,
+        'variable_name'        => $transStudly2Camel->transform($className),
         'name'                 => $modelName,
         'object_name_plural'   => pluraliseClassName($className),
         'object_name_singular' => $className,

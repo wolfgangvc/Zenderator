@@ -2,7 +2,12 @@
 
 {% for model in models %}
 $this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::class] = function (Slim\Container $c) {
-    return new \{{ model.namespace }}\Services\{{ model.class_name }}Service($c);
+    return new \{{ model.namespace }}\Services\{{ model.class_name }}Service(
+{% for object in model.related_objects|sort %}
+        $c->get(\{{ model.namespace }}\TableGateways\{{ object.remote_model_class }}TableGateway::class),
+{% endfor %}
+        $c->get(\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class)
+    );
 };
 {% endfor %}
 
