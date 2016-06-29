@@ -1,5 +1,5 @@
 <?php
-
+{% if 'Services' in config.templates %}
 {% for model in models %}
 $this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::class] = function (Slim\Container $c) {
     return new \{{ model.namespace }}\Services\{{ model.class_name }}Service(
@@ -10,7 +10,9 @@ $this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::
     );
 };
 {% endfor %}
+{% endif %}
 
+{% if 'Controllers' in config.templates %}
 {% for model in models %}
 $this->container[\{{ model.namespace }}\Controllers\{{ model.class_name }}Controller::class] = function (Slim\Container $c) {
     return new \{{ model.namespace }}\Controllers\{{ model.class_name }}Controller(
@@ -18,6 +20,7 @@ $this->container[\{{ model.namespace }}\Controllers\{{ model.class_name }}Contro
     );
 };
 {% endfor %}
+{% endif %}
 
 {% for model in models %}
 $this->container[\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class] = function (Slim\Container $c) {

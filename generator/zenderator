@@ -279,7 +279,7 @@ if(in_array("JsLib", $config['templates'])) {
 }
 
 echo "Generating App Container:";
-renderToFile($twig, true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $renderData]);
+renderToFile($twig, true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $renderData, 'config' => $config]);
 echo " [DONE]\n";
 
 // "Routes" suit
