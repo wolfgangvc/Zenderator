@@ -11,24 +11,8 @@ use Zenderator\Exceptions\TableGatewayException;
 
 abstract class TableGateway extends ZendTableGateway
 {
-
-    public $container;
-
+    
     protected $model;
-
-    /**
-     * AbstractTableGateway constructor.
-     *
-     * @param \Slim\Container $container
-     * @param AdapterInterface $adapter
-     */
-    public function __construct(\Slim\Container $container, AdapterInterface $adapter)
-    {
-        $this->container = $container;
-
-        $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->model);
-        return parent::__construct($this->table, $adapter, null, $resultSetPrototype);
-    }
 
     /**
      * @param Model $model

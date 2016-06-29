@@ -8,14 +8,6 @@ use Zend\Db\Adapter\Exception\InvalidQueryException;
 
 abstract class CrudController extends Controller
 {
-
-    public function __construct(\Slim\Container $container)
-    {
-        parent::__construct($container);
-        # This may be busted.
-        $this->model = $this->service->getNewModelInstance();
-    }
-
     public function listRequest(Request $request, Response $response, $args)
     {
         $objects = [];

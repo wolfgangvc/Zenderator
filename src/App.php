@@ -11,6 +11,7 @@ use Slim;
 use Faker\Provider;
 use Faker\Factory as FakerFactory;
 use Zenderator\Services\EventLoggerService;
+use Zenderator\Twig\Extensions\ArrayUniqueTwigExtension;
 use Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware;
 
 class App
@@ -98,6 +99,10 @@ class App
                     $c['router'],
                     $c['request']->getUri()
                 )
+            );
+            
+            $view->addExtension(
+                new ArrayUniqueTwigExtension() 
             );
 
             // Added Twig_Extension_Debug to enable twig dump() etc.
