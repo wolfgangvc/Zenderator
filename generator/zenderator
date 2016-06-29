@@ -162,7 +162,11 @@ foreach($models as $modelName => $modelData){
     }
     
     echo " > {$modelName}";
-    $className = str_replace("ld", "", $modelName);
+    if(substr($modelName, 0, 2) == "ld") {
+        $className = substr($modelName, 2);
+    }else{
+        $className = $modelName;
+    }   
     $outputPath = APP_ROOT . "/src/";
 
     // Decide on column types.
