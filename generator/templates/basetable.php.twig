@@ -4,12 +4,42 @@ use \Zenderator\Abstracts\TableGateway as AbstractTableGateway;
 use \Zenderator\Abstracts\Model;
 use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
+use \Zend\Db\Adapter\AdapterInterface;
+use \Zend\Db\ResultSet\ResultSet;
 
 abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {
     protected $table = '{{ table }}';
 
     protected $model = '{{ namespace_model }}';
+
+    /**
+     * AbstractTableGateway constructor.
+     *
+     * @param \Slim\Container $container
+     * @param AdapterInterface $adapter
+     */
+    public function __construct(
+        \Slim\Container $container,
+{% for column in columns %}
+    {% if 'constraints' in column|keys %}
+        \{{ namespace }}\TableGateways\{{ column.constraints.remote_model_class }}TableGateway ${{ column.constraints.remote_model_class }}TableGateway,
+    {% endif %}
+{% endfor %}
+        AdapterInterface $adapter
+    )
+    {
+        $this->container = $container;
+
+{% for column in columns %}
+    {% if 'constraints' in column|keys %}
+        $this->{{ column.constraints.remote_model_class }}TableGateway = ${{ column.constraints.remote_model_class }}TableGateway;
+    {% endif %}
+{% endfor %}
+
+        $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->model);
+        return parent::__construct($this->table, $adapter, null, $resultSetPrototype);
+    }
 
     public function getNewMockModelInstance()
     {
