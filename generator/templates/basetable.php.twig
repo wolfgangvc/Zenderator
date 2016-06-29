@@ -13,29 +13,34 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     protected $model = '{{ namespace_model }}';
 
+    /** @var \Faker\Generator */
+    protected $faker;
+
+{% for object in related_objects|sort %}
+    /** @var TableGateways\{{ object.remote_model_class }}TableGateway */
+    protected ${{ object.remote_model_variable }}TableGateway;
+{% endfor %}
+
     /**
      * AbstractTableGateway constructor.
      *
-     * @param \Slim\Container $container
+{% for object in related_objects|sort %}
+     * @param TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
+{% endfor %}
      * @param AdapterInterface $adapter
      */
     public function __construct(
-        \Slim\Container $container,
-{% for column in columns %}
-    {% if 'constraints' in column|keys %}
-        \{{ namespace }}\TableGateways\{{ column.constraints.remote_model_class }}TableGateway ${{ column.constraints.remote_model_class }}TableGateway,
-    {% endif %}
+{% for object in related_objects|sort %}
+        TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
 {% endfor %}
+        \Faker\Generator $faker,
         AdapterInterface $adapter
     )
     {
-        $this->container = $container;
-
-{% for column in columns %}
-    {% if 'constraints' in column|keys %}
-        $this->{{ column.constraints.remote_model_class }}TableGateway = ${{ column.constraints.remote_model_class }}TableGateway;
-    {% endif %}
+{% for object in related_objects|sort %}
+        $this->{{ object.remote_model_variable }}TableGateway = ${{ object.remote_model_variable }}TableGateway;
 {% endfor %}
+        $this->faker = $faker;
 
         $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->model);
         return parent::__construct($this->table, $adapter, null, $resultSetPrototype);
@@ -43,36 +48,31 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     public function getNewMockModelInstance()
     {
-{% for column in columns %}
-{% if 'constraints' in column|keys %}
-      /** @var TableGateways\{{ column.constraints.remote_model_class }}TableGateway ${{ column.constraints.remote_model_class }}TableGateway */
-      ${{ column.constraints.remote_model_class }}TableGateway = $this->container->get(\{{ namespace }}\TableGateways\{{ column.constraints.remote_model_class }}TableGateway::class);
-      ${{ column.constraints.remote_model_class }}ExampleObject = ${{ column.constraints.remote_model_class }}TableGateway->getNewMockModelInstance();
-      ${{ column.constraints.remote_model_class }}TableGateway->save(${{ column.constraints.remote_model_class }}ExampleObject);
+{% for object in related_objects|sort %}
+      ${{ object.remote_model_variable }}ExampleObject = $this->{{ object.remote_model_variable }}TableGateway->getNewMockModelInstance();
+      $this->{{ object.remote_model_variable }}TableGateway->save(${{ object.remote_model_variable }}ExampleObject);
 
-{% endif %}
 {% endfor %}
-      $faker = $this->container->get("Faker");
 
       $new{{ class_name }}Data = [
-{% for column in columns %}
-      // Type = {{ column.type }} PHPType = {{ column.phptype }}
+{% for column in columns|sort %}
+        // Type = {{ column.type }} PHPType = {{ column.phptype }}
 {% if 'constraints' in column|keys %}
-      '{{ column.field|lower }}' => ${{ column.constraints.remote_model_class }}TableGateway->fetchRandom()->get{{ column.constraints.remote_model_key_get_function }}(),
+        '{{ column.field|lower }}' => $this->{{ column.constraints.remote_model_variable }}TableGateway->fetchRandom()->get{{ column.constraints.remote_model_key_get_function }}(),
 {% elseif column.phptype == 'int' and 'max_field_length' in column|keys %}
-      '{{ column.field|lower }}' => $faker->numberBetween(1, {{ 10 ** column.max_length - 1 < column.max_field_length ? 10 ** column.max_length - 1 : column.max_field_length}}),
+        '{{ column.field|lower }}' => $this->faker->numberBetween(1, {{ 10 ** column.max_length - 1 < column.max_field_length ? 10 ** column.max_length - 1 : column.max_field_length}}),
 {% elseif column.phptype == 'int' %}
-      '{{ column.field|lower }}' => $faker->numberBetween(1, {{ 10 ** column.max_length - 2 }}),
+        '{{ column.field|lower }}' => $this->faker->numberBetween(1, {{ 10 ** column.max_length - 2 }}),
 {% elseif column.type == 'enum' and column.phptype == 'string' %}
-      '{{ column.field|lower }}' => '{{ column.permitted_values[0] }}',
+        '{{ column.field|lower }}' => '{{ column.permitted_values[0] }}',
 {% elseif column.type == 'datetime' and column.phptype == 'string' %}
-      '{{ column.field|lower }}' => $faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings.
+        '{{ column.field|lower }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings.
 {% elseif column.phptype == 'float' %}
-      '{{ column.field|lower }}' => $faker->randomFloat(3, -5, 5),
+        '{{ column.field|lower }}' => $this->faker->randomFloat(3, -5, 5),
 {% elseif column.max_length %}
-      '{{ column.field|lower }}' => substr($faker->text({{ column.max_length }} >= 5 ? {{ column.max_length }} : 5), 0, {{ column.max_length }}),
+        '{{ column.field|lower }}' => substr($this->faker->text({{ column.max_length }} >= 5 ? {{ column.max_length }} : 5), 0, {{ column.max_length }}),
 {% else %}
-      '{{ column.field|lower }}' => $faker->word,
+        '{{ column.field|lower }}' => $this->faker->word,
 {% endif %}
 {% endfor %}
       ];

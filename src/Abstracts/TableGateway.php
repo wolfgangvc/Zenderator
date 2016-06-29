@@ -11,9 +11,7 @@ use Zenderator\Exceptions\TableGatewayException;
 
 abstract class TableGateway extends ZendTableGateway
 {
-
-    public $container;
-
+    
     protected $model;
 
     /**

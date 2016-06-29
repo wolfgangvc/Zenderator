@@ -22,16 +22,20 @@ $namespace = rtrim($namespaces[0], '\\');
 $loader = new Twig_Loader_Filesystem(__DIR__ . "/templates");
 $twig = new Twig_Environment($loader);
 
+$twig->addExtension(
+    new \Zenderator\Twig\Extensions\ArrayUniqueTwigExtension()
+);
+
 $ignoredTables = [
     'tbl_migration',
 ];
 
 $transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+$transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
 $transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
 $transSnake2Camel  = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
 $transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
 $transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
-
 
 $adapter  = new DbAdaptor($databaseConfiguration);
 $metadata = new Metadata($adapter);
@@ -128,7 +132,8 @@ foreach ($tables as $table) {
             $zendConstraint = $constraints[$column->getName()];
             $models[$table->getName()]['columns'][$column->getName()]['constraints'] = [
                 'zend_constraint' => $zendConstraint,
-                'remote_model_class' => str_replace("ld", "", $zendConstraint->getReferencedTableName()),
+                'remote_model_class' => sanitiseModelNameToClassName($zendConstraint->getReferencedTableName()),
+                'remote_model_variable' => $transStudly2Camel->transform(sanitiseModelNameToClassName($zendConstraint->getReferencedTableName())),
                 'remote_model_key' => $zendConstraint->getReferencedColumns()[0],
                 'remote_model_key_get_function' => $transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
                 'local_model_key' => $zendConstraint->getColumns()[0],
@@ -162,7 +167,7 @@ foreach($models as $modelName => $modelData){
     }
     
     echo " > {$modelName}";
-    $className = str_replace("ld", "", $modelName);
+    $className = sanitiseModelNameToClassName($modelName);
     $outputPath = APP_ROOT . "/src/";
 
     // Decide on column types.
@@ -200,6 +205,14 @@ foreach($models as $modelName => $modelData){
         $columns[$key] = $value;
     }
 
+    $relatedObjects = [];
+    foreach($columns as $column){
+        if(isset($column['constraints'])) {
+            $relatedObjects[$column['constraints']['remote_model_class']] = $column['constraints'];
+        }
+    }
+    #\Kint::dump($relatedObjects);exit;
+
     $renderData[$modelName] = [
         'namespace'            => $namespace,
         'app_container'        => APP_CORE_NAME,
@@ -210,6 +223,7 @@ foreach($models as $modelName => $modelData){
         'controller_route'     => $transCamel2Snake->transform(Inflect::pluralize($className)),
         'namespace_model'      => "{$namespace}\\Models\\{$className}Model",
         'columns'              => $columns,
+        'related_objects'      => $relatedObjects,
         'table'                => $modelName,
         'primary_keys'         => $modelData['primary_keys'],
     ];
@@ -303,4 +317,12 @@ function pluraliseClassName($className){
     $output = $transSnake2Studly->transform(implode("_", $words));
     #\Kint::dump($className, $words, $output);
     return $output;
+}
+
+function sanitiseModelNameToClassName($modelName){
+    if(substr($modelName, 0, 2) == "ld") {
+        return substr($modelName, 2);
+    }else{
+        return $modelName;
+    }
 }

@@ -14,7 +14,13 @@ $this->container[\{{ model.namespace }}\Controllers\{{ model.class_name }}Contro
 
 {% for model in models %}
 $this->container[\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class] = function (Slim\Container $c) {
-    return new \{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway($c, $c->get('DatabaseInstance'));
+    return new \{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway(
+{% for object in model.related_objects|sort %}
+        $c->get(\{{ model.namespace }}\TableGateways\{{ object.remote_model_class }}TableGateway::class),
+{% endfor %}
+        $c->get('Faker'),
+        $c->get('DatabaseInstance')
+    );
 };
 {% endfor %}
 
