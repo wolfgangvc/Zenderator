@@ -7,29 +7,11 @@ use Slim\Http\Response;
 abstract class Controller
 {
 
-    /** @var \Slim\Container */
-    protected $container;
     /** @var Service */
     protected $service;
     /** @var bool */
     protected $apiExplorerEnabled = true;
-
-    /**
-     * @return \Slim\Container
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    /**
-     * @param \Slim\Container $container
-     */
-    public function setContainer($container)
-    {
-        $this->container = $container;
-    }
-
+    
     /**
      * @return Service
      */
@@ -60,12 +42,6 @@ abstract class Controller
     public function setApiExplorerEnabled(bool $apiExplorerEnabled)
     {
         $this->apiExplorerEnabled = $apiExplorerEnabled;
-    }
-
-
-    public function __construct(\Slim\Container $container)
-    {
-        $this->container = $container;
     }
 
     public function jsonResponse($json, Request $request, Response $response)

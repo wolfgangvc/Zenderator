@@ -2,14 +2,19 @@
 namespace {{ namespace }}\Controllers\Base;
 
 use Zenderator\Abstracts\CrudController as AbstractCrudController;
+use \{{ namespace }}\Services;
 
 abstract class Base{{ class_name }}Controller extends AbstractCrudController
 {
     const RESPONSIBLE_MODEL = '{{ class_name }}';
 
-    public function __construct(\Slim\Container $container)
+    /**
+     * @param Services\{{ class_name }}Service ${{ variable_name }}
+     */
+    public function __construct(
+        Services\{{ class_name }}Service ${{ variable_name }}
+    )
     {
-        $this->service = $container->get(\{{ namespace }}\Services\{{ class_name }}Service::class);
-        parent::__construct($container);
+        $this->service = ${{ variable_name }};
     }
 }

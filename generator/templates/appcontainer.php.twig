@@ -13,7 +13,9 @@ $this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::
 
 {% for model in models %}
 $this->container[\{{ model.namespace }}\Controllers\{{ model.class_name }}Controller::class] = function (Slim\Container $c) {
-    return new \{{ model.namespace }}\Controllers\{{ model.class_name }}Controller($c);
+    return new \{{ model.namespace }}\Controllers\{{ model.class_name }}Controller(
+        $c->get(\{{ model.namespace }}\Services\{{ model.class_name }}Service::class)
+    );
 };
 {% endfor %}
 
