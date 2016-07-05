@@ -70,7 +70,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% elseif column.phptype == 'float' %}
         '{{ column.field|lower }}' => $this->faker->randomFloat(3, -5, 5),
 {% elseif column.max_length %}
-        '{{ column.field|lower }}' => substr($this->faker->text({{ column.max_length }} >= 5 ? {{ column.max_length }} : 5), 0, {{ column.max_length }}),
+        '{{ column.field|lower }}' => substr($this->faker->text({{ column.max_length < 50000 ? column.max_length : 50000 }} >= 5 ? {{ column.max_length < 50000 ? column.max_length : 50000 }} : 5), 0, {{ column.max_length < 50000 ? column.max_length : 50000 }}),
 {% else %}
         '{{ column.field|lower }}' => $this->faker->word,
 {% endif %}
