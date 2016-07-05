@@ -201,6 +201,9 @@ class App
         };
 
         require(APP_ROOT . "/src/AppContainer.php");
+        if(file_exists(APP_ROOT . "/src/AppContainerExtra.php")){
+            require(APP_ROOT . "/src/AppContainerExtra.php");
+        }
 
         $this->monolog = $this->getContainer()->get('MonoLog');
 
