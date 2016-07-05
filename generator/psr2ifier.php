@@ -1,21 +1,21 @@
 #!/usr/bin/php
 <?php
-if(!defined("APP_ROOT")){
-    define("APP_ROOT", __DIR__ . "/zenderator");
+if(!defined("ZENDERATOR_ROOT")){
+    define("ZENDERATOR_ROOT", __DIR__ . "/zenderator");
 }
 $begin = microtime(true);
 echo "PSR2ifying... \n";
 $pathsToPSR2 = [
-    APP_ROOT . "/src/Models/Base",
-    APP_ROOT . "/src/Models",
-    APP_ROOT . "/src/Controllers/Base",
-    APP_ROOT . "/src/Controllers",
-    APP_ROOT . "/src/Services/Base",
-    APP_ROOT . "/src/Services",
-    APP_ROOT . "/src/*.php",
-    APP_ROOT . "/tests/Api/Generated",
-    APP_ROOT . "/tests/Models/Generated",
-    APP_ROOT . "/public/index.php",
+    ZENDERATOR_ROOT . "/src/Models/Base",
+    ZENDERATOR_ROOT . "/src/Models",
+    ZENDERATOR_ROOT . "/src/Controllers/Base",
+    ZENDERATOR_ROOT . "/src/Controllers",
+    ZENDERATOR_ROOT . "/src/Services/Base",
+    ZENDERATOR_ROOT . "/src/Services",
+    ZENDERATOR_ROOT . "/src/*.php",
+    ZENDERATOR_ROOT . "/tests/Api/Generated",
+    ZENDERATOR_ROOT . "/tests/Models/Generated",
+    ZENDERATOR_ROOT . "/public/index.php",
 ];
 
 function psr2ify($pathToPSR2)
@@ -23,7 +23,7 @@ function psr2ify($pathToPSR2)
     ob_start();
     echo " > {$pathToPSR2} ... ";
     $begin = microtime(true);
-    exec(APP_ROOT . "/vendor/bin/phpcbf --standard=PSR2 {$pathToPSR2}");
+    exec(ZENDERATOR_ROOT . "/vendor/bin/phpcbf --standard=PSR2 {$pathToPSR2}");
     $time = microtime(true) - $begin;
     echo " [Complete in " . number_format($time, 2) . "]\n";
     echo ob_get_clean();
