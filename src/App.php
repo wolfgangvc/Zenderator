@@ -165,7 +165,7 @@ class App
             $environment = $this->getContainer()->get('Environment');
             // Set up Monolog
             $monolog = new Logger(APP_NAME);
-            $monolog->pushHandler(new StreamHandler("logs/" . APP_NAME . "." . date("Y-m-d") . ".log", Logger::WARNING));
+            $monolog->pushHandler(new StreamHandler(APP_ROOT . "/logs/" . APP_NAME . "." . date("Y-m-d") . ".log", Logger::WARNING));
             $monolog->pushHandler(new RedisHandler($this->getContainer()->get('Redis'), "Logs", Logger::DEBUG));
             if(isset($environment['SLACK_TOKEN']) && isset($environment['SLACK_CHANNEL'])) {
                 $monolog->pushHandler(
