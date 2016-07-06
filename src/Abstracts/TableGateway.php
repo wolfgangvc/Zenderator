@@ -8,6 +8,7 @@ use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway as ZendTableGateway;
 use Zenderator\Exceptions\TableGatewayException;
+use Zenderator\Exceptions\TableGatewayRecordNotFoundException;
 
 abstract class TableGateway extends ZendTableGateway
 {
@@ -240,7 +241,7 @@ abstract class TableGateway extends ZendTableGateway
     {
         $row = $this->select([$field => $value])->current();
         if (!$row) {
-            throw new TableGatewayException("Could not find record by ['{$field}' => '{$value}']");
+            throw new TableGatewayRecordNotFoundException("Could not find record by ['{$field}' => '{$value}']");
         }
         return $row;
     }
@@ -254,7 +255,7 @@ abstract class TableGateway extends ZendTableGateway
     {
         $row = $this->select($primaryKeys)->current();
         if (!$row) {
-            throw new TableGatewayException("Could not find record by primary keys: " . var_export($primaryKeys, true) . ".");
+            throw new TableGatewayRecordNotFoundException("Could not find record by primary keys: " . var_export($primaryKeys, true) . ".");
         }
         return $row;
     }
