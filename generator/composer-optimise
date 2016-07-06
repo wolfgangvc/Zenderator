@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 $begin = microtime(true);
 echo "Optimising Composer Autoloader... \n";

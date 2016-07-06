@@ -1,10 +1,14 @@
 #!/usr/bin/php
 <?php
-if(!defined("ZENDERATOR_ROOT")){
+if(!defined("APP_ROOT")){
     define("ZENDERATOR_ROOT", __DIR__ . "/zenderator");
+}else{
+    if(!defined("ZENDERATOR_ROOT")) {
+        define("ZENDERATOR_ROOT", APP_ROOT);
+    }
 }
 $begin = microtime(true);
-echo "PSR2ifying... \n";
+echo "php-cs-fixer-fying... \n";
 $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/src/Models/Base",
     ZENDERATOR_ROOT . "/src/Models",
@@ -18,12 +22,12 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/public/index.php",
 ];
 
-function psr2ify($pathToPSR2)
+function phpcsfixerfy($pathToPSR2)
 {
     ob_start();
     echo " > {$pathToPSR2} ... ";
     $begin = microtime(true);
-    exec(ZENDERATOR_ROOT . "/vendor/bin/phpcbf --standard=PSR2 {$pathToPSR2}");
+    exec(ZENDERATOR_ROOT . "/vendor/bin/php-cs-fixer fix {$pathToPSR2} --rules=no_unused_imports,align_double_arrow,align_equals");
     $time = microtime(true) - $begin;
     echo " [Complete in " . number_format($time, 2) . "]\n";
     echo ob_get_clean();
@@ -31,7 +35,7 @@ function psr2ify($pathToPSR2)
 
 foreach ($pathsToPSR2 as $pathToPSR2) {
     if (file_exists($pathToPSR2)) {
-        psr2ify($pathToPSR2);
+        phpcsfixerfy($pathToPSR2);
     }
 }
 

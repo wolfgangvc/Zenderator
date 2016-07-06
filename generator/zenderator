@@ -293,13 +293,13 @@ if(in_array("Routes", $config['templates'])) {
 }
 if(isset($config['formatting']) && in_array("clean", $config['formatting'])) {
     echo "Running PHP-CS-Fix-ifier...\n";
-    require('phpcsfixerfier.php');
+    require('phpcsfixerfier');
 }
 if(isset($config['formatting']) && in_array("psr2", $config['formatting'])) {
     echo "Running PSR2ifier...\n";
-    require('psr2ifier.php');
+    require('psr2ifier');
 }
-require('composer-optimise.php');
+require('composer-optimise');
 
 function renderToFile(Twig_Environment $twig, bool $overwrite, string $path, string $template, array $data){
     $output = $twig->render($template, $data);
