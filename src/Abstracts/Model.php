@@ -31,16 +31,19 @@ abstract class Model
     public function exchangeArray(array $data)
     {
         $transformer = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+
         foreach ($data as $key => $value) {
-            $method = 'set' . ucfirst($transformer->transform($key));
-            $originalKey = "original_" . $transformer->transform($key);
+            $method = 'set' . $transformer->transform($key);
+            $originalProperty = "original_" . $transformer->transform($key);
+
             // @todo Query $this->getListOfProperties() instead of methods list..
             if (method_exists($this, $method)) {
                 if (is_numeric($value)) {
                     $value = doubleval($value);
                 }
                 $this->$method($value);
-                $this->$originalKey = $value;
+                #echo "Writing into \$this->{$originalProperty}: exchangeArray\n";
+                $this->$originalProperty = $value;
             }
         }
 
@@ -119,9 +122,11 @@ abstract class Model
      */
     public function getListOfDirtyProperties()
     {
+        $transformer = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
         $dirtyProperties = [];
         foreach($this->getListOfProperties() as $property){
-            $originalProperty = "original_" . $property;
+            $originalProperty = "original_" . $transformer->transform($property);
+            #echo "Writing into \$this->{$originalProperty}: getListOfDirtyProperties\n";
             if($this->$property != $this->$originalProperty){
                 $dirtyProperties[$property] = [
                     'before' => $this->$originalProperty,

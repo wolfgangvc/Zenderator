@@ -24,20 +24,20 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
         $data = [];
 {% for column in columns %}
 {% if column.phptype == 'int' or column.phptype == 'float' %}
-        $data['{{ column.field|lower }}'] = self::getFaker()->randomDigitNotNull;
+        $data['{{ column.field }}'] = self::getFaker()->randomDigitNotNull;
 {% else %}
-        $data['{{ column.field|lower }}'] = self::getFaker()->word;
+        $data['{{ column.field }}'] = self::getFaker()->word;
 {% endif %}
 {% endfor %}
 $this->testInstance = new {{ class_name }}Model($data);
 {% for column in columns %}
-    $this->assertEquals($data['{{ column.field|lower }}'], $this->testInstance->get{{ column.field }}());
+    $this->assertEquals($data['{{ column.field }}'], $this->testInstance->get{{ column.field }}());
 {% endfor %}
     }
 
     public function testGetRandom()
     {
-        /** @var {{ class_name|lower }}TableGateway $table */
+        /** @var {{ class_name }}TableGateway $table */
         $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 
         // If there is no data in the table, create some.
@@ -54,11 +54,24 @@ $this->testInstance = new {{ class_name }}Model($data);
 
     public function testNewMockModelInstance()
     {
-        /** @var {{ class_name|lower }}TableGateway $table */
+        /** @var {{ class_name }}TableGateway $table */
         $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
         $newMockModel = $table->getNewMockModelInstance();
 
         $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class($newMockModel));
+
+        return $newMockModel;
+    }
+
+    /**
+     * @depends testNewMockModelInstance
+     */
+    public function testSave(Models\{{ class_name }}Model $mockModel)
+    {
+        /** @var Models\{{ class_name }}Model $mockModel */
+        /** @var Models\{{ class_name }}Model $savedModel */
+        $savedModel = $mockModel->save();
+        $this->assertEquals($mockModel, $savedModel);
     }
 
 {% if columns.id is defined %}
