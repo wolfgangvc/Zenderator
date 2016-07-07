@@ -52,6 +52,15 @@ $this->testInstance = new {{ class_name }}Model($data);
         return ${{ class_name|lower }};
     }
 
+    public function testNewMockModelInstance()
+    {
+        /** @var {{ class_name|lower }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+        $newMockModel = $table->getNewMockModelInstance();
+
+        $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class($newMockModel));
+    }
+
 {% if columns.id is defined %}
     /**
      * @depends testGetRandom
