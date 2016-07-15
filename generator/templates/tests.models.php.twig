@@ -100,11 +100,11 @@ $this->testInstance = new {{ class_name }}Model($data);
 
         $test{{ class_name }} = new {{ class_name }}Model();
 {% for column in columns %}
-        {% if column.phptype == 'int' or column.phptype == 'float' %}
+{% if column.phptype == 'int' or column.phptype == 'float' %}
         $input = self::getFaker()->randomDigitNotNull;
-        {% else %}
+{% else %}
         $input = self::getFaker()->word;
-        {% endif %}
+{% endif %}
         $test{{ class_name }}->set{{ column.field }}($input);
         $this->assertEquals($input, $test{{ class_name }}->get{{ column.field }}());
 {% endfor %}
@@ -124,5 +124,27 @@ $this->testInstance = new {{ class_name }}Model($data);
     }
 {% endif %}
 {% endfor %}
+
+{% if primary_keys %}
+    public function testAutoincrementedIdIsApplied()
+    {
+        /** @var {{ class_name }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+        $newMockModel = $table->getNewMockModelInstance();
+
+        // Set primary keys to null.
+{% for primary_parameter in primary_parameters %}
+        $newMockModel->set{{ primary_parameter }}(null);
+{% endfor %}
+
+        // Save the object
+        $newMockModel->save();
+
+        // verify that the AI keys have been set.
+{% for primary_parameter in primary_parameters %}
+        $this->assertNotNull($newMockModel->get{{ primary_parameter }}());
+{% endfor %}
+    }
+{% endif %}
 
 }
