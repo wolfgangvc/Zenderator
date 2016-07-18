@@ -145,13 +145,18 @@ foreach ($tables as $table) {
          * Get Primary Keys
          */
         $primaryKeys = [];
+        $primaryParameters = [];
         foreach($table->getConstraints() as $constraint){
             if($constraint->getType() == 'PRIMARY KEY'){
                 $primaryKeys = $constraint->getColumns();
+
             }
         }
+        foreach($primaryKeys as $primaryKey){
+            $primaryParameters[] = $transCamel2Studly->transform($primaryKey);
+        }
         $models[$table->getName()]['primary_keys'] = $primaryKeys;
-        
+        $models[$table->getName()]['primary_parameters'] = $primaryParameters;
 
         #\Kint::dump($models[$table->getName()]);
     }
@@ -227,6 +232,7 @@ foreach($models as $modelName => $modelData){
         'related_objects'      => $relatedObjects,
         'table'                => $modelName,
         'primary_keys'         => $modelData['primary_keys'],
+        'primary_parameters'   => $modelData['primary_parameters'],
     ];
     
     #\Kint::dump($renderData[$modelName]);exit;

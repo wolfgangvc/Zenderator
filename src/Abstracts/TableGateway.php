@@ -40,11 +40,20 @@ abstract class TableGateway extends ZendTableGateway
                 if (!is_array($pk)) {
                     $pk = ['id' => $pk];
                 }
-                return $this->getByPrimaryKey($pk);
             } else {
                 $this->saveUpdate($model, $oldModel);
-                return $this->getByPrimaryKey($pk);
             }
+            $updatedModel = $this->getByPrimaryKey($pk);
+
+            // Update the primary key fields on the existant $model object, because we may still be referencing this.
+            // While it feels a bit yucky to magically mutate the model object, it is expected behaviour.
+            foreach($model->getPrimaryKeys() as $key => $value){
+                $setter = "set{$key}";
+                $getter = "get{$key}";
+                $model->$setter($updatedModel->$getter());
+            }
+
+            return $updatedModel;
         } catch (InvalidQueryException $iqe) {
             throw new InvalidQueryException(
                 "While trying to call " . get_class() . "->save(): ... " . $iqe->getMessage(),
