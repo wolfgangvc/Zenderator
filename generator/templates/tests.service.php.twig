@@ -1,0 +1,79 @@
+<?php
+namespace {{ namespace }}\Test\Services;
+
+use \{{ namespace }}\{{ namespace }};
+use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
+use \{{ namespace }}\Services\{{ class_name }}Service;
+use \{{ namespace }}\Models\{{ class_name }}Model;
+
+class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
+{
+    /** @var {{ class_name }}Service */
+    private ${{ variable_name }}Service;
+    /** @var {{ class_name }}TableGateway */
+    private ${{ variable_name }}TableGateway;
+
+    public function setUp()
+    {
+        $this->{{ variable_name }}Service = {{ namespace }}::Container()->get({{ class_name }}Service::class);
+        $this->{{ variable_name }}TableGateway = {{ namespace }}::Container()->get({{ class_name }}TableGateway::class);
+
+        for($i = 0; $i <= 5; $i++){
+            $this->{{ variable_name }}TableGateway
+                ->getNewMockModelInstance()
+                ->save();
+        }
+    }
+
+    /**
+     * @large
+     */
+    public function testGetAll()
+    {
+        $all = $this->{{ variable_name }}Service->getAll();
+        $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class(reset($all)));
+    }
+
+    public function testGetRandom()
+    {
+        $random = $this->{{ variable_name }}Service->getRandom();
+        $this->assertEquals(
+            '{{ namespace }}\Models\{{ class_name }}Model',
+            get_class($random)
+        );
+
+        return $random;
+    }
+
+    public function testgetMockObject()
+    {
+        $this->assertEquals(
+            '{{ namespace }}\Models\{{ class_name }}Model',
+            $this->{{ variable_name }}Service->getMockObject()
+        );
+    }
+
+    /**
+     * @depends testGetRandom
+     */
+    public function testGetByField({{ class_name }}Model $random)
+    {
+{% for column in columns %}
+        $found = $this->{{ variable_name }}Service->getByField('{{ column.field }}', $random->get{{ column.field }}());
+        $this->assertEquals(
+            '{{ namespace }}\Models\{{ class_name }}Model',
+            get_class($found)
+        );
+{% endfor %}
+    }
+
+    public function testGetTermPlural()
+    {
+        $this->assertNotEmpty($this->{{ variable_name }}Service->getTermPlural());
+    }
+
+    public function testGetTermSingular()
+    {
+        $this->assertNotEmpty($this->{{ variable_name }}Service->getTermSingular());
+    }
+}

@@ -250,6 +250,7 @@ foreach($models as $modelName => $modelData){
     if(in_array("Services", $config['templates'])) {
         renderToFile($twig, true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
         renderToFile($twig, false, APP_ROOT . "/src/Services/{$className}Service.php", "service.php.twig", $renderData[$modelName]);
+        renderToFile($twig, true, APP_ROOT . "/tests/Services/Generated/{$className}Test.php", "tests.service.php.twig", $renderData[$modelName]);
     }
     
     // "Controller" suite
