@@ -63,6 +63,13 @@ $this->testInstance = new {{ class_name }}Model($data);
         return $newMockModel;
     }
 
+    public function testNewModelFactory()
+    {
+        $instance = {{ class_name }}Model::factory();
+
+        $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class($instance));
+    }
+
     /**
      * @depends testNewMockModelInstance
      */

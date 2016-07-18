@@ -20,6 +20,7 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/tests/Api/Generated",
     ZENDERATOR_ROOT . "/tests/Models/Generated",
     ZENDERATOR_ROOT . "/public/index.php",
+    ZENDERATOR_ROOT . "/vendor/segura/zenderator",
 ];
 
 function phpcsfixerfy($pathToPSR2)

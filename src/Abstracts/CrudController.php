@@ -17,7 +17,7 @@ abstract class CrudController extends Controller
 
         return $this->jsonResponse(
             [
-                'Status' => 'OKAY',
+                'Status'                        => 'OKAY',
                 $this->service->getTermPlural() => $objects,
             ],
             $request,
@@ -32,7 +32,7 @@ abstract class CrudController extends Controller
 
             return $this->jsonResponse(
                 [
-                    'Status' => 'OKAY',
+                    'Status'                          => 'OKAY',
                     $this->service->getTermSingular() => $object,
                 ],
                 $request,
@@ -50,7 +50,7 @@ abstract class CrudController extends Controller
             $object = $this->service->createFromArray($newObjectArray);
             return $this->jsonResponse(
                 [
-                    'Status' => 'OKAY',
+                    'Status'                          => 'OKAY',
                     $this->service->getTermSingular() => $object->__toArray(),
                 ],
                 $request,
@@ -68,7 +68,7 @@ abstract class CrudController extends Controller
             $this->service->deleteByID($args['id']);
             return $this->jsonResponse(
                 [
-                    'Status' => 'OKAY',
+                    'Status'                          => 'OKAY',
                     $this->service->getTermSingular() => $object,
                 ],
                 $request,

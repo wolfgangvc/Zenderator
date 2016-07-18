@@ -33,13 +33,13 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
         /**
          * @var \Slim\App $app
          */
-        if(!defined("APP_CORE_NAME")){
+        if (!defined("APP_CORE_NAME")) {
             throw new \Exception("You must define AppCoreName in bootstrap.php. This must be the same as the core app container in /src");
         }
-        $coreAppName = APP_CORE_NAME;
-        $app = $coreAppName::Instance();
-        $this->container = $app->getContainer();
-        $this->container['TestAppInstance'] = function (\Slim\Container $c) use ($app){
+        $coreAppName                        = APP_CORE_NAME;
+        $app                                = $coreAppName::Instance();
+        $this->container                    = $app->getContainer();
+        $this->container['TestAppInstance'] = function (\Slim\Container $c) use ($app) {
             return $app;
         };
         $this->app = $app;
@@ -48,15 +48,15 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->singleTestTime = microtime(true);
-        $this->waypoint_count = 0;
+        $this->singleTestTime     = microtime(true);
+        $this->waypoint_count     = 0;
         $this->waypoint_last_time = $this->singleTestTime;
     }
 
     public function tearDown()
     {
         parent::tearDown();
-        if(self::DEBUG_MODE) {
+        if (self::DEBUG_MODE) {
             $time = microtime(true) - $this->singleTestTime;
             echo "" . get_called_class() . ":" . $this->getName() . ": Took " . number_format($time, 3) . " seconds\n\n";
         }
@@ -71,7 +71,7 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
     public static function tearDownAfterClass()
     {
         parent::tearDownAfterClass();
-        if(self::DEBUG_MODE) {
+        if (self::DEBUG_MODE) {
             $time = microtime(true) - self::$startTime;
             echo "\n" . get_called_class() . ": Took " . number_format($time, 3) . " seconds\n";
         }
@@ -79,9 +79,9 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
 
     public function waypoint($message = "")
     {
-        if(self::DEBUG_MODE) {
+        if (self::DEBUG_MODE) {
             $time_since_last_waypoint = number_format((microtime(true) - $this->waypoint_last_time) * 1000, 2, '.', '');
-            $time_since_begin = number_format((microtime(true) - $this->singleTestTime) * 1000, 2, '.', '');
+            $time_since_begin         = number_format((microtime(true) - $this->singleTestTime) * 1000, 2, '.', '');
             $this->waypoint_count++;
             if ($this->waypoint_count == 1) {
                 echo "\n";

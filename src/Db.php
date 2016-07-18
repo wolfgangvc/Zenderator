@@ -15,9 +15,9 @@ class Db
     {
         if (!self::$instance instanceof Adapter) {
             $dbConfig = include APP_ROOT . "/config/mysql.php";
-            if($dbConfig) {
+            if ($dbConfig) {
                 self::$instance = new Adapter($dbConfig);
-            }else{
+            } else {
                 self::$instance = false;
             }
         }

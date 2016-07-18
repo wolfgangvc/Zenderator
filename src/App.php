@@ -32,7 +32,7 @@ class App
     public static function Instance($doNotUseStaticInstance = false)
     {
         if (!self::$instance || $doNotUseStaticInstance === true) {
-            $calledClass = get_called_class();
+            $calledClass    = get_called_class();
             self::$instance = new $calledClass();
         }
         return self::$instance;
@@ -62,7 +62,7 @@ class App
     public function __construct()
     {
         // Check defined config
-        if(!defined("APP_NAME")){
+        if (!defined("APP_NAME")) {
             throw new \Exception("APP_NAME must be defined in /bootstrap.php");
         }
 
@@ -70,8 +70,8 @@ class App
         $this->app = new \Slim\App(
             [
                 'settings' => [
-                    'debug' => true,
-                    'displayErrorDetails' => true,
+                    'debug'                             => true,
+                    'displayErrorDetails'               => true,
                     'determineRouteBeforeAppMiddleware' => true,
                 ]
             ]
@@ -102,7 +102,7 @@ class App
             );
             
             $view->addExtension(
-                new ArrayUniqueTwigExtension() 
+                new ArrayUniqueTwigExtension()
             );
 
             // Added Twig_Extension_Debug to enable twig dump() etc.
@@ -144,30 +144,30 @@ class App
             $environment = $this->getContainer()->get('Environment');
 
             // Set up Redis.
-            if(!isset($environment['REDIS_PORT'])){
+            if (!isset($environment['REDIS_PORT'])) {
                 throw new \Exception("No REDIS_PORT defined in environment variables, cannot connect to Redis!");
             }
-            $redisConfig = parse_url($environment['REDIS_PORT']);
+            $redisConfig  = parse_url($environment['REDIS_PORT']);
             $redisOptions = [];
-            if(isset($environment['REDIS_OVERRIDE_HOST'])){
+            if (isset($environment['REDIS_OVERRIDE_HOST'])) {
                 $redisConfig['host'] = $environment['REDIS_OVERRIDE_HOST'];
             }
-            if(isset($environment['REDIS_OVERRIDE_PORT'])){
+            if (isset($environment['REDIS_OVERRIDE_PORT'])) {
                 $redisConfig['port'] = $environment['REDIS_OVERRIDE_PORT'];
             }
-            if(isset($environment['REDIS_PREFIX'])){
+            if (isset($environment['REDIS_PREFIX'])) {
                 $redisOptions['prefix'] = $environment['REDIS_PREFIX'];
             }
             return new \Predis\Client($redisConfig, $redisOptions);
         };
 
-        $this->container['MonoLog'] = function (Slim\Container $c){
+        $this->container['MonoLog'] = function (Slim\Container $c) {
             $environment = $this->getContainer()->get('Environment');
             // Set up Monolog
             $monolog = new Logger(APP_NAME);
             $monolog->pushHandler(new StreamHandler(APP_ROOT . "/logs/" . APP_NAME . "." . date("Y-m-d") . ".log", Logger::WARNING));
             $monolog->pushHandler(new RedisHandler($this->getContainer()->get('Redis'), "Logs", Logger::DEBUG));
-            if(isset($environment['SLACK_TOKEN']) && isset($environment['SLACK_CHANNEL'])) {
+            if (isset($environment['SLACK_TOKEN']) && isset($environment['SLACK_CHANNEL'])) {
                 $monolog->pushHandler(
                     new SlackHandler(
                         $environment['SLACK_TOKEN'],
@@ -182,11 +182,11 @@ class App
             return $monolog;
         };
 
-        $this->container["TimeAgo"] = function(Slim\Container $container){
+        $this->container["TimeAgo"] = function (Slim\Container $container) {
             return new \TimeAgo();
         };
 
-        $this->container[EventLoggerService::class] = function (Slim\Container $container){
+        $this->container[EventLoggerService::class] = function (Slim\Container $container) {
             return new EventLoggerService(
                 $container->get("MonoLog"),
                 $container->get("Redis"),
@@ -196,20 +196,19 @@ class App
             );
         };
 
-        $this->container["Differ"] = function (Slim\Container $container){
+        $this->container["Differ"] = function (Slim\Container $container) {
             return new Differ();
         };
 
         require(APP_ROOT . "/src/AppContainer.php");
-        if(file_exists(APP_ROOT . "/src/AppContainerExtra.php")){
+        if (file_exists(APP_ROOT . "/src/AppContainerExtra.php")) {
             require(APP_ROOT . "/src/AppContainerExtra.php");
         }
 
         $this->monolog = $this->getContainer()->get('MonoLog');
-
     }
 
-    static public function Log(int $level = Logger::DEBUG, $message)
+    public static function Log(int $level = Logger::DEBUG, $message)
     {
         return self::Instance()->monolog->log($level, $message);
     }
@@ -217,7 +216,7 @@ class App
     public function loadAllRoutes()
     {
         require(APP_ROOT . "/src/Routes.php");
-        if(file_exists(APP_ROOT . "/src/RoutesExtra.php")) {
+        if (file_exists(APP_ROOT . "/src/RoutesExtra.php")) {
             require(APP_ROOT . "/src/RoutesExtra.php");
         }
         return $this;

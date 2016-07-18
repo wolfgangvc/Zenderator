@@ -1,7 +1,6 @@
 <?php
 namespace Zenderator\Abstracts;
 
-use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
@@ -47,7 +46,7 @@ abstract class TableGateway extends ZendTableGateway
 
             // Update the primary key fields on the existant $model object, because we may still be referencing this.
             // While it feels a bit yucky to magically mutate the model object, it is expected behaviour.
-            foreach($model->getPrimaryKeys() as $key => $value){
+            foreach ($model->getPrimaryKeys() as $key => $value) {
                 $setter = "set{$key}";
                 $getter = "get{$key}";
                 $model->$setter($updatedModel->$getter());
@@ -60,7 +59,6 @@ abstract class TableGateway extends ZendTableGateway
                 $iqe->getCode(),
                 $iqe
             );
-
         }
     }
 
@@ -139,7 +137,7 @@ abstract class TableGateway extends ZendTableGateway
             $select->limit(intval($limit));
         }
 
-        if ($order !== null){
+        if ($order !== null) {
             $select->order("{$order} {$direction}");
         }
 
@@ -286,8 +284,8 @@ abstract class TableGateway extends ZendTableGateway
     public function getBySelect(Select $select)
     {
         $resultSet = $this->executeSelect($select);
-        $return = [];
-        foreach($resultSet as $result){
+        $return    = [];
+        foreach ($resultSet as $result) {
             $return[] = $result;
         }
         return $return;
@@ -300,8 +298,8 @@ abstract class TableGateway extends ZendTableGateway
     public function getBySelectRaw(Select $select)
     {
         $resultSet = $this->executeSelect($select);
-        $return = [];
-        while($result = $resultSet->getDataSource()->current()){
+        $return    = [];
+        while ($result = $resultSet->getDataSource()->current()) {
             $return[] = $result;
             $resultSet->getDataSource()->next();
         }

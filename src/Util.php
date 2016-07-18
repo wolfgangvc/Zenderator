@@ -1,7 +1,8 @@
 <?php
 namespace Zenderator;
 
-class Util {
+class Util
+{
     /**
      * Get all files from given path recursively.
      *
@@ -9,7 +10,8 @@ class Util {
      *
      * @return array List of all files
      */
-    public static function getRecursiveFilesFromDir($path) {
+    public static function getRecursiveFilesFromDir($path)
+    {
         $files             = array();
         $DirectoryIterator = new RecursiveDirectoryIterator($path);
         $IteratorIterator  = new RecursiveIteratorIterator($DirectoryIterator, RecursiveIteratorIterator::SELF_FIRST);
@@ -30,7 +32,8 @@ class Util {
      *
      * @return array All items in parent directory.
      */
-    public static function getItemsInDir($path) {
+    public static function getItemsInDir($path)
+    {
         if ($handle = opendir($path)) {
             $items = array();
             while (false !== ($entry = readdir($handle))) {
@@ -66,11 +69,12 @@ class Util {
      *
      * @return array Multidimensional array
      */
-    public static function autoBuildMultidimensionalArr(array $keys, $val) {
-        if(count($keys) == 0){
+    public static function autoBuildMultidimensionalArr(array $keys, $val)
+    {
+        if (count($keys) == 0) {
             return $val;
         }
 
-        return array($keys[0] => self::autoBuildMultidimensionalArr(array_slice($keys,1), $val));
+        return array($keys[0] => self::autoBuildMultidimensionalArr(array_slice($keys, 1), $val));
     }
 }

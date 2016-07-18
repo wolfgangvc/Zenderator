@@ -6,6 +6,7 @@ use \Zenderator\Abstracts\Model as AbstractModel;
 use \{{ namespace }}\Services;
 use \{{ namespace }}\Models;
 use \{{ namespace }}\TableGateways;
+use \{{ namespace }}\Models\{{ class_name }}Model;
 
 abstract class Base{{ class_name }}Model extends AbstractModel
 {
@@ -25,6 +26,14 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% for column in columns %}
     protected $original_{{ column.field }};
 {% endfor %}
+
+    /**
+     * @returns {{ class_name }}Model
+     */
+    static public function factory()
+    {
+        return parent::factory();
+    }
 
 {% for column in columns %}
     public function get{{ column.field }}() {% if column.phptype %}/* Sadly can't use this until nullable return types turns up. : {{ column.phptype }} */{% endif %}

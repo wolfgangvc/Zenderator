@@ -15,6 +15,12 @@ abstract class Model
         }
     }
 
+    public static function factory()
+    {
+        $class = get_called_class();
+        return new $class();
+    }
+
     /**
      * @return \Interop\Container\ContainerInterface
      */
@@ -33,7 +39,7 @@ abstract class Model
         $transformer = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
 
         foreach ($data as $key => $value) {
-            $method = 'set' . $transformer->transform($key);
+            $method           = 'set' . $transformer->transform($key);
             $originalProperty = "original_" . $transformer->transform($key);
 
             // @todo Query $this->getListOfProperties() instead of methods list..
@@ -59,9 +65,9 @@ abstract class Model
 
         $transformer = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
 
-        foreach($this->getListOfProperties() as $property){
-            $getFunction = "get{$property}";
-            $currentValue = $this->$getFunction();
+        foreach ($this->getListOfProperties() as $property) {
+            $getFunction                               = "get{$property}";
+            $currentValue                              = $this->$getFunction();
             $array[$transformer->transform($property)] = $currentValue;
         }
 
@@ -77,7 +83,7 @@ abstract class Model
     {
         $primaryKeyValues = [];
         foreach ($this->_primary_keys as $primary_key) {
-            $getFunction = "get{$primary_key}";
+            $getFunction                    = "get{$primary_key}";
             $primaryKeyValues[$primary_key] = $this->$getFunction();
         }
         return $primaryKeyValues;
@@ -122,15 +128,15 @@ abstract class Model
      */
     public function getListOfDirtyProperties()
     {
-        $transformer = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $transformer     = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
         $dirtyProperties = [];
-        foreach($this->getListOfProperties() as $property){
+        foreach ($this->getListOfProperties() as $property) {
             $originalProperty = "original_" . $transformer->transform($property);
             #echo "Writing into \$this->{$originalProperty}: getListOfDirtyProperties\n";
-            if($this->$property != $this->$originalProperty){
+            if ($this->$property != $this->$originalProperty) {
                 $dirtyProperties[$property] = [
                     'before' => $this->$originalProperty,
-                    'after' => $this->$property,
+                    'after'  => $this->$property,
                 ];
             }
         }
