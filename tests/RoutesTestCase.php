@@ -45,18 +45,18 @@ abstract class RoutesTestCase extends BaseTestCase
 
         $env = Environment::mock(
             [
-                'SCRIPT_NAME' => '/index.php',
-                'REQUEST_URI' => $path,
+                'SCRIPT_NAME'    => '/index.php',
+                'REQUEST_URI'    => $path,
                 'REQUEST_METHOD' => $method,
-                'RAND' => rand(0, 100000000),
+                'RAND'           => rand(0, 100000000),
             ]
         );
-        $uri = Uri::createFromEnvironment($env);
+        $uri     = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies = [];
+        $cookies      = [];
         $serverParams = $env->all();
-        $body = new RequestBody();
+        $body         = new RequestBody();
         if (!is_array($post) && $post != null) {
             $body->write($post);
             $body->rewind();

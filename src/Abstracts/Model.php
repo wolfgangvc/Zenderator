@@ -3,8 +3,9 @@ namespace Zenderator\Abstracts;
 
 use Camel\CaseTransformer;
 use Camel\Format;
+use Zenderator\Interfaces\ModelInterface;
 
-abstract class Model
+abstract class Model implements ModelInterface
 {
     protected $_primary_keys;
     

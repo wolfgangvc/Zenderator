@@ -4,6 +4,7 @@ namespace Zenderator\Test;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Faker\Provider;
+use Zenderator\Db;
 
 abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
 {
@@ -65,11 +66,13 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         self::$startTime = microtime(true);
+        Db::getInstance()->driver->getConnection()->beginTransaction();
         parent::setUpBeforeClass();
     }
 
     public static function tearDownAfterClass()
     {
+        Db::getInstance()->driver->getConnection()->rollback();
         parent::tearDownAfterClass();
         if (self::DEBUG_MODE) {
             $time = microtime(true) - self::$startTime;

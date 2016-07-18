@@ -79,30 +79,30 @@ $this->testInstance = new {{ class_name }}Model($data);
         /** @var Models\{{ class_name }}Model $savedModel */
         $savedModel = $mockModel->save();
         $this->assertEquals($mockModel, $savedModel);
-    }
+ }
 
 {% if columns.id is defined %}
     /**
      * @depends testGetRandom
      */
-    public function testGetById({{ class_name }}Model ${{ class_name|lower }})
+    public function testGetById({{ class_name }}Model ${{ variable_name }})
     {
-        /** @var {{ class_name|lower }}TableGateway $table */
+        /** @var {{ variable_name }}TableGateway $table */
         $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
-        $results = $table->select(['id' => ${{ class_name|lower }}->getId()]);
-        ${{ class_name|lower }}Row = $results->current();
-        $this->assertTrue(${{ class_name|lower }}Row instanceof {{ class_name }}Model);
+        $results = $table->select(['id' => ${{ variable_name }}->getId()]);
+        ${{ variable_name }}Row = $results->current();
+        $this->assertTrue(${{ variable_name }}Row instanceof {{ class_name }}Model);
     }
 {% endif %}
 
     /**
      * @depends testGetRandom
      */
-    public function testSettersAndGetters({{ class_name }}Model ${{ class_name|lower }})
+    public function testSettersAndGetters({{ class_name }}Model ${{ variable_name }})
     {
 {% for column in columns %}
-        $this->assertTrue(method_exists(${{ class_name|lower }}, "get{{ column.field }}"));
-        $this->assertTrue(method_exists(${{ class_name|lower }}, "set{{ column.field }}"));
+        $this->assertTrue(method_exists(${{ variable_name }}, "get{{ column.field }}"));
+        $this->assertTrue(method_exists(${{ variable_name }}, "set{{ column.field }}"));
 {% endfor %}
 
         $test{{ class_name }} = new {{ class_name }}Model();

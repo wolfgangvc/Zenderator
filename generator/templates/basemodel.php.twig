@@ -41,6 +41,9 @@ abstract class Base{{ class_name }}Model extends AbstractModel
         return $this->{{ column.field }};
     }
 
+    /**
+     * @returns {{ class_name }}Model
+     */
     public function set{{ column.field }}({{ column.phptype }} ${{ column.field }} = null)
     {
         $this->{{ column.field }} = ${{ column.field }};
@@ -61,11 +64,26 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endif %}
 {% endfor %}
 
+    /**
+     * @returns {{ class_name }}Model
+     */
     public function save()
     {
         /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
         $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
         return $tableGateway->save($this);
+    }
+
+    /**
+     * Destroy the current record.
+     *
+     * @return int Number of affected rows.
+     */
+    public function destroy()
+    {
+        /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
+        $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
+        return $tableGateway->delete($this->getPrimaryKeys());
     }
 
     /**
