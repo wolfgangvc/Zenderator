@@ -1,7 +1,7 @@
 <?php
 namespace {{ namespace }}\Test\Services;
 
-use \{{ namespace }}\{{ namespace }};
+use \{{ app_container }} as App;
 use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
 use \{{ namespace }}\Services\{{ class_name }}Service;
 use \{{ namespace }}\Models\{{ class_name }}Model;
@@ -15,8 +15,8 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
 
     public function setUp()
     {
-        $this->{{ variable_name }}Service = {{ namespace }}::Container()->get({{ class_name }}Service::class);
-        $this->{{ variable_name }}TableGateway = {{ namespace }}::Container()->get({{ class_name }}TableGateway::class);
+        $this->{{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $this->{{ variable_name }}TableGateway = App::Container()->get({{ class_name }}TableGateway::class);
 
         for($i = 0; $i <= 5; $i++){
             $this->{{ variable_name }}TableGateway
@@ -45,11 +45,11 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
         return $random;
     }
 
-    public function testgetMockObject()
+    public function testGetMockObject()
     {
         $this->assertEquals(
             '{{ namespace }}\Models\{{ class_name }}Model',
-            $this->{{ variable_name }}Service->getMockObject()
+            get_class($this->{{ variable_name }}Service->getMockObject())
         );
     }
 
