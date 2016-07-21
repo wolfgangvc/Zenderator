@@ -58,7 +58,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% for column in columns|sort %}
         // Type = {{ column.type }} PHPType = {{ column.phptype }}
 {% if 'constraints' in column|keys %}
-        '{{ column.field }}' => $this->{{ column.constraints.remote_model_variable }}TableGateway->fetchRandom()->get{{ column.constraints.remote_model_key_get_function }}(),
+        '{{ column.field }}' => $this->{{ column.constraints.remote_model_variable }}TableGateway->getNewMockModelInstance()->save()->get{{ column.constraints.remote_model_key_get_function }}(),
 {% elseif column.phptype == 'int' and 'max_field_length' in column|keys %}
         '{{ column.field }}' => $this->faker->numberBetween(1, {{ 10 ** column.max_length - 1 < column.max_field_length ? 10 ** column.max_length - 1 : column.max_field_length}}),
 {% elseif column.phptype == 'int' %}
@@ -68,7 +68,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% elseif column.type == 'datetime' and column.phptype == 'string' %}
         '{{ column.field }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings.
 {% elseif column.phptype == 'float' %}
-        '{{ column.field }}' => $this->faker->randomFloat(3, -5, 5),
+        '{{ column.field }}' => $this->faker->randomFloat({{ column.max_decimal_places }}, -5, 5),
 {% elseif column.max_length %}
         '{{ column.field }}' => substr($this->faker->text({{ column.max_length < 50000 ? column.max_length : 50000 }} >= 5 ? {{ column.max_length < 50000 ? column.max_length : 50000 }} : 5), 0, {{ column.max_length < 50000 ? column.max_length : 50000 }}),
 {% else %}
