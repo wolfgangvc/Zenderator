@@ -19,7 +19,7 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/src/*.php",
     ZENDERATOR_ROOT . "/tests/Api/Generated",
     ZENDERATOR_ROOT . "/tests/Models/Generated",
-    ZENDERATOR_ROOT . "/public/index.php",
+    ZENDERATOR_ROOT . "/public/index.php",g
     ZENDERATOR_ROOT . "/vendor/segura/zenderator",
 ];
 
@@ -27,6 +27,13 @@ $phpCsFixerRules = [
     'no_unused_imports',
     'align_double_arrow',
     'align_equals',
+    'ordered_use',
+    'short_array_syntax',
+    'phpdoc_order',
+    'phpdoc_params',
+    'phpdoc_scalar',
+    'phpdoc_separation',
+    'phpdoc_short_description'
 ];
 
 function phpcsfixerfy($pathToPSR2, $phpCsFixerRules)
