@@ -36,7 +36,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     }
 
 {% for column in columns %}
-    public function get{{ column.field }}() {% if column.phptype %}/* Sadly can't use this until nullable return types turns up. : {{ column.phptype }} */{% endif %}
+    public function get{{ column.field }}() {% if column.phptype %}{# Sadly can't use this until nullable return types turns up. : {{ column.phptype }} #}{% endif %}
     {
         return $this->{{ column.field }};
     }

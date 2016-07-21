@@ -3,8 +3,8 @@ namespace Zenderator\Abstracts;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Zenderator\Exceptions\TableGatewayException;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
+use Zenderator\Exceptions\TableGatewayException;
 
 abstract class CrudController extends Controller
 {

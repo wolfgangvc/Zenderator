@@ -125,7 +125,7 @@ abstract class Model implements ModelInterface
     }
 
     /**
-     * Returns an array of dirty properties
+     * Returns an array of dirty properties.
      */
     public function getListOfDirtyProperties()
     {

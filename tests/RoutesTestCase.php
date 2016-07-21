@@ -19,8 +19,9 @@ abstract class RoutesTestCase extends BaseTestCase
     /**
      * @param string $method
      * @param string $path
-     * @param array $post
-     * @param bool $isJsonRequest
+     * @param array  $post
+     * @param bool   $isJsonRequest
+     *
      * @return Response
      */
     public function request(string $method, string $path, $post = null, $isJsonRequest = true)

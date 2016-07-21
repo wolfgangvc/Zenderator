@@ -1,6 +1,8 @@
 <?php
 namespace Zenderator;
 
+use Faker\Factory as FakerFactory;
+use Faker\Provider;
 use Monolog\Handler\RedisHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
@@ -8,8 +10,6 @@ use Monolog\Logger;
 use SebastianBergmann\Diff\Differ;
 use Segura\Session\Session;
 use Slim;
-use Faker\Provider;
-use Faker\Factory as FakerFactory;
 use Zenderator\Services\EventLoggerService;
 use Zenderator\Twig\Extensions\ArrayUniqueTwigExtension;
 use Zeuxisoo\Whoops\Provider\Slim\WhoopsMiddleware;

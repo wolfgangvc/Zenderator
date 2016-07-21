@@ -10,8 +10,8 @@ class ArrayUniqueTwigExtension extends \Twig_Extension
     
     public function getFilters()
     {
-        $filters = array();
-        $methods = array('unique');
+        $filters = [];
+        $methods = ['unique'];
         foreach ($methods as $method) {
             $filters[$method] = new \Twig_Filter_Method($this, $method);
         }

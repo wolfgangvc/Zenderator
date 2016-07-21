@@ -17,8 +17,9 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param Model $model
      *
-     * @return array|\ArrayObject|null
      * @throws TableGatewayException
+     *
+     * @return array|\ArrayObject|null
      */
     public function save(Model $model)
     {
@@ -97,8 +98,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param array $data
-     *
-     * @param null $id
+     * @param null  $id
      *
      * @return int
      */
@@ -108,8 +108,8 @@ abstract class TableGateway extends ZendTableGateway
     }
 
     /**
-     * @param array $data
-     * @param null $where
+     * @param array       $data
+     * @param null        $where
      * @param array|Model $oldData
      *
      * @return int
@@ -120,10 +120,10 @@ abstract class TableGateway extends ZendTableGateway
     }
 
     /**
-     * This method is only supposed to be used by getListAction
+     * This method is only supposed to be used by getListAction.
      *
-     * @param null $limit Number to limit to
-     * @param null $order Column to order on
+     * @param null   $limit     Number to limit to
+     * @param null   $order     Column to order on
      * @param string $direction Direction to order on (SELECT::ORDER_ASCENDING|SELECT::ORDER_DESCENDING)
      *
      * @return array [ResultSet,int] Returns an array of resultSet,total_found_rows
@@ -162,8 +162,9 @@ abstract class TableGateway extends ZendTableGateway
     }
 
     /**
-     * @return array|\ArrayObject|null
      * @throws TableGatewayException
+     *
+     * @return array|\ArrayObject|null
      */
     public function fetchRandom()
     {
@@ -181,10 +182,11 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param array|Select $where
      * @param array|string $order
-     * @param int $offset
+     * @param int          $offset
+     *
+     * @throws TableGatewayException
      *
      * @return array|\ArrayObject|null|Model
-     * @throws TableGatewayException
      */
     public function fetchRow($where = null, $order = null, $offset = null)
     {
@@ -225,8 +227,9 @@ abstract class TableGateway extends ZendTableGateway
     /**
      * @param $id
      *
-     * @return Model
      * @throws TableGatewayException
+     *
+     * @return Model
      */
     public function getById($id)
     {
@@ -241,8 +244,9 @@ abstract class TableGateway extends ZendTableGateway
      * @param $field
      * @param $value
      *
-     * @return array|\ArrayObject|null
      * @throws TableGatewayException
+     *
+     * @return array|\ArrayObject|null
      */
     public function getByField($field, $value)
     {
@@ -255,8 +259,10 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param array $primaryKeys
-     * @return array|\ArrayObject|null
+     *
      * @throws TableGatewayException
+     *
+     * @return array|\ArrayObject|null
      */
     public function getByPrimaryKey(array $primaryKeys)
     {
@@ -269,6 +275,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param array $data
+     *
      * @return Model
      */
     public function getNewModelInstance(array $data = [])
@@ -279,6 +286,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param Select $select
+     *
      * @return Model[]
      */
     public function getBySelect(Select $select)
@@ -293,6 +301,7 @@ abstract class TableGateway extends ZendTableGateway
 
     /**
      * @param Select $select
+     *
      * @return Model[]
      */
     public function getBySelectRaw(Select $select)

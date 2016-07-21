@@ -29,7 +29,7 @@ abstract class Controller
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isApiExplorerEnabled()
     {
@@ -37,7 +37,7 @@ abstract class Controller
     }
 
     /**
-     * @param boolean $apiExplorerEnabled
+     * @param bool $apiExplorerEnabled
      */
     public function setApiExplorerEnabled(bool $apiExplorerEnabled)
     {

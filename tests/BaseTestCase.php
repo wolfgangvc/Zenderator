@@ -10,6 +10,7 @@ abstract class BaseTestCase extends \PHPUnit_Framework_TestCase
 {
     /**
      * @see https://github.com/fzaninotto/Faker
+     *
      * @var Generator $faker
      */
     private static $faker;

@@ -12,7 +12,7 @@ class Util
      */
     public static function getRecursiveFilesFromDir($path)
     {
-        $files             = array();
+        $files             = [];
         $DirectoryIterator = new RecursiveDirectoryIterator($path);
         $IteratorIterator  = new RecursiveIteratorIterator($DirectoryIterator, RecursiveIteratorIterator::SELF_FIRST);
         foreach ($IteratorIterator as $file) {
@@ -35,7 +35,7 @@ class Util
     public static function getItemsInDir($path)
     {
         if ($handle = opendir($path)) {
-            $items = array();
+            $items = [];
             while (false !== ($entry = readdir($handle))) {
                 //Skip any hidden files
                 if (substr($entry, 0, 1) !== '.') {
@@ -62,10 +62,10 @@ class Util
      *             )
      *         )
      *     )
-     * )
-
-     * @param array $keys Array of keys to build
-     * @param string $val Value to add to the last nested array
+     * ).
+     *
+     * @param array  $keys Array of keys to build
+     * @param string $val  Value to add to the last nested array
      *
      * @return array Multidimensional array
      */
@@ -75,6 +75,6 @@ class Util
             return $val;
         }
 
-        return array($keys[0] => self::autoBuildMultidimensionalArr(array_slice($keys, 1), $val));
+        return [$keys[0] => self::autoBuildMultidimensionalArr(array_slice($keys, 1), $val)];
     }
 }
