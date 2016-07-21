@@ -28,13 +28,13 @@ $phpCsFixerRules = [
     'no_unused_imports',
     'align_double_arrow',
     'align_equals',
-    'ordered_use',
+    'ordered_imports',
     'short_array_syntax',
     'phpdoc_order',
-    'phpdoc_params',
+    'phpdoc_align',
     'phpdoc_scalar',
     'phpdoc_separation',
-    'phpdoc_short_description'
+    'phpdoc_summary'
 ];
 
 function phpcsfixerfy($pathToPSR2, $phpCsFixerRules)
