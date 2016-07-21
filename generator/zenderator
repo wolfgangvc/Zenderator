@@ -124,6 +124,8 @@ foreach ($tables as $table) {
             $models[$table->getName()]['columns'][$column->getName()]['default_value'] = $column->getColumnDefault();
         }
 
+        $models[$table->getName()]['columns'][$column->getName()]['max_decimal_places'] = $column->getNumericScale();
+
         /**
          * Get relationship constraints
          */
@@ -146,19 +148,20 @@ foreach ($tables as $table) {
          */
         $primaryKeys = [];
         $primaryParameters = [];
+        $autoincrementParameters = [];
         foreach($table->getConstraints() as $constraint){
             if($constraint->getType() == 'PRIMARY KEY'){
                 $primaryKeys = $constraint->getColumns();
-
             }
         }
-        foreach($primaryKeys as $primaryKey){
-            $primaryParameters[] = $transCamel2Studly->transform($primaryKey);
+
+        foreach(getAutoincrementColumns($adapter, $table->getName()) as $column){
+            $autoincrementParameters[] = $transCamel2Studly->transform($column);
         }
+
         $models[$table->getName()]['primary_keys'] = $primaryKeys;
         $models[$table->getName()]['primary_parameters'] = $primaryParameters;
-
-        #\Kint::dump($models[$table->getName()]);
+        $models[$table->getName()]['autoincrement_parameters'] = $autoincrementParameters;
     }
 }
 
@@ -233,6 +236,7 @@ foreach($models as $modelName => $modelData){
         'table'                => $modelName,
         'primary_keys'         => $modelData['primary_keys'],
         'primary_parameters'   => $modelData['primary_parameters'],
+        'autoincrement_parameters' => $modelData['autoincrement_parameters']
     ];
     
     #\Kint::dump($renderData[$modelName]);exit;
@@ -334,4 +338,15 @@ function sanitiseModelNameToClassName($modelName){
     }else{
         return $modelName;
     }
+}
+
+function getAutoincrementColumns(DbAdaptor $adapter, $table){
+    $sql = "SHOW columns FROM {$table} WHERE extra like '%auto_increment%'";
+    $query = $adapter->query($sql);
+    $columns = [];
+
+    foreach($query->execute() as $aiColumn){
+        $columns[] = $aiColumn['Field'];
+    }
+    return $columns;
 }

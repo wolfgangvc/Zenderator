@@ -70,13 +70,13 @@ $this->testInstance = new {{ class_name }}Model($data);
         $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class($instance));
     }
 
-    /**
-     * @depends testNewMockModelInstance
-     */
-    public function testSave(Models\{{ class_name }}Model $mockModel)
+    public function testSave()
     {
+        /** @var {{ class_name }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
         /** @var Models\{{ class_name }}Model $mockModel */
         /** @var Models\{{ class_name }}Model $savedModel */
+        $mockModel = $table->getNewMockModelInstance();
         $savedModel = $mockModel->save();
         $this->assertEquals($mockModel, $savedModel);
  }
@@ -132,7 +132,7 @@ $this->testInstance = new {{ class_name }}Model($data);
 {% endif %}
 {% endfor %}
 
-{% if primary_keys %}
+{% if autoincrement_parameters %}
     public function testAutoincrementedIdIsApplied()
     {
         /** @var {{ class_name }}TableGateway $table */
@@ -140,7 +140,7 @@ $this->testInstance = new {{ class_name }}Model($data);
         $newMockModel = $table->getNewMockModelInstance();
 
         // Set primary keys to null.
-{% for primary_parameter in primary_parameters %}
+{% for primary_parameter in autoincrement_parameters %}
         $newMockModel->set{{ primary_parameter }}(null);
 {% endfor %}
 
