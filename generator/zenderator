@@ -272,6 +272,11 @@ foreach($models as $modelName => $modelData){
     if(in_array("Routes", $config['templates'])) {
         renderToFile($twig, true, APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
     }
+
+    // "SDK" suite
+    if(in_array("SDK", $config['templates'])) {
+        renderToFile($twig, true, APP_ROOT . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
+    }
     echo " [DONE]\n";
 }
 
