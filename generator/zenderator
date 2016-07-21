@@ -223,6 +223,7 @@ foreach($models as $modelName => $modelData){
 
     $renderData[$modelName] = [
         'namespace'            => $namespace,
+        'app_name'             => APP_NAME,
         'app_container'        => APP_CORE_NAME,
         'class_name'           => $className,
         'variable_name'        => $transStudly2Camel->transform($className),
@@ -276,6 +277,7 @@ foreach($models as $modelName => $modelData){
     // "SDK" suite
     if(in_array("SDK", $config['templates'])) {
         renderToFile($twig, true, APP_ROOT . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
+        renderToFile($twig, true, APP_ROOT . "/SDK/AccessLayer/Base/Base{$className}AccessLayer.php", "lib.baseaccesslayer.php.twig", $renderData[$modelName]);
     }
     echo " [DONE]\n";
 }
