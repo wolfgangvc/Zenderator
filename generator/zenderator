@@ -341,7 +341,7 @@ function sanitiseModelNameToClassName($modelName){
 }
 
 function getAutoincrementColumns(DbAdaptor $adapter, $table){
-    $sql = "SHOW columns FROM {$table} WHERE extra like '%auto_increment%'";
+    $sql = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
     $query = $adapter->query($sql);
     $columns = [];
 
