@@ -23,12 +23,18 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/vendor/segura/zenderator",
 ];
 
-function phpcsfixerfy($pathToPSR2)
+$phpCsFixerRules = [
+    'no_unused_imports',
+    'align_double_arrow',
+    'align_equals',
+];
+
+function phpcsfixerfy($pathToPSR2, $phpCsFixerRules)
 {
     ob_start();
     echo " > {$pathToPSR2} ... ";
     $begin = microtime(true);
-    exec(ZENDERATOR_ROOT . "/vendor/bin/php-cs-fixer fix {$pathToPSR2} --rules=no_unused_imports,align_double_arrow,align_equals");
+    exec(ZENDERATOR_ROOT . "/vendor/bin/php-cs-fixer fix {$pathToPSR2} --rules=" . implode(",", $phpCsFixerRules));
     $time = microtime(true) - $begin;
     echo " [Complete in " . number_format($time, 2) . "]\n";
     echo ob_get_clean();
@@ -36,7 +42,7 @@ function phpcsfixerfy($pathToPSR2)
 
 foreach ($pathsToPSR2 as $pathToPSR2) {
     if (file_exists($pathToPSR2)) {
-        phpcsfixerfy($pathToPSR2);
+        phpcsfixerfy($pathToPSR2, $phpCsFixerRules);
     }
 }
 
