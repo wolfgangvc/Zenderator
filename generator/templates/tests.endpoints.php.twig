@@ -10,10 +10,7 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
 
     const MODEL_NAME = '{{ class_name }}';
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
+
     public function test{{ class_name }}Create()
     {
         try{
@@ -47,10 +44,7 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
         }
     }
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
+
     public function test{{ class_name }}CreateFails()
     {
         $this->markTestSkipped("This test makes phpunit sad because closures cannot be serialised");
@@ -79,8 +73,6 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
 
     /**
      * @depends test{{ class_name }}Create
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
      */
     public function test{{ class_name }}Get($id)
     {
@@ -107,8 +99,6 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
 
     /**
      * @depends test{{ class_name }}Create
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
      */
     public function test{{ class_name }}List()
     {
@@ -135,8 +125,6 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
 
     /**
      * @depends test{{ class_name }}Create
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
      */
     public function test{{ class_name }}Delete($id)
     {
@@ -157,8 +145,6 @@ class {{ class_name }}EndpointTest extends \Zenderator\Test\RoutesTestCase
 
     /**
      * @depends test{{ class_name }}Delete
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
      */
     public function test{{ class_name }}DeleteVerify($id)
     {
