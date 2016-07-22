@@ -3,6 +3,10 @@ namespace Zenderator;
 
 use Camel\CaseTransformer;
 use Camel\Format;
+use Slim\Http\Environment;
+use Slim\Http\Headers;
+use Slim\Http\RequestBody;
+use Slim\Http\Uri;
 use Thru\Inflection\Inflect;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
@@ -45,10 +49,10 @@ class Zenderator
         $this->cleanCode();
     }
 
-    public function makeSDK()
+    public function makeSDK($outputPath = APP_ROOT)
     {
         $models = $this->makeModelSchemas();
-        $this->makeSDKFiles($models);
+        $this->makeSDKFiles($models, $outputPath);
         $this->cleanCode();
     }
 
@@ -408,9 +412,12 @@ class Zenderator
         }
     }
 
-    private function makeSDKFiles($models)
+    private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
         $tables = $this->metadata->getTables();
+
+        $endpoints = $this->getEndpoints();
+        \Kint::dump($endpoints);exit;
 
         echo "Generating " . count($tables) . " models.\n";
 
@@ -439,12 +446,12 @@ class Zenderator
 
             // "SDK" suite
             if (in_array("SDK", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
-                $this->renderToFile(true, APP_ROOT . "/SDK/AccessLayer/Base/Base{$className}AccessLayer.php", "lib.baseaccesslayer.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, $outputPath . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, $outputPath . "/SDK/AccessLayer/Base/Base{$className}AccessLayer.php", "lib.baseaccesslayer.php.twig", $renderData[$modelName]);
             }
         }
         echo "Generating Client Container:";
-        $this->renderToFile(true, APP_ROOT . "/SDK/Client.php", "lib.client.php.twig", [
+        $this->renderToFile(true, $outputPath . "/SDK/Client.php", "lib.client.php.twig", [
             'app_name'                 => APP_NAME,
             'app_container'            => APP_CORE_NAME,
             'models'                   => $renderData,
@@ -473,5 +480,69 @@ class Zenderator
     private function cleanCodeComposerAutoloader()
     {
         require(__DIR__ . "/../generator/composer-optimise");
+    }
+
+    private function getEndpoints(){
+
+    }
+
+    /**
+     * @param string $method
+     * @param string $path
+     * @param array  $post
+     * @param bool   $isJsonRequest
+     *
+     * @return Response
+     */
+    private function makeRequest(string $method, string $path, $post = null, $isJsonRequest = true){
+        /**
+         * @var \Slim\App $app
+         */
+        $app = $this->getApp();
+        $calledClass = get_called_class();
+
+        if (defined("$calledClass")) {
+            $modelName = $calledClass::MODEL_NAME;
+            require(APP_ROOT . "/src/Routes/{$modelName}Route.php");
+        } else {
+            require(APP_ROOT . "/src/Routes.php");
+        }
+        require(APP_ROOT . "/src/RoutesExtra.php");
+
+
+        $env = Environment::mock(
+            [
+                'SCRIPT_NAME'    => '/index.php',
+                'REQUEST_URI'    => $path,
+                'REQUEST_METHOD' => $method,
+                'RAND'           => rand(0, 100000000),
+            ]
+        );
+        $uri     = Uri::createFromEnvironment($env);
+        $headers = Headers::createFromEnvironment($env);
+
+        $cookies      = [];
+        $serverParams = $env->all();
+        $body         = new RequestBody();
+        if (!is_array($post) && $post != null) {
+            $body->write($post);
+            $body->rewind();
+        } elseif (is_array($post) && count($post) > 0) {
+            $body->write(json_encode($post));
+            $body->rewind();
+        }
+        $request = new Request($method, $uri, $headers, $cookies, $serverParams, $body);
+        if ($isJsonRequest) {
+            $request = $request->withHeader("Content-type", "application/json");
+        }
+        $this->waypoint("Before Response");
+        $response = new Response();
+        // Invoke app
+        $app($request, $response);
+        #echo "\nRequesting {$method}: {$path} : ".json_encode($post) . "\n";
+        #echo "Response: " . (string) $response->getBody()."\n";
+        $this->waypoint("After Response");
+
+        return $response;
     }
 }

@@ -7,4 +7,6 @@ $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfiguration
 );
-$zenderator->makeSDK();
+$exportPath = isset($argv[1]) ? $argv[1] : APP_ROOT;
+
+$zenderator->makeSDK($exportPath);
