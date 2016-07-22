@@ -10,6 +10,7 @@
         "generator/composer-optimise",
         "generator/phpcsfixerfier",
         "generator/psr2ifier",
+        "generator/sdkifier",
         "generator/zenderator"
     ],
     "repositories": [

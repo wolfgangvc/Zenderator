@@ -7,4 +7,4 @@ $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfiguration
 );
-$zenderator->makeZenderator();
+$zenderator->makeSDK();
