@@ -1,0 +1,18 @@
+<?php
+namespace Segura\SDK\{{ app_name }};
+
+class Client extends Abstracts\Client
+{
+{% for model in models %}
+    /**
+     * @returns AccessLayer\{{ model.class_name }}AccessLayer
+     */
+    public function get{{ model.object_name_plural }}()
+    {
+        return new AccessLayer\{{ model.class_name }}AccessLayer(
+            $this
+        );
+    }
+
+{% endfor %}
+}

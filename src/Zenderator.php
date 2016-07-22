@@ -88,7 +88,6 @@ class Zenderator
         $this->adapter->query('set global innodb_stats_on_metadata=0;');
     }
 
-
     private function renderToFile(bool $overwrite, string $path, string $template, array $data)
     {
         $output = $this->twig->render($template, $data);
@@ -318,7 +317,6 @@ class Zenderator
 
     private function makeCoreFiles($models)
     {
-
         $tables = $this->metadata->getTables();
 
         echo "Generating " . count($tables) . " models.\n";
@@ -380,12 +378,6 @@ class Zenderator
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
             }
 
-            // "SDK" suite
-            if (in_array("SDK", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
-                $this->renderToFile(true, APP_ROOT . "/SDK/AccessLayer/Base/Base{$className}AccessLayer.php", "lib.baseaccesslayer.php.twig", $renderData[$modelName]);
-            }
-            
             // "JS" suit
             if (in_array("JsLib", $this->config['templates'])) {
                 echo "Generating JS Lib...";
@@ -414,6 +406,51 @@ class Zenderator
                 echo " [DONE]\n";
             }
         }
+    }
+
+    private function makeSDKFiles($models)
+    {
+        $tables = $this->metadata->getTables();
+
+        echo "Generating " . count($tables) . " models.\n";
+
+        $renderData = [];
+
+        foreach ($models as $modelName => $modelData) {
+            $className              = $modelData['className'];
+            $renderData[$modelName] = [
+                'namespace'                => $this->namespace,
+                'app_name'                 => APP_NAME,
+                'app_container'            => APP_CORE_NAME,
+                'class_name'               => $className,
+                'variable_name'            => $this->transStudly2Camel->transform($className),
+                'name'                     => $modelName,
+                'object_name_plural'       => $this->pluraliseClassName($className),
+                'object_name_singular'     => $className,
+                'controller_route'         => $this->transCamel2Snake->transform(Inflect::pluralize($className)),
+                'namespace_model'          => "{$this->namespace}\\Models\\{$className}Model",
+                'columns'                  => $modelData['columns'],
+                'related_objects'          => $modelData['related_objects'],
+                'table'                    => $modelName,
+                'primary_keys'             => $modelData['primary_keys'],
+                'primary_parameters'       => $modelData['primary_parameters'],
+                'autoincrement_parameters' => $modelData['autoincrement_parameters']
+            ];
+
+            // "SDK" suite
+            if (in_array("SDK", $this->config['templates'])) {
+                $this->renderToFile(true, APP_ROOT . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, APP_ROOT . "/SDK/AccessLayer/Base/Base{$className}AccessLayer.php", "lib.baseaccesslayer.php.twig", $renderData[$modelName]);
+            }
+        }
+        echo "Generating Client Container:";
+        $this->renderToFile(true, APP_ROOT . "/SDK/Client.php", "lib.client.php.twig", [
+            'app_name'                 => APP_NAME,
+            'app_container'            => APP_CORE_NAME,
+            'models'                   => $renderData,
+            'config'                   => $this->config
+        ]);
+        echo " [DONE]\n";
     }
 
     private function cleanCode()
