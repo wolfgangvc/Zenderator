@@ -36,6 +36,9 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     }
 
 {% for column in columns %}
+    /**
+     * @returns {{ column.phptype }}
+     */
     public function get{{ column.field }}() {% if column.phptype %}{# Sadly can't use this until nullable return types turns up. : {{ column.phptype }} #}{% endif %}
     {
         return $this->{{ column.field }};
@@ -49,8 +52,11 @@ abstract class Base{{ class_name }}Model extends AbstractModel
         $this->{{ column.field }} = ${{ column.field }};
         return $this;
     }
-{% if 'constraints' in column|keys %}
 
+{% if 'constraints' in column|keys %}
+    /**
+     * @returns Models\{{ column.constraints.remote_model_class }}Model
+     */
     public function fetch{{ column.field }}Object() : Models\{{ column.constraints.remote_model_class }}Model
     {
         ${{ column.constraints.remote_model_class }}Service = App::Container()->get(Services\{{ column.constraints.remote_model_class }}Service::class);
@@ -61,6 +67,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
         return ${{ column.constraints.remote_model_class }}Service->getByField('{{ column.constraints.remote_model_key }}', $this->get{{ column.field }}());
 {% endif %}
     }
+
 {% endif %}
 {% endfor %}
 
