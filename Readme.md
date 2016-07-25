@@ -82,12 +82,12 @@ Properties that are used to relate between two objects will also have a `fetchXY
 
 #### Generic Controllers
 
-There is an implementation of a base Controller that all other controllers that Zenderator generates extends from. This provides a basic set of CRUD callbacks to the developer.
+There is an implementation of a base Controller that all other controllers that Zenderator generates extends from. This provides a basic set of CRUD callbacks to the developer. The base functionality is in `Zenderator\Abstracts\CrudController` and provides the following functions, which are override-able in the concrete class implementation for that controller. 
 
-* List: `GET /v1/example` Will fetch all instances of example, by default. 
-* Create: `PUT /v1/example` Will create a new instance of example.
-* Get: `GET /v1/example/44` Will get instance #44, where id=44
-* Delete: `DELETE /v1/example/44` Will delete instance #44.
+* List: `GET /v1/example` Will fetch all instances of example, by default. Calls `Controller::listRequest`. 
+* Create: `PUT /v1/example` Will create a new instance of example. Calls `Controller::createRequest`. 
+* Get: `GET /v1/example/44` Will get instance #44, where id=44. Calls `Controller::getRequest`. 
+* Delete: `DELETE /v1/example/44` Will delete instance #44. Calls `Controller::deleteRequest`. 
 
 #### Test generation
 
