@@ -52,6 +52,20 @@ With the exception of Composer, Slim & Pimple DI, any of these choices can be ov
 
 ### Model Generation
 
+Models consist of two components. A Model object, and a TableGateway object, as per the Zend style. In this case, the model is only responsible for model data, and none of the marshalling of data into and out of the database. This marshalling responsibility is that of the TableGateway.
+
+There are some convenience functions generated baked into the Model, such as `->save()` and `->destroy()` which are really just wrappers around the TableGateway functionality to do the same.
+
+A `Model::factory()` function is provided, as well as Model setters being generated so that they return `$this` in context, so that setter chaining can be performed while creating a new object:
+
+```
+ $example = ExampleModel::factory()
+   ->setThing(...)
+   ->setDifferentThing(...)
+   ->setAnother(...)
+   ->save();
+```
+
 #### Schema interrogation
 
 To generate Models and Services, the database must first be interrogated. For each table, a model muyst be created. For each model, each column is transformed into a property of that model. 
@@ -68,7 +82,12 @@ Properties that are used to relate between two objects will also have a `fetchXY
 
 #### Generic Controllers
 
-// TODO
+There is an implementation of a base Controller that all other controllers that Zenderator generates extends from. This provides a basic set of CRUD callbacks to the developer.
+
+* List: `GET /v1/example` Will fetch all instances of example, by default. 
+* Create: `PUT /v1/example` Will create a new instance of example.
+* Get: `GET /v1/example/44` Will get instance #44, where id=44
+* Delete: `DELETE /v1/example/44` Will delete instance #44.
 
 #### Test generation
 
