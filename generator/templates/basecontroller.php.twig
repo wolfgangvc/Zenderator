@@ -4,6 +4,8 @@ namespace {{ namespace }}\Controllers\Base;
 use Zenderator\Abstracts\CrudController as AbstractCrudController;
 use \{{ namespace }}\Services;
 
+{% include '_overwrite_warning.twig' %}
+
 abstract class Base{{ class_name }}Controller extends AbstractCrudController
 {
     const RESPONSIBLE_MODEL = '{{ class_name }}';

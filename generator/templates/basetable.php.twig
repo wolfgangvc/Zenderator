@@ -7,6 +7,8 @@ use \{{ namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
 use \Zend\Db\ResultSet\ResultSet;
 
+{% include '_overwrite_warning.twig' %}
+
 abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {
     protected $table = '{{ table }}';
