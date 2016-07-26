@@ -99,7 +99,6 @@ class Zenderator
             mkdir(dirname($path), 0777, true);
         }
         if (!file_exists($path) || $overwrite) {
-            echo " > Writing to {$path} (" . strlen($output) . " bytes).\n";
             file_put_contents($path, $output);
         }
     }
