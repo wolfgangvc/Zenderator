@@ -8,21 +8,16 @@ use \{{ namespace }}\Models\{{ class_name }}Model;
 
 class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
 {
-    /** @var {{ class_name }}Service */
-    private ${{ variable_name }}Service;
-    /** @var {{ class_name }}TableGateway */
-    private ${{ variable_name }}TableGateway;
-
-    public function setUp()
+    public static function setUpBeforeClass()
     {
-        $this->{{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
-        $this->{{ variable_name }}TableGateway = App::Container()->get({{ class_name }}TableGateway::class);
+        ${{ variable_name }}TableGateway = App::Container()->get({{ class_name }}TableGateway::class);
 
         for($i = 0; $i <= 5; $i++){
-            $this->{{ variable_name }}TableGateway
+            ${{ variable_name }}TableGateway
                 ->getNewMockModelInstance()
                 ->save();
         }
+        parent::setUpBeforeClass();
     }
 
     /**
@@ -30,13 +25,16 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
      */
     public function testGetAll()
     {
-        $all = $this->{{ variable_name }}Service->getAll();
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $all = ${{ variable_name }}Service->getAll();
         $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class(reset($all)));
     }
 
     public function testGetRandom()
     {
-        $random = $this->{{ variable_name }}Service->getRandom();
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+
+        $random = ${{ variable_name }}Service->getRandom();
         $this->assertEquals(
             '{{ namespace }}\Models\{{ class_name }}Model',
             get_class($random)
@@ -47,9 +45,10 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
 
     public function testGetMockObject()
     {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
         $this->assertEquals(
             '{{ namespace }}\Models\{{ class_name }}Model',
-            get_class($this->{{ variable_name }}Service->getMockObject())
+            get_class(${{ variable_name }}Service->getMockObject())
         );
     }
 
@@ -58,8 +57,9 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
      */
     public function testGetByField({{ class_name }}Model $random)
     {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
 {% for column in columns %}
-        $found = $this->{{ variable_name }}Service->getByField('{{ column.field }}', $random->get{{ column.field }}());
+        $found = ${{ variable_name }}Service->getByField('{{ column.field }}', $random->get{{ column.field }}());
         $this->assertEquals(
             '{{ namespace }}\Models\{{ class_name }}Model',
             get_class($found)
@@ -69,11 +69,13 @@ class {{ class_name }}Test extends \Zenderator\Test\BaseTestCase
 
     public function testGetTermPlural()
     {
-        $this->assertNotEmpty($this->{{ variable_name }}Service->getTermPlural());
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $this->assertNotEmpty(${{ variable_name }}Service->getTermPlural());
     }
 
     public function testGetTermSingular()
     {
-        $this->assertNotEmpty($this->{{ variable_name }}Service->getTermSingular());
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $this->assertNotEmpty(${{ variable_name }}Service->getTermSingular());
     }
 }

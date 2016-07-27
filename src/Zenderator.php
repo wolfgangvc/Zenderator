@@ -416,7 +416,8 @@ class Zenderator
         $tables = $this->metadata->getTables();
 
         $endpoints = $this->getEndpoints();
-        \Kint::dump($endpoints);exit;
+        \Kint::dump($endpoints);
+        exit;
 
         echo "Generating " . count($tables) . " models.\n";
 
@@ -481,8 +482,8 @@ class Zenderator
         require(__DIR__ . "/../generator/composer-optimise");
     }
 
-    private function getEndpoints(){
-
+    private function getEndpoints()
+    {
     }
 
     /**
@@ -493,11 +494,12 @@ class Zenderator
      *
      * @return Response
      */
-    private function makeRequest(string $method, string $path, $post = null, $isJsonRequest = true){
+    private function makeRequest(string $method, string $path, $post = null, $isJsonRequest = true)
+    {
         /**
          * @var \Slim\App $app
          */
-        $app = $this->getApp();
+        $app         = $this->getApp();
         $calledClass = get_called_class();
 
         if (defined("$calledClass")) {
