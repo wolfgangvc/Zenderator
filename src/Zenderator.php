@@ -462,8 +462,12 @@ class Zenderator
 
     private function cleanCode()
     {
-        $this->cleanCodePHPCSFixer();
-        $this->cleanCodePSR2();
+        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
+            $this->cleanCodePHPCSFixer();
+        }
+        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
+            $this->cleanCodePSR2();
+        }
         $this->cleanCodeComposerAutoloader();
     }
 
