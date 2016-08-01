@@ -75,7 +75,7 @@ class Zenderator
         $this->twig   = new \Twig_Environment($this->loader);
 
         $this->twig->addExtension(
-            new \Zenderator\Twig\Extensions\ArrayUniqueTwigExtension()
+            new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
         );
 
         $this->ignoredTables = [

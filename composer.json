@@ -16,10 +16,11 @@
     "repositories": [
         {
             "type": "vcs",
-            "url":  "git@github.com:segurasystems/LibSessions.git"
+            "url":  "git@github.com:segurasystems/LibAppCore.git"
         }
     ],
     "require": {
+        "segura/appcore": "dev-master",
         "slim/slim": "^3.2",
         "raveren/kint": "^1.0",
         "zendframework/zend-db": "^2.7",
