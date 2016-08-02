@@ -2,6 +2,7 @@
 <?php
 
 $rootOfApp = __DIR__ . "/../../../../";
+
 require_once($rootOfApp . "/bootstrap.php");
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,

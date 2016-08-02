@@ -1,7 +1,7 @@
 <?php
 namespace {{ namespace }}\Services\Base;
 
-use Zenderator\Abstracts\Service as AbstractService;
+use Segura\AppCore\Abstracts\Service as AbstractService;
 use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
@@ -70,7 +70,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
     /**
      * @param int $id
      * @return Models\{{ class_name }}Model
-     * @throws \Zenderator\Exceptions\TableGatewayException
+     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getById($id)
     {
@@ -82,7 +82,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
      * @param string $field
      * @param $value
      * @return Models\{{ class_name }}Model
-     * @throws \Zenderator\Exceptions\TableGatewayException
+     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getByField(string $field, $value)
     {
@@ -92,7 +92,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
 
     /**
      * @return Models\{{ class_name }}Model
-     * @throws \Zenderator\Exceptions\TableGatewayException
+     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getRandom()
     {
