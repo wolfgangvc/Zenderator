@@ -23,7 +23,7 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/SDK",
     ZENDERATOR_ROOT . "/vendor/segura/appcore",
     ZENDERATOR_ROOT . "/vendor/segura/zenderator",
-    ZENDERATOR_ROOT . "/vendor/segura/lib*",
+    ZENDERATOR_ROOT . "/vendor/segura",
 ];
 
 function psr2ify($pathToPSR2)
