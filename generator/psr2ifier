@@ -21,7 +21,9 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/tests/Models/Generated",
     ZENDERATOR_ROOT . "/public/index.php",
     ZENDERATOR_ROOT . "/SDK",
+    ZENDERATOR_ROOT . "/vendor/segura/appcore",
     ZENDERATOR_ROOT . "/vendor/segura/zenderator",
+    ZENDERATOR_ROOT . "/vendor/segura/lib*",
 ];
 
 function psr2ify($pathToPSR2)
