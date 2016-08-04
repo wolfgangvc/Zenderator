@@ -3,6 +3,7 @@ namespace Zenderator;
 
 use Camel\CaseTransformer;
 use Camel\Format;
+use Segura\AppCore\App;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
@@ -409,51 +410,60 @@ class Zenderator
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
-        $tables = $this->metadata->getTables();
+        $packs            = [];
+        $routeCount       = 0;
+        $sharedRenderData = [
+            'app_name'      => APP_NAME,
+            'app_container' => APP_CORE_NAME,
+        ];
 
-        $endpoints = $this->getEndpoints();
-        \Kint::dump($endpoints);
-        exit;
-
-        echo "Generating " . count($tables) . " models.\n";
-
-        $renderData = [];
-
-        foreach ($models as $modelName => $modelData) {
-            $className              = $modelData['className'];
-            $renderData[$modelName] = [
-                'namespace'                => $this->namespace,
-                'app_name'                 => APP_NAME,
-                'app_container'            => APP_CORE_NAME,
-                'class_name'               => $className,
-                'variable_name'            => $this->transStudly2Camel->transform($className),
-                'name'                     => $modelName,
-                'object_name_plural'       => $this->pluraliseClassName($className),
-                'object_name_singular'     => $className,
-                'controller_route'         => $this->transCamel2Snake->transform(Inflect::pluralize($className)),
-                'namespace_model'          => "{$this->namespace}\\Models\\{$className}Model",
-                'columns'                  => $modelData['columns'],
-                'related_objects'          => $modelData['related_objects'],
-                'table'                    => $modelName,
-                'primary_keys'             => $modelData['primary_keys'],
-                'primary_parameters'       => $modelData['primary_parameters'],
-                'autoincrement_parameters' => $modelData['autoincrement_parameters']
-            ];
-
-            // "SDK" suite
-            if (in_array("SDK", $this->config['templates'])) {
-                $this->renderToFile(true, $outputPath . "/SDK/AccessLayer/{$className}AccessLayer.php", "lib.accesslayer.php.twig", $renderData[$modelName]);
-                $this->renderToFile(true, $outputPath . "/SDK/AccessLayer/Base/Base{$className}AccessLayer.php", "lib.baseaccesslayer.php.twig", $renderData[$modelName]);
+        foreach ($this->getRoutes() as $route) {
+            if ($route['name']) {
+                if(isset($route['class'])){
+                    $packs[$route['class']][] = $route;
+                    $routeCount++;
+                }else{
+                    echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
+                }
             }
         }
-        echo "Generating Client Container:";
-        $this->renderToFile(true, $outputPath . "/SDK/Client.php", "lib.client.php.twig", [
-            'app_name'                 => APP_NAME,
-            'app_container'            => APP_CORE_NAME,
-            'models'                   => $renderData,
-            'config'                   => $this->config
-        ]);
-        echo " [DONE]\n";
+
+        echo "Generating SDK for {$routeCount} routes...\n";
+        // "SDK" suite
+        if (in_array("SDK", $this->config['templates'])) {
+            foreach ($packs as $packName => $routes) {
+                echo " > Pack: {$packName}...\n";
+                $routeRenderData = [
+                  'routes' => $routes,
+                ];
+
+                $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
+                \Kint::dump($routeRenderData);
+                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/accesslayer.php.twig", $routeRenderData);
+                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/baseaccesslayer.php.twig", $routeRenderData);
+                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/tests.client.php.twig", $routeRenderData);
+            }
+
+            $renderData = array_merge(
+                $sharedRenderData,
+                [
+                    'packs'         => $packs,
+                    'config'        => $this->config
+                ]
+            );
+
+            echo "Generating Abstract Access Layer:";
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/abstractaccesslayer.php.twig", $renderData);
+            echo " [DONE]\n";
+
+            echo "Generating Client Container:";
+            $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
+            echo " [DONE]\n";
+
+            echo "Generating Composer.json:";
+            $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
+            echo " [DONE]\n";
+        }
     }
 
     private function cleanCode()
@@ -482,8 +492,12 @@ class Zenderator
         require(__DIR__ . "/../generator/composer-optimise");
     }
 
-    private function getEndpoints()
+    private function getRoutes()
     {
+        $response = $this->makeRequest("GET", "/v1");
+        $body     = (string) $response->getBody();
+        $body     = json_decode($body, true);
+        return $body['Routes'];
     }
 
     /**
@@ -499,7 +513,7 @@ class Zenderator
         /**
          * @var \Slim\App $app
          */
-        $app         = $this->getApp();
+        $app         = App::$instance;
         $calledClass = get_called_class();
 
         if (defined("$calledClass")) {

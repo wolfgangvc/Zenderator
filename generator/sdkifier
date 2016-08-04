@@ -7,6 +7,6 @@ $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfiguration
 );
-$exportPath = isset($argv[1]) ? $argv[1] : APP_ROOT;
+$exportPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
 
 $zenderator->makeSDK($exportPath);

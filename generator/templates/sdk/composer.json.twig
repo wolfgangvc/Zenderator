@@ -1,0 +1,37 @@
+{
+    "name": "segura/lib{{ app_name }}",
+    "authors": [
+        {
+            "name": "Matthew Baggett",
+            "email": "matthew@baggett.me"
+        },
+        {
+            "name": "Segura Systems",
+            "email": "systems@segura.co.uk"
+        }
+    ],
+
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:segurasystems/Lib{{ app_name }}.git"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.2.1"
+    },
+    "require-dev": {
+        "fzaninotto/Faker": "dev-master",
+        "phpunit/phpunit": "5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Segura\\SDK\\{{ app_name }}\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Segura\\SDK\\{{ app_name }}\\Test\\": "tests/"
+        }
+    }
+}

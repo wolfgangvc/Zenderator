@@ -1,0 +1,15 @@
+<?php
+namespace Segura\SDK\{{ app_name }}\Test;
+
+class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase{
+
+{% for route in routes %}
+    /**
+     *
+     **/
+    public function test{{ route.function|capitalize }}()
+    {
+    }
+
+{% endfor %}
+}

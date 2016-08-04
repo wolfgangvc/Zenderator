@@ -1,10 +1,45 @@
 <?php
 
 $app->group("/v1", function () {
+  /** @var $this Slim\App */
+
   $this->group("/{{ controller_route }}", function() {
-    $this->get("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':listRequest')   ->setName("{{ class_name }} List");
-    $this->put("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':createRequest') ->setName("{{ class_name }} Create");
-    $this->get("/{id}",       \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':getRequest')    ->setName("{{ class_name }} Get");
-    $this->delete("/{id}",    \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':deleteRequest') ->setName("{{ class_name }} Delete");
+    /** @var $this Slim\App */
+
+    $this->get("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':listRequest')
+      ->setName(json_encode([
+        'name'      => "{{ class_name }} List",
+        'class'     => '{{ class_name }}',
+        'function'  => 'list',
+        'endpoint'  => '/v1/{{ controller_route }}',
+        'method'    => 'LIST',
+      ]));
+
+    $this->put("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':createRequest')
+      ->setName(json_encode([
+        'name'      => "{{ class_name }} Create",
+        'class'     => '{{ class_name }}',
+        'function'  => 'create',
+        'endpoint'  => '/v1/{{ controller_route }}',
+        'method'    => 'PUT',
+      ]));
+
+    $this->get("/{id}",       \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':getRequest')
+      ->setName(json_encode([
+        'name'      => "{{ class_name }} Get",
+        'class'     => '{{ class_name }}',
+        'function'  => 'get',
+        'endpoint'  => '/v1/{{ controller_route }}/id',
+        'method'    => 'GET',
+      ]));
+
+    $this->delete("/{id}",    \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':deleteRequest')
+      ->setName(json_encode([
+        'name'      => "{{ class_name }} Delete",
+        'class'     => '{{ class_name }}',
+        'function'  => 'delete',
+        'endpoint'  => '/v1/{{ controller_route }}/id',
+        'method'    => 'DELETE',
+      ]));
   });
 });
