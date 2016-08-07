@@ -434,7 +434,8 @@ class Zenderator
             foreach ($packs as $packName => $routes) {
                 echo " > Pack: {$packName}...\n";
                 $routeRenderData = [
-                  'routes' => $routes,
+                  'pack_name' => $packName,
+                  'routes'    => $routes,
                 ];
 
                 $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
@@ -456,6 +457,10 @@ class Zenderator
             $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/abstractaccesslayer.php.twig", $renderData);
             echo " [DONE]\n";
 
+            echo "Generating Abstract Client :";
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/abstractclient.php.twig", $renderData);
+            echo " [DONE]\n";
+
             echo "Generating Client Container:";
             $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
             echo " [DONE]\n";
@@ -463,6 +468,12 @@ class Zenderator
             echo "Generating Composer.json:";
             $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
             echo " [DONE]\n";
+
+            echo "Generating phpunit.xml:";
+            $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
+            echo " [DONE]\n";
+
+            #\Kint::dump($renderData);
         }
     }
 

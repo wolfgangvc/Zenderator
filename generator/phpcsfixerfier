@@ -23,7 +23,10 @@ $pathsToPSR2 = [
     ZENDERATOR_ROOT . "/public/index.php",
     ZENDERATOR_ROOT . "/vendor/segura/appcore",
     ZENDERATOR_ROOT . "/vendor/segura/zenderator",
-    ZENDERATOR_ROOT . "/vendor/segura",
+    ZENDERATOR_ROOT . "/vendor/segura/libscmapi",
+    ZENDERATOR_ROOT . "/vendor/segura/libschengen",
+    ZENDERATOR_ROOT . "/vendor/segura/libapi",
+    ZENDERATOR_ROOT . "/vendor/segura/libhorizon",
 ];
 
 $phpCsFixerRules = [

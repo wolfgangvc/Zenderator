@@ -2,11 +2,44 @@
 namespace Segura\SDK\{{ app_name }}\Abstracts;
 
 use GuzzleHttp\Client as GuzzleClient;
+use Segura\SDK\{{ app_name }}\Client as SDKClient;
 
 abstract class AbstractAccessLayer
 {
-    public function __construct(GuzzleClient $guzzleClient)
-    {
+    /** @var GuzzleClient */
+    protected $guzzleClient;
+
+    /** @var SDKClient **/
+    protected $sdkClient;
+
+    private $baseUrl = "http://http://scampi.segurasystems.dev/";
+
+    /**
+     * AbstractAccessLayer constructor.
+     * @param GuzzleClient $guzzleClient
+     * @parma SDKClient $sdkClient
+     */
+    public function __construct(
+        GuzzleClient $guzzleClient,
+        SDKClient $sdkClient
+    ){
         $this->guzzleClient = $guzzleClient;
+        $this->sdkClient = $sdkClient;
+    }
+
+    /**
+    * @param string $method
+    * @param string $endpoint
+    * @param array $postData
+    *
+    * @return mixed|ResponseInterface
+    */
+    protected function request(
+        $method = "GET",
+        $endpoint = "/",
+        $postData = []
+    ) {
+        $url = "http://{$this->baseUrl}/v1/{$endpoint}";
+        return $this->guzzleClient->request($method, $url);
     }
 }

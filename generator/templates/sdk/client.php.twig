@@ -3,13 +3,13 @@ namespace Segura\SDK\{{ app_name }};
 
 class Client extends Abstracts\Client
 {
-{% for model in models %}
+{% for pack in packs|keys %}
     /**
-     * @returns AccessLayer\{{ model.class_name }}AccessLayer
+     * @returns AccessLayer\{{ pack }}AccessLayer
      */
-    public function get{{ model.object_name_plural }}()
+    public function get{{ pack }}()
     {
-        return new AccessLayer\{{ model.class_name }}AccessLayer(
+        return new AccessLayer\{{ pack }}AccessLayer(
             $this
         );
     }

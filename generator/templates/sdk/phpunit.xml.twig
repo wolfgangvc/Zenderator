@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+         colors="true"
+         stopOnFailure="false"
+         syntaxCheck="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true">
+
+    <testsuites>
+{% for pack in packs|keys %}
+        <testsuite name="models">
+            <file>tests/AccessLayer/{{ pack }}Test.php</file>
+        </testsuite>
+{% endfor %}
+    </testsuites>
+
+    <logging>
+        <log type="coverage-clover" target="build/clover.xml"/>
+    </logging>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./src</directory>
+            <exclude>
+                <directory>./vendor</directory>
+                <directory>./build</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+</phpunit>
