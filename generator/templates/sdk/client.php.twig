@@ -1,6 +1,8 @@
 <?php
 namespace Segura\SDK\{{ app_name }};
 
+use \GuzzleHttp\Client as GuzzleClient;
+
 class Client extends Abstracts\Client
 {
 {% for pack in packs|keys %}
@@ -10,6 +12,7 @@ class Client extends Abstracts\Client
     public function get{{ pack }}()
     {
         return new AccessLayer\{{ pack }}AccessLayer(
+            new GuzzleClient(),
             $this
         );
     }

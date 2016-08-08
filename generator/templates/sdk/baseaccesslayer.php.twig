@@ -12,9 +12,10 @@ abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
      **/
     public function {{ route.function }}()
     {
+        /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
         $response = $this->request("{{ route.method }}", $endpoint);
-        $body = $response->getContent();
+        $body = $response->getBody()->getContents();
         \Kint::dump($body);exit;
     }
 

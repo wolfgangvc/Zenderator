@@ -2,6 +2,7 @@
 namespace Segura\SDK\{{ app_name }}\Abstracts;
 
 use GuzzleHttp\Client as GuzzleClient;
+use Psr\Http\Message\ResponseInterface;
 use Segura\SDK\{{ app_name }}\Client as SDKClient;
 
 abstract class AbstractAccessLayer
@@ -12,7 +13,7 @@ abstract class AbstractAccessLayer
     /** @var SDKClient **/
     protected $sdkClient;
 
-    private $baseUrl = "http://http://scampi.segurasystems.dev/";
+    private $baseUrl = "http://scampi.segurasystems.dev";
 
     /**
      * AbstractAccessLayer constructor.
@@ -39,7 +40,8 @@ abstract class AbstractAccessLayer
         $endpoint = "/",
         $postData = []
     ) {
-        $url = "http://{$this->baseUrl}/v1/{$endpoint}";
+        $endpoint = ltrim($endpoint, "/");
+        $url = "{$this->baseUrl}/{$endpoint}";
         return $this->guzzleClient->request($method, $url);
     }
 }
