@@ -3,6 +3,7 @@ namespace Segura\SDK\{{ app_name }}\Test;
 
 use Segura\SDK\{{ app_name }}\AccessLayer\{{ pack_name }}AccessLayer;
 use Segura\SDK\{{ app_name }}\Client as SDKClient;
+use Segura\SDK\{{ app_name }}\Models;
 
 class {{ pack_name }}Test extends \PHPUnit_Framework_TestCase{
     /** @var SDKClient */
@@ -19,14 +20,7 @@ class {{ pack_name }}Test extends \PHPUnit_Framework_TestCase{
     }
 
 {% for route in routes %}
-    /**
-     *
-     **/
-    public function test{{ route.function|capitalize }}()
-    {
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}();
-        $this->assertNotNull(json_decode($response));
-    }
-
+{% set test_file = "sdk/Tests/" ~ "_test_" ~ route.function ~ ".php.twig" %}
+{% include test_file %}
 {% endfor %}
 }

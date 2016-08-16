@@ -1,0 +1,28 @@
+<?php
+namespace Segura\SDK\{{ app_name }}\Models\Base;
+
+use Segura\SDK\{{ app_name }}\Abstracts\AbstractModel;
+
+abstract class Base{{ pack_name }}Model extends AbstractModel
+{
+
+    // Properties
+{% for property in properties %}
+    protected ${{ property }};
+{% endfor %}
+
+    // Getters and Setters
+{% for property in properties %}
+    public function get{{ property }}()
+    {
+        return ${{ property }};
+    }
+
+    public function set{{ property }}()
+    {
+        $this->{{ property }};
+        return $this;
+    }
+
+{% endfor %}
+}

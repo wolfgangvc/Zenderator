@@ -3,7 +3,7 @@ namespace Segura\SDK\{{ app_name }};
 
 use \GuzzleHttp\Client as GuzzleClient;
 
-class Client extends Abstracts\Client
+class Client extends Abstracts\AbstractClient
 {
 {% for pack in packs|keys %}
     /**

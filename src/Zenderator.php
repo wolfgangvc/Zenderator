@@ -378,6 +378,8 @@ class Zenderator
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
             }
 
+            \Kint::dump($renderData[$modelName]);
+
             // "JS" suit
             if (in_array("JsLib", $this->config['templates'])) {
                 echo "Generating JS Lib...";
@@ -431,18 +433,35 @@ class Zenderator
         echo "Generating SDK for {$routeCount} routes...\n";
         // "SDK" suite
         if (in_array("SDK", $this->config['templates'])) {
+
             foreach ($packs as $packName => $routes) {
                 echo " > Pack: {$packName}...\n";
                 $routeRenderData = [
-                  'pack_name' => $packName,
-                  'routes'    => $routes,
+                    'pack_name'  => $packName,
+                    'routes'     => $routes,
                 ];
+                $properties = [];
+                foreach($routes as $route){
+                    foreach($route['properties'] as $property) {
+                        $properties[] = $property;
+                    }
+                }
+                $properties = array_unique($properties);
+                $routeRenderData['properties'] = $properties;
 
                 $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
-                \Kint::dump($routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/accesslayer.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/baseaccesslayer.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/tests.client.php.twig", $routeRenderData);
+                #\Kint::dump($routeRenderData);
+
+                // Access Layer
+                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
+                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
+
+                // Models
+                $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
+                $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
+
+                // Tests
+                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
             }
 
             $renderData = array_merge(
@@ -453,12 +472,10 @@ class Zenderator
                 ]
             );
 
-            echo "Generating Abstract Access Layer:";
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/abstractaccesslayer.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Abstract Client :";
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/abstractclient.php.twig", $renderData);
+            echo "Generating Abstract Objects:";
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
             echo " [DONE]\n";
 
             echo "Generating Client Container:";
@@ -469,8 +486,16 @@ class Zenderator
             $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
             echo " [DONE]\n";
 
+            echo "Generating Test Bootstrap:";
+            $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
+            echo " [DONE]\n";
+
             echo "Generating phpunit.xml:";
             $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
+            echo " [DONE]\n";
+
+            echo "Generating Exceptions:";
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
             echo " [DONE]\n";
 
             #\Kint::dump($renderData);
