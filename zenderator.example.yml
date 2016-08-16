@@ -4,3 +4,6 @@ templates:
   - Controllers
   - Endpoints
   - Routes
+formatting:
+  - psr2
+  - clean
