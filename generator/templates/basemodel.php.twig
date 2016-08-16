@@ -72,6 +72,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 {% endif %}
 {% endfor %}
 
+{% if remote_constraints %}
     /*****************************************************
      * "Referenced By" Remote Constraint Object Fetchers *
      *****************************************************/
@@ -86,6 +87,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     }
 
 {% endfor %}
+{% endif %}
 
     /**
      * @returns {{ class_name }}Model

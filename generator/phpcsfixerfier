@@ -1,34 +1,28 @@
 #!/usr/bin/php
 <?php
 if(!defined("APP_ROOT")){
-    define("ZENDERATOR_ROOT", __DIR__ . "/zenderator");
-}else{
-    if(!defined("ZENDERATOR_ROOT")) {
-        define("ZENDERATOR_ROOT", APP_ROOT);
-    }
+    define("APP_ROOT", realpath(__DIR__ . "/../../../../"));
 }
 $begin = microtime(true);
 echo "php-cs-fixer-fying... \n";
 $pathsToPSR2 = [
-    ZENDERATOR_ROOT . "/src/Models/Base",
-    ZENDERATOR_ROOT . "/src/Models",
-    ZENDERATOR_ROOT . "/src/Controllers/Base",
-    ZENDERATOR_ROOT . "/src/Controllers",
-    ZENDERATOR_ROOT . "/src/Services/Base",
-    ZENDERATOR_ROOT . "/src/Services",
-    ZENDERATOR_ROOT . "/src/*.php",
-    ZENDERATOR_ROOT . "/tests/Api/Generated",
-    ZENDERATOR_ROOT . "/tests/Models/Generated",
-    ZENDERATOR_ROOT . "/SDK",
-    ZENDERATOR_ROOT . "/public/index.php",
-    ZENDERATOR_ROOT . "/vendor/segura/appcore",
-    ZENDERATOR_ROOT . "/vendor/segura/zenderator",
-    ZENDERATOR_ROOT . "/vendor/segura/libscmapi",
-    ZENDERATOR_ROOT . "/vendor/segura/libschengen",
-    ZENDERATOR_ROOT . "/vendor/segura/libapi",
-    ZENDERATOR_ROOT . "/vendor/segura/libhorizon",
+    APP_ROOT . "/src/Models/Base",
+    APP_ROOT . "/src/Models",
+    APP_ROOT . "/src/Controllers/Base",
+    APP_ROOT . "/src/Controllers",
+    APP_ROOT . "/src/Services/Base",
+    APP_ROOT . "/src/Services",
+    APP_ROOT . "/src/*.php",
+    APP_ROOT . "/tests/Api/Generated",
+    APP_ROOT . "/tests/Models/Generated",
+    APP_ROOT . "/public/index.php",
+    APP_ROOT . "/vendor/segura/appcore",
+    APP_ROOT . "/vendor/segura/zenderator",
+    APP_ROOT . "/vendor/segura/libscmapi",
+    APP_ROOT . "/vendor/segura/libschengen",
+    APP_ROOT . "/vendor/segura/libapi",
+    APP_ROOT . "/vendor/segura/libhorizon",
 ];
-
 $phpCsFixerRules = [
     'no_unused_imports',
     'align_double_arrow',
@@ -47,15 +41,19 @@ function phpcsfixerfy($pathToPSR2, $phpCsFixerRules)
     ob_start();
     echo " > {$pathToPSR2} ... ";
     $begin = microtime(true);
-    exec(ZENDERATOR_ROOT . "/vendor/bin/php-cs-fixer fix {$pathToPSR2} --rules=" . implode(",", $phpCsFixerRules));
+    exec(APP_ROOT . "/vendor/bin/php-cs-fixer fix {$pathToPSR2} --rules=" . implode(",", $phpCsFixerRules));
     $time = microtime(true) - $begin;
     echo " [Complete in " . number_format($time, 2) . "]\n";
     echo ob_get_clean();
 }
 
 foreach ($pathsToPSR2 as $pathToPSR2) {
+    echo " > {$pathToPSR2} ... ";
     if (file_exists($pathToPSR2)) {
         phpcsfixerfy($pathToPSR2, $phpCsFixerRules);
+    }else{
+        echo "\n";
+        echo "  > Skipping, files or directory does not exist.\n";
     }
 }
 
