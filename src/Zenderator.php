@@ -102,6 +102,7 @@ class Zenderator
             mkdir(dirname($path), 0777, true);
         }
         if (!file_exists($path) || $overwrite) {
+            echo "  > Writing to {$path}\n";
             file_put_contents($path, $output);
         }
     }
@@ -375,7 +376,7 @@ class Zenderator
 
             // "Routes" suit
             if (in_array("Routes", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Routes/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
             }
 
             // "JS" suit
