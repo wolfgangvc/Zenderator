@@ -6,6 +6,9 @@ $this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::
 {% for object in model.related_objects|sort %}
         $c->get(\{{ model.namespace }}\TableGateways\{{ object.remote_model_class }}TableGateway::class),
 {% endfor %}
+{% for remote_constraint in model.remote_constraints %}
+        $c->get(\{{ model.namespace }}\TableGateways\{{ remote_constraint.local_model_class }}TableGateway::class),
+{% endfor %}
         $c->get(\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class)
     );
 };
