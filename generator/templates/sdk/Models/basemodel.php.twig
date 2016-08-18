@@ -15,7 +15,7 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 {% for property in properties %}
     public function get{{ property }}()
     {
-        return ${{ property }};
+        return $this->{{ property }};
     }
 
     public function set{{ property }}()

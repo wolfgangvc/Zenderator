@@ -3,9 +3,12 @@
     **/
     public function test{{ route.function|capitalize }}($listOfAll{{ route.plural }})
     {
-        array_shuffle($listOfAll{{ route.plural }});
+        shuffle($listOfAll{{ route.plural }});
+        /** @var ${{ route.singular }} {{ route.singular }}Model */
         ${{ route.singular }} = reset($listOfAll{{ route.plural }});
         $response = $this->{{ pack_name|lower }}->{{ route.function }}(
             ${{ route.singular }}->getId()
         );
+
+        $this->assertEquals(${{ route.singular }}->getId(),
     }

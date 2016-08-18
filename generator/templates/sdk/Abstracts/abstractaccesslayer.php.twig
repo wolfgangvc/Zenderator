@@ -50,4 +50,13 @@ abstract class AbstractAccessLayer
             ]
         ]);
     }
+
+    protected function replaceUrlElements(string $endpoint, array $replacements = null){
+        if (count($replacements) > 0) {
+            foreach($replacements as $key => $value){
+                $endpoint = str_replace('{' . $key . '}', $value, $endpoint);
+            }
+        }
+        return $endpoint;
+    }
 }

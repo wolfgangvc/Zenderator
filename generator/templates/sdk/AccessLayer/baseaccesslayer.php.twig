@@ -9,22 +9,8 @@ abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
 {
 
 {% for route in routes %}
-    /**
-     *
-     **/
-    public function {{ route.function }}()
-    {
-        /** @var $response \GuzzleHttp\Psr7\Response */
-        $endpoint = "{{ route.pattern }}";
-        $response = $this->request("{{ route.method }}", $endpoint);
-        $body = $response->getBody()->getContents();
-        if(json_decode($body) === null){
-            throw new SDKException("Response from API was not expected JSON");
-        }
-        $body = json_decode($body, true);
-        return $this->hydrate($body['{{ route.plural }}']);
-    }
-
+{% set test_file = "sdk/AccessLayer/" ~ "_function_" ~ route.function ~ ".php.twig" %}
+{% include test_file %}
 {% endfor %}
 
     private function hydrate($raw{{ routes[0].singular }})

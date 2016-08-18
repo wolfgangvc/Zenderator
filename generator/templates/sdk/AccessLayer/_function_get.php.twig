@@ -1,0 +1,20 @@
+    /**
+     *
+     **/
+    public function {{ route.function }}($id)
+    {
+        /** @var $response \GuzzleHttp\Psr7\Response */
+        $endpoint = $this->replaceUrlElements(
+            "{{ route.pattern }}",
+            [
+                'id' => $id
+            ]
+        );
+        $response = $this->request("{{ route.method }}", $endpoint);
+        $body = $response->getBody()->getContents();
+        if(json_decode($body) === null){
+            throw new SDKException("Response from API was not expected JSON");
+        }
+        $body = json_decode($body, true);
+        return $this->hydrate($body['{{ route.singular }}']);
+    }
