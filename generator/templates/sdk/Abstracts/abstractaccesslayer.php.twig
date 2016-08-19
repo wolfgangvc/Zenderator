@@ -31,24 +31,31 @@ abstract class AbstractAccessLayer
     /**
     * @param string $method
     * @param string $endpoint
-    * @param array $postData
+    * @param array  $options
     *
     * @return mixed|ResponseInterface
     */
     protected function request(
         $method = "GET",
         $endpoint = "/",
-        $postData = []
+        $options = []
     ) {
         $endpoint = ltrim($endpoint, "/");
         $url = "{$this->baseUrl}/{$endpoint}";
-        return $this->guzzleClient->request($method, $url, [
-            'headers' => [
-                'User-Agent' => 'lib{{ app_name }}/dev-master',
-                'Accept'     => 'application/json',
-                'Content-Type' => 'application/json',
-            ]
-        ]);
+        return $this->guzzleClient->request(
+            $method,
+            $url,
+            array_merge(
+                [
+                    'headers' => [
+                        'User-Agent' => 'lib{{ app_name }}/dev-master',
+                        'Accept'     => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ]
+                ],
+                $options
+            )
+        );
     }
 
     protected function replaceUrlElements(string $endpoint, array $replacements = null){

@@ -8,7 +8,7 @@
         $response = $this->request("{{ route.method }}", $endpoint);
         $body = $response->getBody()->getContents();
         if(json_decode($body) === null){
-            throw new SDKException("Response from API was not expected JSON");
+            throw new Exceptions\SDKException("Response from API was not expected JSON");
         }
         $body = json_decode($body, true);
         return $this->hydrate($body['{{ route.plural }}']);

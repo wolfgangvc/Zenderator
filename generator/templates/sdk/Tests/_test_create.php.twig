@@ -3,6 +3,10 @@
     **/
     public function test{{ route.function|capitalize }}()
     {
-        $this->markTestIncomplete("Haven't written this yet.");
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}();
+        ${{ route.singular }} = $this->{{ pack_name|lower }}->{{ route.function }}([
+            {% for property, value in route.example %}
+                '{{ property }}' => '{{ value }}',
+            {% endfor %}
+        ]);
+        return ${{ route.singular }};
     }

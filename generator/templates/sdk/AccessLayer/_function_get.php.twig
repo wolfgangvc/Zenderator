@@ -10,11 +10,24 @@
                 'id' => $id
             ]
         );
-        $response = $this->request("{{ route.method }}", $endpoint);
-        $body = $response->getBody()->getContents();
-        if(json_decode($body) === null){
-            throw new SDKException("Response from API was not expected JSON");
+        try{
+            $response = $this->request("{{ route.method }}", $endpoint);
+            $body = $response->getBody()->getContents();
+            if(json_decode($body) === null){
+                throw new Exceptions\SDKException("Response from API was not expected JSON.");
+            }
+            $body = json_decode($body, true);
+            return $this->hydrate($body['{{ route.singular }}']);
+        }catch(\GuzzleHttp\Exception\ClientException $clientException){
+            $body = $clientException->getResponse()->getBody()->getContents();
+            if(json_decode($body) === null){
+                throw new Exceptions\SDKException("Response from API was not expected JSON and it was a " . $clientException->getResponse()->getStatusCode());
+            }
+            $json = json_decode($body, true);
+            if($json['Status'] == 'FAIL'){
+                throw new Exceptions\ObjectNotFoundException($json['Reason']);
+            }else{
+                throw new Exceptions\ObjectNotFoundException("A bad thing happened: " . $body);
+            }
         }
-        $body = json_decode($body, true);
-        return $this->hydrate($body['{{ route.singular }}']);
     }

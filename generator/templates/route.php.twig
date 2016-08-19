@@ -6,6 +6,8 @@ $app->group("/v1", function () {
   $this->group("/{{ controller_route }}", function() {
     /** @var $this Slim\App */
 
+    $DIContainer = \{{ app_container }}::Instance()->getContainer();
+
     $this->get("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':listRequest')
       ->setName(json_encode([
         'name'       => "{{ class_name }} List",
@@ -36,6 +38,7 @@ $app->group("/v1", function () {
           '{{ column.field }}',
 {% endfor %}
         ],
+        'example'   => $DIContainer->get('{{ class_name }}MockModel')->__toArray(),
       ]));
 
     $this->get("/{id}",       \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':getRequest')

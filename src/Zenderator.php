@@ -532,6 +532,12 @@ class Zenderator
             echo " [DONE]\n";
 
             echo "Generating Exceptions:";
+            $derivedExceptions = [
+                'ObjectNotFoundException'
+            ];
+            foreach($derivedExceptions as $derivedException) {
+                $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
+            }
             $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
             echo " [DONE]\n";
 
