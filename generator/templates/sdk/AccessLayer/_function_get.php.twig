@@ -14,14 +14,14 @@
             $response = $this->request("{{ route.method }}", $endpoint);
             $body = $response->getBody()->getContents();
             if(json_decode($body) === null){
-                throw new Exceptions\SDKException("Response from API was not expected JSON.");
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
             }
             $body = json_decode($body, true);
             return $this->hydrate($body['{{ route.singular }}']);
         }catch(\GuzzleHttp\Exception\ClientException $clientException){
             $body = $clientException->getResponse()->getBody()->getContents();
             if(json_decode($body) === null){
-                throw new Exceptions\SDKException("Response from API was not expected JSON and it was a " . $clientException->getResponse()->getStatusCode());
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON and it was a " . $clientException->getResponse()->getStatusCode());
             }
             $json = json_decode($body, true);
             if($json['Status'] == 'FAIL'){

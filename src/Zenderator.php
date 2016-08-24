@@ -384,6 +384,8 @@ class Zenderator
                 'autoincrement_parameters' => $modelData['autoincrement_parameters']
             ];
 
+            \Kint::dump($renderData[$modelName]['remote_constraints']);
+
             // "Model" suite
             if (in_array("Models", $this->config['templates'])) {
                 $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "basemodel.php.twig", $renderData[$modelName]);
@@ -499,6 +501,10 @@ class Zenderator
 
                 // Tests
                 $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
+
+                if(!file_exists($outputPath . "/tests/fixtures")){
+                    mkdir($outputPath . "/tests/fixtures", null, true);
+                }
             }
 
             $renderData = array_merge(
