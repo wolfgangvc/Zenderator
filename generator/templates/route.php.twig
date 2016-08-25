@@ -6,40 +6,71 @@ $app->group("/v1", function () {
   $this->group("/{{ controller_route }}", function() {
     /** @var $this Slim\App */
 
+    $DIContainer = \{{ app_container }}::Instance()->getContainer();
+
     $this->get("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':listRequest')
       ->setName(json_encode([
-        'name'      => "{{ class_name }} List",
-        'class'     => '{{ class_name }}',
-        'function'  => 'list',
-        'endpoint'  => '/v1/{{ controller_route }}',
-        'method'    => 'LIST',
+        'name'       => "{{ class_name }} List",
+        'class'      => '{{ class_name }}',
+        'function'   => 'list',
+        'endpoint'   => '/v1/{{ controller_route }}',
+        'method'     => 'GET',
+        'singular'   => '{{ object_name_singular }}',
+        'plural'     => '{{ object_name_plural }}',
+        'properties' => [
+{% for column in columns %}
+          '{{ column.field }}',
+{% endfor %}
+        ],
       ]));
 
     $this->put("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':createRequest')
       ->setName(json_encode([
-        'name'      => "{{ class_name }} Create",
-        'class'     => '{{ class_name }}',
-        'function'  => 'create',
-        'endpoint'  => '/v1/{{ controller_route }}',
-        'method'    => 'PUT',
+        'name'       => "{{ class_name }} Create",
+        'class'      => '{{ class_name }}',
+        'function'   => 'create',
+        'endpoint'   => '/v1/{{ controller_route }}',
+        'method'     => 'PUT',
+        'singular'   => '{{ object_name_singular }}',
+        'plural'     => '{{ object_name_plural }}',
+        'properties' => [
+{% for column in columns %}
+          '{{ column.field }}',
+{% endfor %}
+        ],
+        'example'   => $DIContainer->get('{{ class_name }}MockModel')->__toArray(),
       ]));
 
     $this->get("/{id}",       \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':getRequest')
       ->setName(json_encode([
-        'name'      => "{{ class_name }} Get",
-        'class'     => '{{ class_name }}',
-        'function'  => 'get',
-        'endpoint'  => '/v1/{{ controller_route }}/id',
-        'method'    => 'GET',
+        'name'       => "{{ class_name }} Get",
+        'class'      => '{{ class_name }}',
+        'function'   => 'get',
+        'endpoint'   => '/v1/{{ controller_route }}/id',
+        'method'     => 'GET',
+        'singular'   => '{{ object_name_singular }}',
+        'plural'     => '{{ object_name_plural }}',
+        'properties' => [
+{% for column in columns %}
+          '{{ column.field }}',
+{% endfor %}
+        ],
       ]));
 
     $this->delete("/{id}",    \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':deleteRequest')
       ->setName(json_encode([
-        'name'      => "{{ class_name }} Delete",
-        'class'     => '{{ class_name }}',
-        'function'  => 'delete',
-        'endpoint'  => '/v1/{{ controller_route }}/id',
-        'method'    => 'DELETE',
+        'name'       => "{{ class_name }} Delete",
+        'class'      => '{{ class_name }}',
+        'function'   => 'delete',
+        'endpoint'   => '/v1/{{ controller_route }}/id',
+        'method'     => 'DELETE',
+        'singular'   => '{{ object_name_singular }}',
+        'plural'     => '{{ object_name_plural }}',
+        'properties' => [
+{% for column in columns %}
+          '{{ column.field }}',
+{% endfor %}
+        ],
       ]));
   });
 });

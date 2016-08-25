@@ -1,0 +1,37 @@
+<?php
+namespace Segura\SDK\{{ app_name }}\AccessLayer\Base;
+
+use Segura\SDK\{{ app_name }}\Abstracts\AbstractAccessLayer;
+use Segura\SDK\{{ app_name }}\Exceptions;
+use Segura\SDK\{{ app_name }}\Models;
+
+abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
+{
+
+{% for route in routes %}
+{% set test_file = "sdk/AccessLayer/" ~ "_function_" ~ route.function ~ ".php.twig" %}
+{% include test_file %}
+
+{% endfor %}
+
+    private function hydrate($raw{{ routes[0].singular }})
+    {
+        if(
+            // If the data given IS an array
+            is_array($raw{{ routes[0].singular }}) &&
+            // And Is NOT an associative array
+            !(array_keys($raw{{ routes[0].singular }}) !== range(0, count($raw{{ routes[0].singular }}) - 1)) &&
+            // And is NOT an empty array...
+            !count($raw{{ routes[0].singular }}) == 0
+        ){
+            // Then we have to hydrate each element. Recursively. Aww yeah.
+            $array = [];
+            foreach($raw{{ routes[0].singular }} as $index => ${{ routes[0].singular|lower }}){
+                $array[$index] = $this->hydrate(${{ routes[0].singular|lower }});
+            }
+            return $array;
+        }else{
+            return new Models\{{ routes[0].singular }}Model($raw{{ routes[0].singular }});
+        }
+    }
+}

@@ -1,0 +1,20 @@
+    /**
+    * @depends testGet
+    **/
+    public function test{{ route.function|capitalize }}(${{ route.singular }})
+    {
+        $response = $this->{{ pack_name|lower }}->{{ route.function }}(${{ route.singular }}->getId());
+        $this->assertTrue($response);
+
+        return ${{ route.singular }};
+    }
+
+    /**
+     * @depends test{{ route.function|capitalize }}
+     * @expectedException Segura\SDK\SCMAPI\Exceptions\ObjectNotFoundException
+     * @expectedExceptionMessage Cannot find record by ID
+     */
+    public function test{{ route.function|capitalize }}VerifyDeleted(${{ route.singular}})
+    {
+        $this->{{ pack_name|lower }}->get(${{ route.singular }}->getId());
+    }

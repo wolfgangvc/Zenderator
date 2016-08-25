@@ -1,0 +1,13 @@
+    /**
+    * @depends testCreate
+    **/
+    public function test{{ route.function|capitalize }}(Models\{{ route.singular }}Model ${{ route.singular }})
+    {
+        $requested{{ route.singular }} = $this->{{ pack_name|lower }}->{{ route.function }}(
+            ${{ route.singular }}->getId()
+        );
+
+        $this->assertEquals(${{ route.singular }}->getId(), $requested{{ route.singular }}->getId());
+
+        return ${{ route.singular }};
+    }

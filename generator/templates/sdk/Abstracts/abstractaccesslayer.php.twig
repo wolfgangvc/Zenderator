@@ -13,7 +13,7 @@ abstract class AbstractAccessLayer
     /** @var SDKClient **/
     protected $sdkClient;
 
-    private $baseUrl = "http://scampi.segurasystems.dev";
+    private $baseUrl = "http://scmapi.segurasystems.dev";
 
     /**
      * AbstractAccessLayer constructor.
@@ -31,17 +31,39 @@ abstract class AbstractAccessLayer
     /**
     * @param string $method
     * @param string $endpoint
-    * @param array $postData
+    * @param array  $options
     *
     * @return mixed|ResponseInterface
     */
     protected function request(
         $method = "GET",
         $endpoint = "/",
-        $postData = []
+        $options = []
     ) {
         $endpoint = ltrim($endpoint, "/");
         $url = "{$this->baseUrl}/{$endpoint}";
-        return $this->guzzleClient->request($method, $url);
+        return $this->guzzleClient->request(
+            $method,
+            $url,
+            array_merge(
+                [
+                    'headers' => [
+                        'User-Agent' => 'lib{{ app_name }}/dev-master',
+                        'Accept'     => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ]
+                ],
+                $options
+            )
+        );
+    }
+
+    protected function replaceUrlElements(string $endpoint, array $replacements = null){
+        if (count($replacements) > 0) {
+            foreach($replacements as $key => $value){
+                $endpoint = str_replace('{' . $key . '}', $value, $endpoint);
+            }
+        }
+        return $endpoint;
     }
 }

@@ -1,12 +1,3 @@
-<?php
-namespace Segura\SDK\{{ app_name }}\AccessLayer\Base;
-
-use Segura\SDK\{{ app_name }}\Abstracts\AbstractAccessLayer;
-
-abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
-{
-
-{% for route in routes %}
     /**
      *
      **/
@@ -16,8 +7,9 @@ abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
         $endpoint = "{{ route.pattern }}";
         $response = $this->request("{{ route.method }}", $endpoint);
         $body = $response->getBody()->getContents();
-        \Kint::dump($body);exit;
+        if(json_decode($body) === null){
+            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+        }
+        $body = json_decode($body, true);
+        return $this->hydrate($body['{{ route.plural }}']);
     }
-
-{% endfor %}
-}

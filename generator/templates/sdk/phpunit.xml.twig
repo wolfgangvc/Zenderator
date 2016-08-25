@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
+<phpunit bootstrap="bootstrap.php"
          colors="true"
          stopOnFailure="false"
          syntaxCheck="false"
@@ -28,5 +28,9 @@
             </exclude>
         </whitelist>
     </filter>
+
+    <listeners>
+        <listener class="PHPUnit_Util_Log_VCR" file="vendor/php-vcr/phpunit-testlistener-vcr/PHPUnit/Util/Log/VCR.php" />
+    </listeners>
 
 </phpunit>

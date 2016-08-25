@@ -11,11 +11,19 @@ use Zend\Db\ResultSet\ResultSet;
 abstract class Base{{ class_name }}Service extends AbstractService
 {
 
+    // Related Objects Table Gateways
 {% for object in related_objects|sort %}
     /** @var TableGateways\{{ object.remote_model_class }}TableGateway */
     protected ${{ object.remote_model_variable }}TableGateway;
 {% endfor %}
 
+    // Remote Constraints Table Gateways
+{% for remote_constraint in remote_constraints %}
+    /** @var TableGateways\{{ remote_constraint.local_model_class }}TableGateway */
+    protected ${{ remote_constraint.local_model_variable }}TableGateway;
+{% endfor %}
+
+    // Self Table Gateway
     /** @var TableGateways\{{ class_name }}TableGateway */
     protected ${{ variable_name }}TableGateway;
 
@@ -25,17 +33,26 @@ abstract class Base{{ class_name }}Service extends AbstractService
 {% for object in related_objects|sort %}
      * @param TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway
 {% endfor %}
+{% for remote_constraint in remote_constraints %}
+     * @param TableGateways\{{ remote_constraint.local_model_class }}TableGateway ${{ remote_constraint.local_model_variable }}TableGateway
+{% endfor %}
      * @param TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
      */
     public function __construct(
 {% for object in related_objects|sort %}
         TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
 {% endfor %}
+{% for remote_constraint in remote_constraints %}
+        TableGateways\{{ remote_constraint.local_model_class }}TableGateway ${{ remote_constraint.local_model_variable }}TableGateway,
+{% endfor %}
         TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
     )
     {
 {% for object in related_objects|sort %}
         $this->{{ object.remote_model_variable }}TableGateway = ${{ object.remote_model_variable }}TableGateway;
+{% endfor %}
+{% for remote_constraint in remote_constraints %}
+        $this->{{ remote_constraint.local_model_variable }}TableGateway = ${{ remote_constraint.local_model_variable }}TableGateway;
 {% endfor %}
         $this->{{ variable_name }}TableGateway = ${{ variable_name }}TableGateway;
     }

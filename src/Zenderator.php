@@ -3,6 +3,7 @@ namespace Zenderator;
 
 use Camel\CaseTransformer;
 use Camel\Format;
+use Composer\Semver\Constraint\Constraint;
 use Segura\AppCore\App;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
@@ -33,11 +34,17 @@ class Zenderator
 
     private $ignoredTables;
 
+    /** @var CaseTransformer */
     private $transSnake2Studly;
+    /** @var CaseTransformer */
     private $transStudly2Camel;
+    /** @var CaseTransformer */
     private $transCamel2Studly;
+    /** @var CaseTransformer */
     private $transSnake2Camel;
+    /** @var CaseTransformer */
     private $transSnake2Spinal;
+    /** @var CaseTransformer */
     private $transCamel2Snake;
 
     public function __construct($rootOfApp, $databaseConfiguration)
@@ -317,6 +324,32 @@ class Zenderator
         return $models;
     }
 
+    private function filterConstraints($remoteConstraints)
+    {
+        $constraints = [];
+        //\Kint::dump($remoteConstraints);exit;
+        foreach ($remoteConstraints as $remoteConstraint) {
+            /** @var ConstraintObject $remoteConstraint */
+            // Decide if there's a collision...
+            $collisionCount = 0;
+            foreach ($remoteConstraints as $collidingConstraint) {
+                /** @var ConstraintObject $collidingConstraint */
+                if ($collidingConstraint->getTableName() == $remoteConstraint->getTableName()) {
+                    $collisionCount++;
+                }
+            }
+
+            if ($collisionCount > 1) {
+                $constraintName = $remoteConstraint->getTableName() . "By" . $this->transCamel2Studly->transform($remoteConstraint->getColumns()[0]);
+            } else {
+                $constraintName = $remoteConstraint->getTableName();
+            }
+            echo " * Constraint Name: {$constraintName}\n";
+            $constraints[$constraintName] = $remoteConstraint;
+        }
+        return $constraints;
+    }
+
     private function makeCoreFiles($models)
     {
         $tables = $this->metadata->getTables();
@@ -326,6 +359,10 @@ class Zenderator
         $renderData = [];
 
         foreach ($models as $modelName => $modelData) {
+            if (isset($modelData['remote_constraints'])) {
+                $modelData['remote_constraints'] = $this->filterConstraints($modelData['remote_constraints']);
+            }
+
             $className              = $modelData['className'];
             $renderData[$modelName] = [
                 'namespace'                => $this->namespace,
@@ -346,6 +383,8 @@ class Zenderator
                 'primary_parameters'       => $modelData['primary_parameters'],
                 'autoincrement_parameters' => $modelData['autoincrement_parameters']
             ];
+
+            \Kint::dump($renderData[$modelName]['remote_constraints']);
 
             // "Model" suite
             if (in_array("Models", $this->config['templates'])) {
@@ -378,6 +417,8 @@ class Zenderator
             if (in_array("Routes", $this->config['templates'])) {
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
             }
+
+            #\Kint::dump($renderData[$modelName]);
 
             // "JS" suit
             if (in_array("JsLib", $this->config['templates'])) {
@@ -435,15 +476,35 @@ class Zenderator
             foreach ($packs as $packName => $routes) {
                 echo " > Pack: {$packName}...\n";
                 $routeRenderData = [
-                  'pack_name' => $packName,
-                  'routes'    => $routes,
+                    'pack_name'  => $packName,
+                    'routes'     => $routes,
                 ];
+                $properties = [];
+                foreach ($routes as $route) {
+                    foreach ($route['properties'] as $property) {
+                        $properties[] = $property;
+                    }
+                }
+                $properties                    = array_unique($properties);
+                $routeRenderData['properties'] = $properties;
 
                 $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
-                \Kint::dump($routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/accesslayer.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/baseaccesslayer.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/tests.client.php.twig", $routeRenderData);
+                #\Kint::dump($routeRenderData);
+
+                // Access Layer
+                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
+                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
+
+                // Models
+                $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
+                $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
+
+                // Tests
+                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
+
+                if(!file_exists($outputPath . "/tests/fixtures")){
+                    mkdir($outputPath . "/tests/fixtures", null, true);
+                }
             }
 
             $renderData = array_merge(
@@ -454,12 +515,10 @@ class Zenderator
                 ]
             );
 
-            echo "Generating Abstract Access Layer:";
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/abstractaccesslayer.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Abstract Client :";
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/abstractclient.php.twig", $renderData);
+            echo "Generating Abstract Objects:";
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
+            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
             echo " [DONE]\n";
 
             echo "Generating Client Container:";
@@ -470,8 +529,22 @@ class Zenderator
             $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
             echo " [DONE]\n";
 
+            echo "Generating Test Bootstrap:";
+            $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
+            echo " [DONE]\n";
+
             echo "Generating phpunit.xml:";
             $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
+            echo " [DONE]\n";
+
+            echo "Generating Exceptions:";
+            $derivedExceptions = [
+                'ObjectNotFoundException'
+            ];
+            foreach($derivedExceptions as $derivedException) {
+                $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
+            }
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
             echo " [DONE]\n";
 
             #\Kint::dump($renderData);
@@ -571,17 +644,17 @@ class Zenderator
         return $response;
     }
 
-    private function makeConstraintArray($zendConstraint)
+    private function makeConstraintArray($zendConstraint, $name = null)
     {
         if (is_array($zendConstraint)) {
             $result = [];
-            foreach ($zendConstraint as $zendConstraintElement) {
-                $result[] = $this->makeConstraintArray($zendConstraintElement);
+            foreach ($zendConstraint as $name => $zendConstraintElement) {
+                $result[$name] = $this->makeConstraintArray($zendConstraintElement, $name);
             }
             return $result;
         } elseif ($zendConstraint instanceof ConstraintObject) {
-            return [
-                'field'                         => $zendConstraint->getTableName(),
+            $constraintArray = [
+                'field'                         => $name,
                 'local_model_class'             => $this->sanitiseModelNameToClassName($zendConstraint->getTableName()),
                 'remote_model_class'            => $this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName()),
                 'local_model_variable'          => $this->transStudly2Camel->transform($this->sanitiseModelNameToClassName($zendConstraint->getTableName())),
@@ -591,6 +664,7 @@ class Zenderator
                 'local_model_key_get_function'  => $this->transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
                 'remote_model_key_get_function' => $this->transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
             ];
+            return $constraintArray;
         } else {
             throw new \Exception("makeConstraintArray has been passed a non-Zend Constraint.");
         }

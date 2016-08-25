@@ -1,0 +1,24 @@
+    /**
+     *
+     **/
+    public function {{ route.function }}($id)
+    {
+        /** @var $response \GuzzleHttp\Psr7\Response */
+        $endpoint = $this->replaceUrlElements(
+            "{{ route.pattern }}",
+            [
+                'id' => $id
+            ]
+        );
+        $response = $this->request("{{ route.method }}", $endpoint);
+        $body = $response->getBody()->getContents();
+        if(json_decode($body) === null){
+            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+        }
+        $body = json_decode($body, true);
+        if($body['Status'] == 'OKAY'){
+            return true;
+        }else{
+            return false;
+        }
+    }
