@@ -2,6 +2,7 @@
 namespace {{ namespace }}\TableGateways\Base;
 use \Segura\AppCore\Abstracts\TableGateway as AbstractTableGateway;
 use \Segura\AppCore\Abstracts\Model;
+use \Segura\AppCore\Db;
 use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
@@ -13,10 +14,17 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {
     protected $table = '{{ table }}';
 
+    protected $database = '{{ database }}';
+
     protected $model = '{{ namespace_model }}';
 
     /** @var \Faker\Generator */
     protected $faker;
+
+    /** @var Db */
+    private $databaseConnector;
+
+    private $databaseAdaptor;
 
 {% for object in related_objects|sort %}
     /** @var TableGateways\{{ object.remote_model_class }}TableGateway */
@@ -29,23 +37,26 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% for object in related_objects|sort %}
      * @param TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
 {% endfor %}
-     * @param AdapterInterface $adapter
+     * @param Db $databaseConnector
      */
     public function __construct(
 {% for object in related_objects|sort %}
         TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
 {% endfor %}
         \Faker\Generator $faker,
-        AdapterInterface $adapter
+        Db $databaseConnector
     )
     {
 {% for object in related_objects|sort %}
         $this->{{ object.remote_model_variable }}TableGateway = ${{ object.remote_model_variable }}TableGateway;
 {% endfor %}
         $this->faker = $faker;
+        $this->databaseConnector = $databaseConnector;
 
+        /** @var $adaptor AdaptorInterface */
+        $this->databaseAdaptor = $this->databaseConnector->getDatabase($this->database);
         $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->model);
-        return parent::__construct($this->table, $adapter, null, $resultSetPrototype);
+        return parent::__construct($this->table, $this->databaseAdaptor, null, $resultSetPrototype);
     }
 
     public function getNewMockModelInstance()

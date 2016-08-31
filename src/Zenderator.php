@@ -27,10 +27,10 @@ class Zenderator
     private $loader;
     /** @var \Twig_Environment */
     private $twig;
-    /** @var Adapter */
-    private $adapter;
-    /** @var Metadata */
-    private $metadata;
+    /** @var Adapter[] */
+    private $adapters;
+    /** @var Metadata[] */
+    private $metadatas;
 
     private $ignoredTables;
 
@@ -47,10 +47,10 @@ class Zenderator
     /** @var CaseTransformer */
     private $transCamel2Snake;
 
-    public function __construct($rootOfApp, $databaseConfiguration)
+    public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
-        $this->setUp($databaseConfiguration);
+        $this->setUp($databaseConfigs);
     }
 
     public function makeZenderator()
@@ -67,7 +67,7 @@ class Zenderator
         $this->cleanCode();
     }
 
-    private function setUp($databaseConfiguration)
+    private function setUp($databaseConfigs)
     {
         if (!file_exists($this->rootOfApp . "/zenderator.yml")) {
             die("Missing Zenderator config /zenderator.yml\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
@@ -97,9 +97,11 @@ class Zenderator
         $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
         $this->transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
-        $this->adapter  = new DbAdaptor($databaseConfiguration);
-        $this->metadata = new Metadata($this->adapter);
-        $this->adapter->query('set global innodb_stats_on_metadata=0;');
+        foreach($databaseConfigs as $dbName => $databaseConfig) {
+            $this->adapters[$dbName] = new DbAdaptor($databaseConfig);
+            $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
+            $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
+        }
     }
 
     private function renderToFile(bool $overwrite, string $path, string $template, array $data)
@@ -109,7 +111,7 @@ class Zenderator
             mkdir(dirname($path), 0777, true);
         }
         if (!file_exists($path) || $overwrite) {
-            echo "  > Writing to {$path}\n";
+            #echo "  > Writing to {$path}\n";
             file_put_contents($path, $output);
         }
     }
@@ -149,177 +151,187 @@ class Zenderator
     private function makeModelSchemas()
     {
         global $argv;
-        /**
-         * @var $tables \Zend\Db\Metadata\Object\TableObject[]
-         */
-        $tables = $this->metadata->getTables();
-
-        echo "Collecting " . count($tables) . " entities data.\n";
-
         $models = [];
-        foreach ($tables as $table) {
-            if (in_array($table->getName(), $this->ignoredTables)) {
-                continue;
-            }
-            #echo " ??? " . strtolower($table->getName()) . " != " . strtolower($argv[1]) . "\n";
-            if (isset($argv[1]) && strtolower($table->getName()) != strtolower($argv[1])) {
-                continue;
-            }
-            $constraints = [];
-            foreach ($table->getConstraints() as $constraint) {
-                /** @var ConstraintObject $constraint */
-                if ($constraint->getType() == "FOREIGN KEY") {
-                    $columnAffected               = $constraint->getColumns()[0];
-                    $constraints[$columnAffected] = $constraint;
-
-                    $remoteClassName = $this->sanitiseModelNameToClassName($constraint->getReferencedTableName());
-                    #echo " *** Detected that {$remoteClassName} has a remote constraint with {$constraint->getTableName()}\n";
-                    $models[$remoteClassName]['remote_constraints'][] = $constraint;
-                }
-            }
-
+        foreach($this->adapters as $dbName => $adapter) {
+            echo "Adaptor: {$dbName}\n";
             /**
-             * @var int                                   $i
-             * @var \Zend\Db\Metadata\Object\ColumnObject $column
+             * @var $tables \Zend\Db\Metadata\Object\TableObject[]
              */
-            foreach ($table->getColumns() as $i => $column) {
-                $typeFragments = explode(" ", $column->getDataType());
+            $tables = $this->metadatas[$dbName]->getTables();
 
-                /**
-                 * Get field properties.
-                 */
-                $models[$table->getName()]['columns'][$column->getName()] = [
-                    'field'            => $this->transCamel2Studly->transform($column->getName()),
-                    'type'             => reset($typeFragments),
-                    'permitted_values' => $column->getErrata('permitted_values'),
-                ];
+            echo "Collecting " . count($tables) . " entities data.\n";
 
-                /**
-                 * Calculate Max Length for field.
-                 */
-                if (in_array($column->getDataType(), ['int','bigint','tinyint'])) {
-                    $maxLength = $column->getNumericPrecision();
-                } else {
-                    $maxLength = $column->getCharacterMaximumLength();
+            foreach ($tables as $table){
+                $models[$table->getName()]['database'] = $dbName;
+                $models[$table->getName()]['table'] = $table->getName();
+                $models[$table->getName()]['className'] =
+                    $this->sanitiseModelNameToClassName($this->transSnake2Studly->transform($dbName)) .
+                    $this->sanitiseModelNameToClassName($table->getName());
+
+                if (in_array($table->getName(), $this->ignoredTables)) {
+                    continue;
                 }
-                switch ($column->getDataType()) {
-                    case 'bigint':
-                        $maxFieldLength = 9223372036854775807;
-                        break;
-                    case 'int':
-                        $maxFieldLength = 2147483647;
-                        break;
-                    case 'mediumint':
-                        $maxFieldLength = 8388607;
-                        break;
-                    case 'smallint':
-                        $maxFieldLength = 32767;
-                        break;
-                    case 'tinyint':
-                        $maxFieldLength = 127;
-                        break;
-                    default:
-                        $maxFieldLength = null;
+                #echo " ??? " . strtolower($table->getName()) . " != " . strtolower($argv[1]) . "\n";
+                if (isset($argv[1]) && strtolower($table->getName()) != strtolower($argv[1])) {
+                    continue;
                 }
-
-                /**
-                 * Max field lengths.
-                 */
-                $models[$table->getName()]['columns'][$column->getName()]['max_length'] = $maxLength;
-                if ($maxFieldLength != null) {
-                    $models[$table->getName()]['columns'][$column->getName()]['max_field_length'] = $maxFieldLength;
-                }
-
-                /**
-                 * If there is a default set in the schema, use it.
-                 */
-                if ($column->getColumnDefault()) {
-                    $models[$table->getName()]['columns'][$column->getName()]['default_value'] = $column->getColumnDefault();
-                }
-
-                $models[$table->getName()]['columns'][$column->getName()]['max_decimal_places'] = $column->getNumericScale();
-
-                /**
-                 * Get relationship constraints.
-                 */
-                if (isset($constraints[$column->getName()])) {
-                    $models[$table->getName()]['columns'][$column->getName()]['constraints'] = $this->makeConstraintArray($constraints[$column->getName()]);
-                }
-                $models[$table->getName()]['table'] = $table;
-
-                /**
-                 * Get Primary Keys.
-                 */
-                $primaryKeys             = [];
-                $primaryParameters       = [];
-                $autoincrementParameters = [];
+                $constraints = [];
                 foreach ($table->getConstraints() as $constraint) {
-                    if ($constraint->getType() == 'PRIMARY KEY') {
-                        $primaryKeys = $constraint->getColumns();
+                    /** @var ConstraintObject $constraint */
+                    if ($constraint->getType() == "FOREIGN KEY") {
+                        $columnAffected = $constraint->getColumns()[0];
+                        $constraints[$columnAffected] = $constraint;
+
+                        $remoteClassName = $this->sanitiseModelNameToClassName($constraint->getReferencedTableName());
+                        #echo " *** Detected that {$remoteClassName} has a remote constraint with {$constraint->getTableName()}\n";
+                        $models[$remoteClassName]['remote_constraints'][] = $constraint;
                     }
                 }
 
-                foreach ($this->getAutoincrementColumns($this->adapter, $table->getName()) as $column) {
-                    $autoincrementParameters[] = $this->transCamel2Studly->transform($column);
+                /**
+                 * @var int $i
+                 * @var \Zend\Db\Metadata\Object\ColumnObject $column
+                 */
+                foreach ($table->getColumns() as $i => $column) {
+                    $typeFragments = explode(" ", $column->getDataType());
+
+                    /**
+                     * Get field properties.
+                     */
+                    $models[$table->getName()]['columns'][$column->getName()] = [
+                        'field' => $this->transCamel2Studly->transform($column->getName()),
+                        'type' => reset($typeFragments),
+                        'permitted_values' => $column->getErrata('permitted_values'),
+                    ];
+
+                    /**
+                     * Calculate Max Length for field.
+                     */
+                    if (in_array($column->getDataType(), ['int', 'bigint', 'tinyint'])) {
+                        $maxLength = $column->getNumericPrecision();
+                    } else {
+                        $maxLength = $column->getCharacterMaximumLength();
+                    }
+                    switch ($column->getDataType()) {
+                        case 'bigint':
+                            $maxFieldLength = 9223372036854775807;
+                            break;
+                        case 'int':
+                            $maxFieldLength = 2147483647;
+                            break;
+                        case 'mediumint':
+                            $maxFieldLength = 8388607;
+                            break;
+                        case 'smallint':
+                            $maxFieldLength = 32767;
+                            break;
+                        case 'tinyint':
+                            $maxFieldLength = 127;
+                            break;
+                        default:
+                            $maxFieldLength = null;
+                    }
+
+                    /**
+                     * Max field lengths.
+                     */
+                    $models[$table->getName()]['columns'][$column->getName()]['max_length'] = $maxLength;
+                    if ($maxFieldLength != null) {
+                        $models[$table->getName()]['columns'][$column->getName()]['max_field_length'] = $maxFieldLength;
+                    }
+
+                    /**
+                     * If there is a default set in the schema, use it.
+                     */
+                    if ($column->getColumnDefault()) {
+                        $models[$table->getName()]['columns'][$column->getName()]['default_value'] = $column->getColumnDefault();
+                    }
+
+                    $models[$table->getName()]['columns'][$column->getName()]['max_decimal_places'] = $column->getNumericScale();
+
+                    /**
+                     * Get relationship constraints.
+                     */
+                    if (isset($constraints[$column->getName()])) {
+                        $models[$table->getName()]['columns'][$column->getName()]['constraints'] = $this->makeConstraintArray($constraints[$column->getName()]);
+                    }
+
+                    /**
+                     * Get Primary Keys.
+                     */
+                    $primaryKeys = [];
+                    $primaryParameters = [];
+                    $autoincrementParameters = [];
+                    foreach ($table->getConstraints() as $constraint) {
+                        if ($constraint->getType() == 'PRIMARY KEY') {
+                            $primaryKeys = $constraint->getColumns();
+                        }
+                    }
+
+                    foreach ($this->getAutoincrementColumns($this->adapters[$dbName], $table->getName()) as $autoIncrementColumn) {
+                        $autoincrementParameters[] = $this->transCamel2Studly->transform($autoIncrementColumn);
+                    }
+
+                    $models[$table->getName()]['primary_keys'] = $primaryKeys;
+                    $models[$table->getName()]['primary_parameters'] = $primaryParameters;
+                    $models[$table->getName()]['autoincrement_parameters'] = $autoincrementParameters;
+                }
+            }
+
+            foreach ($models as $modelName => $modelData) {
+                if (isset($argv[1]) && strtolower($modelName) != strtolower($argv[1])) {
+                    continue;
                 }
 
-                $models[$table->getName()]['primary_keys']             = $primaryKeys;
-                $models[$table->getName()]['primary_parameters']       = $primaryParameters;
-                $models[$table->getName()]['autoincrement_parameters'] = $autoincrementParameters;
-            }
-        }
+                echo " > {$modelName}\n";
 
-        foreach ($models as $modelName => $modelData) {
-            if (isset($argv[1]) && strtolower($modelName) != strtolower($argv[1])) {
-                continue;
-            }
+                // Decide on column types.
+                $columns = [];
+                #\Kint::dump($modelData);
+                foreach ($modelData['columns'] as $key => $value) {
+                    switch ($value['type']) {
+                        case 'float':
+                        case 'decimal':
+                            $value['phptype'] = 'float';
+                            break;
+                        case 'bit':
+                        case 'int':
+                        case 'bigint':
+                        case 'tinyint':
+                            $value['phptype'] = 'int';
+                            break;
+                        case 'varchar':
+                        case 'smallblob':
+                        case 'blob':
+                        case 'longblob':
+                        case 'smalltext':
+                        case 'text':
+                        case 'longtext':
+                            $value['phptype'] = 'string';
+                            break;
+                        case 'enum':
+                            $value['phptype'] = 'string';
+                            break;
+                        case 'datetime':
+                            $value['phptype'] = 'string';
+                            break;
+                        default:
+                            echo " > Type not translated: {$value['type']}\n";
+                    }
 
-            echo " > {$modelName}\n";
-            $models[$modelName]['className'] = $this->sanitiseModelNameToClassName($modelName);
-
-            // Decide on column types.
-            $columns = [];
-            foreach ($modelData['columns'] as $key => $value) {
-                switch ($value['type']) {
-                    case 'float':
-                    case 'decimal':
-                        $value['phptype'] = 'float';
-                        break;
-                    case 'int':
-                    case 'bigint':
-                    case 'tinyint':
-                        $value['phptype'] = 'int';
-                        break;
-                    case 'varchar':
-                    case 'smallblob':
-                    case 'blob':
-                    case 'longblob':
-                    case 'smalltext':
-                    case 'text':
-                    case 'longtext':
-                        $value['phptype'] = 'string';
-                        break;
-                    case 'enum':
-                        $value['phptype'] = 'string';
-                        break;
-                    case 'datetime':
-                        $value['phptype'] = 'string';
-                        break;
-                    default:
-                        echo " > Type not translated: {$value['type']}\n";
+                    $columns[$key] = $value;
                 }
+                $models[$modelName]['columns'] = $columns;
 
-                $columns[$key] = $value;
-            }
-            $models[$modelName]['columns'] = $columns;
-
-            $relatedObjects = [];
-            foreach ($columns as $column) {
-                if (isset($column['constraints'])) {
-                    $relatedObjects[$column['constraints']['remote_model_class']] = $column['constraints'];
+                $relatedObjects = [];
+                foreach ($columns as $column) {
+                    if (isset($column['constraints'])) {
+                        $relatedObjects[$column['constraints']['remote_model_class']] = $column['constraints'];
+                    }
                 }
+                $models[$modelName]['related_objects'] = $relatedObjects;
             }
-            $models[$modelName]['related_objects'] = $relatedObjects;
+            echo "\n\n";
         }
         return $models;
     }
@@ -344,7 +356,7 @@ class Zenderator
             } else {
                 $constraintName = $remoteConstraint->getTableName();
             }
-            echo " * Constraint Name: {$constraintName}\n";
+            #echo " * Constraint Name: {$constraintName}\n";
             $constraints[$constraintName] = $remoteConstraint;
         }
         return $constraints;
@@ -352,10 +364,8 @@ class Zenderator
 
     private function makeCoreFiles($models)
     {
-        $tables = $this->metadata->getTables();
 
-        echo "Generating " . count($tables) . " models.\n";
-
+        echo "Generating Core files for " . count($models) . " models";
         $renderData = [];
 
         foreach ($models as $modelName => $modelData) {
@@ -378,13 +388,15 @@ class Zenderator
                 'columns'                  => $modelData['columns'],
                 'related_objects'          => $modelData['related_objects'],
                 'remote_constraints'       => isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
-                'table'                    => $modelName,
+                'database'                 => $modelData['database'],
+                'table'                    => $modelData['table'],
                 'primary_keys'             => $modelData['primary_keys'],
                 'primary_parameters'       => $modelData['primary_parameters'],
                 'autoincrement_parameters' => $modelData['autoincrement_parameters']
             ];
 
-            \Kint::dump($renderData[$modelName]['remote_constraints']);
+            #\Kint::dump($renderData[$modelName]['remote_constraints']);
+            #\Kint::dump($renderData[$modelName]);
 
             // "Model" suite
             if (in_array("Models", $this->config['templates'])) {
@@ -420,24 +432,22 @@ class Zenderator
 
             #\Kint::dump($renderData[$modelName]);
 
-            // "JS" suit
-            if (in_array("JsLib", $this->config['templates'])) {
-                echo "Generating JS Lib...";
-                $this->renderToFile(true, APP_ROOT . "/public/jslib/api.js", "jslib.js.twig", [
-                    'models'         => $renderData,
-                    'date_generated' => date("Y-m-d H:i:s")
-                ]);
-                echo "\n > Wrote to " . APP_ROOT . "/public/jslib/api.js";
-                echo " [DONE]\n";
-                copy(APP_ROOT . "/public/jslib/api.js", APP_ROOT . "/other/api_js_testrig/api.js");
-                echo " > Copied to " . APP_ROOT . "/public/jslib/api.js";
-                echo " [DONE]\n\n";
-            }
+
+        }
+        // "JS" suit
+        if (in_array("JsLib", $this->config['templates'])) {
+            echo "Generating JS Lib...";
+            $this->renderToFile(true, APP_ROOT . "/public/jslib/api.js", "jslib.js.twig", [
+                'models'         => $renderData,
+                'date_generated' => date("Y-m-d H:i:s")
+            ]);
+            copy(APP_ROOT . "/public/jslib/api.js", APP_ROOT . "/other/api_js_testrig/api.js");
+            echo " [DONE]\n\n";
         }
 
         echo "Generating App Container:";
         $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $renderData, 'config' => $this->config]);
-        echo " [DONE]\n";
+        echo " [DONE]\n\n";
 
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
@@ -446,7 +456,7 @@ class Zenderator
                 'models'        => $renderData,
                 'app_container' => APP_CORE_NAME,
             ]);
-            echo " [DONE]\n";
+            echo " [DONE]\n\n";
         }
     }
 

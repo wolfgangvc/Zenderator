@@ -4,8 +4,9 @@
 $rootOfApp = __DIR__ . "/../../../../";
 
 require_once($rootOfApp . "/bootstrap.php");
+$databaseConfigs = require($rootOfApp . "/config/mysql.php");
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
-    $databaseConfiguration
+    $databaseConfigs
 );
 $zenderator->makeZenderator();
