@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "segura/appcore": "dev-master",
+        "segura/appcore": "*",
         "slim/slim": "^3.2",
         "raveren/kint": "^1.0",
         "zendframework/zend-db": "^2.7",
