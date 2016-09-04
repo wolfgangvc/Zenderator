@@ -16,6 +16,7 @@ use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Metadata\Object\ConstraintObject;
+use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
 {
@@ -38,6 +39,8 @@ class Zenderator
     private $transSnake2Studly;
     /** @var CaseTransformer */
     private $transStudly2Camel;
+    /** @var CaseTransformer */
+    private $transStudly2Studly;
     /** @var CaseTransformer */
     private $transCamel2Studly;
     /** @var CaseTransformer */
@@ -92,6 +95,7 @@ class Zenderator
 
         $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
         $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
         $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
         $this->transSnake2Camel  = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
         $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
@@ -147,7 +151,18 @@ class Zenderator
         }
         return $columns;
     }
-    
+
+    private function schemaToDbAdaptorName($schema){
+        $foundSchemas = [];
+        foreach($this->adapters as $dbName => $adapter){
+            if($adapter->getCurrentSchema() == $schema) {
+                return $dbName;
+            }
+            $foundSchemas[] = $adapter->getCurrentSchema();
+        }
+        throw new SchemaToAdaptorException("Cannot find a DB Adaptor by Schema Name {$schema}. " . implode(", ", $foundSchemas));
+    }
+
     private function makeModelSchemas()
     {
         global $argv;
@@ -388,6 +403,7 @@ class Zenderator
                 'columns'                  => $modelData['columns'],
                 'related_objects'          => $modelData['related_objects'],
                 'remote_constraints'       => isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
+                'remote_constraints_tables' => isset($modelData['remote_constraints']) ? $this->makeConstraintTableList($modelData['remote_constraints']) : false,
                 'database'                 => $modelData['database'],
                 'table'                    => $modelData['table'],
                 'primary_keys'             => $modelData['primary_keys'],
@@ -396,7 +412,6 @@ class Zenderator
             ];
 
             #\Kint::dump($renderData[$modelName]['remote_constraints']);
-            #\Kint::dump($renderData[$modelName]);
 
             // "Model" suite
             if (in_array("Models", $this->config['templates'])) {
@@ -409,6 +424,9 @@ class Zenderator
 
             // "Service" suite
             if (in_array("Services", $this->config['templates'])) {
+                if($className == 'UnitySupplier') {
+                    \Kint::dump($className, $renderData[$modelName]);
+                }
                 $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
                 $this->renderToFile(false, APP_ROOT . "/src/Services/{$className}Service.php", "service.php.twig", $renderData[$modelName]);
                 $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$className}Test.php", "tests.service.php.twig", $renderData[$modelName]);
@@ -654,6 +672,22 @@ class Zenderator
         return $response;
     }
 
+    /**
+     * @param ConstraintObject[] $zendConstraints
+     * @return string[]
+     */
+    private function makeConstraintTableList(array $zendConstraints){
+        $listOfTableGateways = [];
+        foreach($zendConstraints as $zendConstraint){
+            $tableGatewayCanonicalName =
+                $this->transCamel2Studly->transform($this->schemaToDbAdaptorName($zendConstraint->getReferencedTableSchema())) .
+                $this->transCamel2Studly->transform($zendConstraint->getReferencedTableName());
+            $constraintArray = $this->makeConstraintArray($zendConstraint);
+            $listOfTableGateways[$tableGatewayCanonicalName][$constraintArray['field']] = $constraintArray;
+        }
+        return $listOfTableGateways;
+    }
+
     private function makeConstraintArray($zendConstraint, $name = null)
     {
         if (is_array($zendConstraint)) {
@@ -663,16 +697,22 @@ class Zenderator
             }
             return $result;
         } elseif ($zendConstraint instanceof ConstraintObject) {
+            $localSchemaModelPrefix  = $this->transSnake2Studly->transform(
+                $this->schemaToDbAdaptorName($zendConstraint->getSchemaName())
+            );
+            $remoteSchemaModelPrefix = $this->transSnake2Studly->transform($zendConstraint->getReferencedTableSchema());
+
             $constraintArray = [
                 'field'                         => $name,
-                'local_model_class'             => $this->sanitiseModelNameToClassName($zendConstraint->getTableName()),
-                'remote_model_class'            => $this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName()),
-                'local_model_variable'          => $this->transStudly2Camel->transform($this->sanitiseModelNameToClassName($zendConstraint->getTableName())),
-                'remote_model_variable'         => $this->transStudly2Camel->transform($this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName())),
-                'local_model_key'               => $zendConstraint->getColumns()[0],
-                'remote_model_key'              => $zendConstraint->getReferencedColumns()[0],
-                'local_model_key_get_function'  => $this->transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
-                'remote_model_key_get_function' => $this->transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
+                'database'                      => $zendConstraint->getSchemaName(),
+                'local_model_class'             => $localSchemaModelPrefix  . $this->sanitiseModelNameToClassName($zendConstraint->getTableName()),
+                'remote_model_class'            => $remoteSchemaModelPrefix . $this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName()),
+                'local_model_variable'          => $localSchemaModelPrefix  . $this->transStudly2Studly->transform($this->sanitiseModelNameToClassName($zendConstraint->getTableName())),
+                'remote_model_variable'         => $remoteSchemaModelPrefix . $this->transStudly2Studly->transform($this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName())),
+                'local_model_key'               => $localSchemaModelPrefix  . $this->transCamel2Studly->transform($zendConstraint->getColumns()[0]),
+                'remote_model_key'              => $remoteSchemaModelPrefix . $this->transCamel2Studly->transform($zendConstraint->getReferencedColumns()[0]),
+                'local_model_key_get_function'  => $localSchemaModelPrefix  . $this->transStudly2Studly->transform($zendConstraint->getReferencedColumns()[0]),
+                'remote_model_key_get_function' => $remoteSchemaModelPrefix . $this->transStudly2Studly->transform($zendConstraint->getReferencedColumns()[0]),
             ];
             return $constraintArray;
         } else {
