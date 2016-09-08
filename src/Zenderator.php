@@ -16,6 +16,7 @@ use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Metadata\Object\ConstraintObject;
+use Zenderator\Components\Model;
 use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
@@ -93,16 +94,16 @@ class Zenderator
             'tbl_migration',
         ];
 
-        $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+        $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
         $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-        $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
-        $this->transSnake2Camel  = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
-        $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
-        $this->transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transCamel2Studly  = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+        $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+        $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
-        foreach($databaseConfigs as $dbName => $databaseConfig) {
-            $this->adapters[$dbName] = new DbAdaptor($databaseConfig);
+        foreach ($databaseConfigs as $dbName => $databaseConfig) {
+            $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
             $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
             $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
         }
@@ -152,10 +153,11 @@ class Zenderator
         return $columns;
     }
 
-    private function schemaToDbAdaptorName($schema){
+    private function schemaToDbAdaptorName($schema)
+    {
         $foundSchemas = [];
-        foreach($this->adapters as $dbName => $adapter){
-            if($adapter->getCurrentSchema() == $schema) {
+        foreach ($this->adapters as $dbName => $adapter) {
+            if ($adapter->getCurrentSchema() == $schema) {
                 return $dbName;
             }
             $foundSchemas[] = $adapter->getCurrentSchema();
@@ -167,7 +169,7 @@ class Zenderator
     {
         global $argv;
         $models = [];
-        foreach($this->adapters as $dbName => $adapter) {
+        foreach ($this->adapters as $dbName => $adapter) {
             echo "Adaptor: {$dbName}\n";
             /**
              * @var $tables \Zend\Db\Metadata\Object\TableObject[]
@@ -176,20 +178,51 @@ class Zenderator
 
             echo "Collecting " . count($tables) . " entities data.\n";
 
-            foreach ($tables as $table){
-                $models[$table->getName()]['database'] = $dbName;
-                $models[$table->getName()]['table'] = $table->getName();
+            foreach ($tables as $table) {
+                $oModel = Components\Model::Factory()
+                    ->setNamespace($this->namespace)
+                    ->setAdaptor($adapter)
+                    ->setDatabase($dbName)
+                    ->setTable($table->getName())
+                    ->computeColumns($table->getColumns())
+                    ->computeConstraints($table->getConstraints());
+                $models[] = $oModel;
+            }
+        }
+        return $models;
+    }
+
+    private function makeModelSchemasOld()
+    {
+        global $argv;
+        $models  = [];
+        $models2 = [];
+        foreach ($this->adapters as $dbName => $adapter) {
+            echo "Adaptor: {$dbName}\n";
+            /**
+             * @var $tables \Zend\Db\Metadata\Object\TableObject[]
+             */
+            $tables = $this->metadatas[$dbName]->getTables();
+
+            echo "Collecting " . count($tables) . " entities data.\n";
+
+            foreach ($tables as $table) {
+                $models[$table->getName()]['database']  = $dbName;
+                $models[$table->getName()]['table']     = $table->getName();
                 $models[$table->getName()]['className'] =
                     $this->sanitiseModelNameToClassName($this->transSnake2Studly->transform($dbName)) .
                     $this->sanitiseModelNameToClassName($table->getName());
 
-                if (in_array($table->getName(), $this->ignoredTables)) {
-                    continue;
-                }
-                #echo " ??? " . strtolower($table->getName()) . " != " . strtolower($argv[1]) . "\n";
-                if (isset($argv[1]) && strtolower($table->getName()) != strtolower($argv[1])) {
-                    continue;
-                }
+
+                $oModel = Components\Model::Factory()
+                    ->setAdaptor($adapter)
+                    ->setDatabase($dbName)
+                    ->setTable($table->getName())
+                    ->computeColumns($table->getColumns())
+                    ->computeConstraints($table->getConstraints());
+
+                exit;
+
                 $constraints = [];
                 foreach ($table->getConstraints() as $constraint) {
                     /** @var ConstraintObject $constraint */
@@ -377,7 +410,47 @@ class Zenderator
         return $constraints;
     }
 
-    private function makeCoreFiles($models)
+    /**
+     * @param Model[] $models
+     */
+    private function makeCoreFiles(array $models){
+        echo "Generating Core files for " . count($models) . " models";
+        foreach($models as $model){
+            // "Model" suite
+            if (in_array("Models", $this->config['templates'])) {
+                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "basemodel.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "model.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "tests.models.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "basetable.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "table.php.twig", $model->getRenderDataset());
+            }
+
+            // "Service" suite
+            if (in_array("Services", $this->config['templates'])) {
+                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "baseservice.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "service.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "tests.service.php.twig", $model->getRenderDataset());
+            }
+
+            // "Controller" suite
+            if (in_array("Controllers", $this->config['templates'])) {
+                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "basecontroller.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "controller.php.twig", $model->getRenderDataset());
+            }
+
+            // "Endpoint" test suite
+            if (in_array("Endpoints", $this->config['templates'])) {
+                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "tests.endpoints.php.twig", $model->getRenderDataset());
+            }
+
+            // "Routes" suit
+            if (in_array("Routes", $this->config['templates'])) {
+                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "route.php.twig", $model->getRenderDataset());
+            }
+        }
+    }
+
+    private function makeCoreFilesOld($models)
     {
 
         echo "Generating Core files for " . count($models) . " models";
@@ -390,25 +463,25 @@ class Zenderator
 
             $className              = $modelData['className'];
             $renderData[$modelName] = [
-                'namespace'                => $this->namespace,
-                'app_name'                 => APP_NAME,
-                'app_container'            => APP_CORE_NAME,
-                'class_name'               => $className,
-                'variable_name'            => $this->transStudly2Camel->transform($className),
-                'name'                     => $modelName,
-                'object_name_plural'       => $this->pluraliseClassName($className),
-                'object_name_singular'     => $className,
-                'controller_route'         => $this->transCamel2Snake->transform(Inflect::pluralize($className)),
-                'namespace_model'          => "{$this->namespace}\\Models\\{$className}Model",
-                'columns'                  => $modelData['columns'],
-                'related_objects'          => $modelData['related_objects'],
-                'remote_constraints'       => isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
+                'namespace'                 => $this->namespace,
+                'app_name'                  => APP_NAME,
+                'app_container'             => APP_CORE_NAME,
+                'class_name'                => $className,
+                'variable_name'             => $this->transStudly2Camel->transform($className),
+                'name'                      => $modelName,
+                'object_name_plural'        => $this->pluraliseClassName($className),
+                'object_name_singular'      => $className,
+                'controller_route'          => $this->transCamel2Snake->transform(Inflect::pluralize($className)),
+                'namespace_model'           => "{$this->namespace}\\Models\\{$className}Model",
+                'columns'                   => $modelData['columns'],
+                'related_objects'           => $modelData['related_objects'],
+                'remote_constraints'        => isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
                 'remote_constraints_tables' => isset($modelData['remote_constraints']) ? $this->makeConstraintTableList($modelData['remote_constraints']) : false,
-                'database'                 => $modelData['database'],
-                'table'                    => $modelData['table'],
-                'primary_keys'             => $modelData['primary_keys'],
-                'primary_parameters'       => $modelData['primary_parameters'],
-                'autoincrement_parameters' => $modelData['autoincrement_parameters']
+                'database'                  => $modelData['database'],
+                'table'                     => $modelData['table'],
+                'primary_keys'              => $modelData['primary_keys'],
+                'primary_parameters'        => $modelData['primary_parameters'],
+                'autoincrement_parameters'  => $modelData['autoincrement_parameters']
             ];
 
             #\Kint::dump($renderData[$modelName]['remote_constraints']);
@@ -424,7 +497,7 @@ class Zenderator
 
             // "Service" suite
             if (in_array("Services", $this->config['templates'])) {
-                if($className == 'UnitySupplier') {
+                if ($className == 'UnitySupplier') {
                     \Kint::dump($className, $renderData[$modelName]);
                 }
                 $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
@@ -449,8 +522,6 @@ class Zenderator
             }
 
             #\Kint::dump($renderData[$modelName]);
-
-
         }
         // "JS" suit
         if (in_array("JsLib", $this->config['templates'])) {
@@ -530,7 +601,7 @@ class Zenderator
                 // Tests
                 $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
 
-                if(!file_exists($outputPath . "/tests/fixtures")){
+                if (!file_exists($outputPath . "/tests/fixtures")) {
                     mkdir($outputPath . "/tests/fixtures", null, true);
                 }
             }
@@ -569,7 +640,7 @@ class Zenderator
             $derivedExceptions = [
                 'ObjectNotFoundException'
             ];
-            foreach($derivedExceptions as $derivedException) {
+            foreach ($derivedExceptions as $derivedException) {
                 $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
             }
             $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
@@ -674,15 +745,17 @@ class Zenderator
 
     /**
      * @param ConstraintObject[] $zendConstraints
+     *
      * @return string[]
      */
-    private function makeConstraintTableList(array $zendConstraints){
+    private function makeConstraintTableList(array $zendConstraints)
+    {
         $listOfTableGateways = [];
-        foreach($zendConstraints as $zendConstraint){
+        foreach ($zendConstraints as $zendConstraint) {
             $tableGatewayCanonicalName =
                 $this->transCamel2Studly->transform($this->schemaToDbAdaptorName($zendConstraint->getReferencedTableSchema())) .
                 $this->transCamel2Studly->transform($zendConstraint->getReferencedTableName());
-            $constraintArray = $this->makeConstraintArray($zendConstraint);
+            $constraintArray                                                            = $this->makeConstraintArray($zendConstraint);
             $listOfTableGateways[$tableGatewayCanonicalName][$constraintArray['field']] = $constraintArray;
         }
         return $listOfTableGateways;

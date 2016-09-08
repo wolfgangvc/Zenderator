@@ -2,6 +2,7 @@
 
 namespace Zenderator\Exception;
 
-class SchemaToAdaptorException extends Exception{
+class SchemaToAdaptorException extends Exception
+{
 
 }
