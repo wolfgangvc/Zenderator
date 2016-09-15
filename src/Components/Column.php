@@ -58,6 +58,10 @@ class Column extends Entity
         return $this;
     }
 
+    public function getPropertyFunction(){
+        return $this->transCamel2Studly->transform($this->getField());
+    }
+
     /**
      * @return mixed
      */

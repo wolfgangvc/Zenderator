@@ -51,6 +51,8 @@ class Zenderator
     /** @var CaseTransformer */
     private $transCamel2Snake;
 
+    static $databaseConfigs;
+
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
@@ -71,8 +73,19 @@ class Zenderator
         $this->cleanCode();
     }
 
+    static public function schemaName2databaseName($schemaName){
+        foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
+            $adapter  = new DbAdaptor($databaseConfig);
+            if($schemaName == $adapter->getCurrentSchema()) {
+                return $dbName;
+            }
+        }
+        throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
+    }
+
     private function setUp($databaseConfigs)
     {
+        self::$databaseConfigs = $databaseConfigs;
         if (!file_exists($this->rootOfApp . "/zenderator.yml")) {
             die("Missing Zenderator config /zenderator.yml\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
         }
@@ -116,7 +129,7 @@ class Zenderator
             mkdir(dirname($path), 0777, true);
         }
         if (!file_exists($path) || $overwrite) {
-            #echo "  > Writing to {$path}\n";
+            echo "  > Writing to {$path}\n";
             file_put_contents($path, $output);
         }
     }
@@ -415,8 +428,13 @@ class Zenderator
      */
     private function makeCoreFiles(array $models){
         echo "Generating Core files for " . count($models) . " models";
+        $allModelData = [];
         foreach($models as $model){
+            $allModelData[$model->getClassName()] = $model->getRenderDataset();
             // "Model" suite
+            echo " > {$model->getClassName()}\n";
+
+            #\Kint::dump($model->getRenderDataset());
             if (in_array("Models", $this->config['templates'])) {
                 $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "basemodel.php.twig", $model->getRenderDataset());
                 $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "model.php.twig", $model->getRenderDataset());
@@ -447,6 +465,20 @@ class Zenderator
             if (in_array("Routes", $this->config['templates'])) {
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "route.php.twig", $model->getRenderDataset());
             }
+        }
+
+        echo "Generating App Container:";
+        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
+        echo " [DONE]\n\n";
+
+        // "Routes" suit
+        if (in_array("Routes", $this->config['templates'])) {
+            echo "Generating Router:";
+            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "routes.php.twig", [
+                'models'        => $allModelData,
+                'app_container' => APP_CORE_NAME,
+            ]);
+            echo " [DONE]\n\n";
         }
     }
 

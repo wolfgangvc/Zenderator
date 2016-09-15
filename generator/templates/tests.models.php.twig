@@ -29,9 +29,9 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $data['{{ column.field }}'] = self::getFaker()->word;
 {% endif %}
 {% endfor %}
-$this->testInstance = new {{ class_name }}Model($data);
+        $this->testInstance = new {{ class_name }}Model($data);
 {% for column in columns %}
-    $this->assertEquals($data['{{ column.field }}'], $this->testInstance->get{{ column.field }}());
+        $this->assertEquals($data['{{ column.getField }}'], $this->testInstance->get{{ column.getPropertyFunction }}());
 {% endfor %}
     }
 

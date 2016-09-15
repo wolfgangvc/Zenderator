@@ -4,6 +4,7 @@ namespace Zenderator\Components;
 
 use Thru\Inflection\Inflect;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
+use Zenderator\Zenderator;
 
 class Model extends Entity
 {
@@ -16,9 +17,10 @@ class Model extends Entity
     /** @var string */
     protected $table;
     /** @var Column[] */
-    protected $columns;
-    protected $constraints;
-    protected $primaryKeys;
+    protected $columns = [];
+    protected $constraints = [];
+    protected $relatedObjects = [];
+    protected $primaryKeys = [];
     protected $autoIncrements;
 
     /**
@@ -66,17 +68,28 @@ class Model extends Entity
 
     /**
      * @param \Zend\Db\Metadata\Object\ConstraintObject[] $zendConstraints
+     * @return Model
      */
     public function computeConstraints(array $zendConstraints)
     {
+        echo "Computing the constraints of {$this->getClassName()}\n";
         foreach ($zendConstraints as $zendConstraint) {
             if ($zendConstraint->getType() == "FOREIGN KEY") {
-                $columnAffected = $zendConstraint->getColumns()[0];
+                $this->relatedObjects[] = RelatedModel::Factory()
+                    ->setSchema($zendConstraint->getReferencedTableSchema())
+                    ->setTable($zendConstraint->getReferencedTableName())
+                    ->setBindings(
+                        $this->getDatabase(),
+                        $zendConstraint->getColumns()[0],
+                        Zenderator::schemaName2databaseName($zendConstraint->getReferencedTableSchema()),
+                        $zendConstraint->getReferencedColumns()[0]
+                    );
             }
             if ($zendConstraint->getType() == "PRIMARY KEY") {
                 $this->primaryKeys = $zendConstraint->getColumns();
             }
         }
+        return $this;
     }
 
     public function computeAutoIncrementColumns()
@@ -190,6 +203,7 @@ class Model extends Entity
      */
     public function setDatabase(string $database)
     {
+        echo "Set database: {$database}\n";
         $this->database = $database;
         return $this;
     }
@@ -198,6 +212,8 @@ class Model extends Entity
     {
         return [
             'namespace' => $this->getNamespace(),
+            'database' => $this->getDatabase(),
+            'table' => $this->getTable(),
             'app_name' => APP_NAME,
             'app_container' => APP_CORE_NAME,
             'class_name' => $this->getClassName(),
@@ -207,15 +223,14 @@ class Model extends Entity
             'object_name_singular' => Inflect::singularize($this->getClassName()),
             'controller_route' => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
             'namespace_model' => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
-            'columns' => $modelData['columns'],
-            'related_objects' => $modelData['related_objects'],
-            'remote_constraints' => isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
-            'remote_constraints_tables' => isset($modelData['remote_constraints']) ? $this->makeConstraintTableList($modelData['remote_constraints']) : false,
-            'database' => $modelData['database'],
-            'table' => $modelData['table'],
-            'primary_keys' => $modelData['primary_keys'],
-            'primary_parameters' => $modelData['primary_parameters'],
-            'autoincrement_parameters' => $modelData['autoincrement_parameters']
-        ]
+            'columns' => $this->columns,
+            'related_objects' => $this->relatedObjects, #$modelData['related_objects'],
+            'remote_constraints' => [], #isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
+            'remote_constraints_tables' => [],#isset($modelData['remote_constraints']) ? $this->makeConstraintTableList($modelData['remote_constraints']) : false,
+
+            'primary_keys' => $this->primaryKeys,
+            'primary_parameters' => [],#$modelData['primary_parameters'],
+            'autoincrement_parameters' => [],#$modelData['autoincrement_parameters']
+        ];
     }
 }
