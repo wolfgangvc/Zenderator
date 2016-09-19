@@ -5,12 +5,30 @@ namespace Zenderator\Components;
 class RelatedModel extends Entity
 {
     protected $schema;
-    protected $table;
-
+    protected $localTable;
+    protected $remoteTable;
     protected $localBoundSchema;
     protected $localBoundColumn;
     protected $remoteBoundSchema;
     protected $remoteBoundColumn;
+
+    /**
+     * @return mixed
+     */
+    public function getRemoteTable()
+    {
+        return $this->remoteTable;
+    }
+
+    /**
+     * @param mixed $remoteTable
+     * @return RelatedModel
+     */
+    public function setRemoteTable($remoteTable)
+    {
+        $this->remoteTable = $remoteTable;
+        return $this;
+    }
 
     /**
      * @return mixed
@@ -48,38 +66,54 @@ class RelatedModel extends Entity
         return $this;
     }
 
-    public function getName()
+    /**
+     * @return mixed
+     */
+    public function getSchema()
     {
-        return
-            $this->transCamel2Studly->transform($this->getSchema()) .
-            $this->transCamel2Studly->transform($this->table);
+        return $this->schema;
+    }
+
+    /**
+     * @param mixed $schema
+     * @return RelatedModel
+     */
+    public function setSchema($schema)
+    {
+        $this->schema = $schema;
+        return $this;
     }
 
     public function getRemoteClass()
     {
         return
             $this->transCamel2Studly->transform($this->remoteBoundSchema) .
-            $this->transCamel2Studly->transform($this->table);
+            $this->transCamel2Studly->transform($this->remoteTable);
     }
 
     public function getRemoteVariable()
     {
         return
             $this->transCamel2Camel->transform($this->remoteBoundSchema) .
-            $this->transCamel2Studly->transform($this->table);
+            $this->transCamel2Studly->transform($this->remoteTable);
     }
+
     public function getLocalClass()
     {
         return
             $this->transCamel2Studly->transform($this->localBoundSchema) .
-            $this->transCamel2Studly->transform($this->table);
+            $this->transCamel2Studly->transform($this->localTable);
     }
 
     public function getLocalVariable()
     {
         return
             $this->transCamel2Camel->transform($this->localBoundSchema) .
-            $this->transCamel2Studly->transform($this->table);
+            $this->transCamel2Studly->transform($this->localTable);
+    }
+
+    public function getLocalBoundColumnGetter(){
+        return "get" . $this->transCamel2Studly->transform($this->getLocalBoundColumn());
     }
 
     /**
@@ -88,10 +122,6 @@ class RelatedModel extends Entity
     public function getLocalBoundColumn()
     {
         return $this->localBoundColumn;
-    }
-
-    public function getLocalBoundColumnGetter(){
-        return "get" . $this->transCamel2Studly->transform($this->getLocalBoundColumn());
     }
 
     /**
@@ -112,6 +142,10 @@ class RelatedModel extends Entity
         return $this->remoteBoundColumn;
     }
 
+    public function getRemoteBoundColumnGetter(){
+        return "get" . $this->transCamel2Studly->transform($this->getRemoteBoundColumn());
+    }
+
     /**
      * @param mixed $remoteBoundColumn
      * @return RelatedModel
@@ -122,40 +156,21 @@ class RelatedModel extends Entity
         return $this;
     }
 
-
     /**
      * @return mixed
      */
-    public function getSchema()
+    public function getLocalTable()
     {
-        return $this->schema;
+        return $this->localTable;
     }
 
     /**
-     * @param mixed $schema
+     * @param mixed $localTable
      * @return RelatedModel
      */
-    public function setSchema($schema)
+    public function setLocalTable($localTable)
     {
-        $this->schema = $schema;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    /**
-     * @param mixed $table
-     * @return RelatedModel
-     */
-    public function setTable($table)
-    {
-        $this->table = $table;
+        $this->localTable = $localTable;
         return $this;
     }
 

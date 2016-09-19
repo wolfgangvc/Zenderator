@@ -71,23 +71,27 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
         // Type = {{ column.getDbType }} PHPType = {{ column.getPhpType }}
-{% if 'constraints' in column|keys %}
+{% if column.hasRelatedObjects %}
         // @todo this doesn't work this way any more - MB
-        '{{ column.field }}' => $this->{{ column.constraints.remote_model_variable }}TableGateway->getNewMockModelInstance()->save()->get{{ column.constraints.remote_model_key_get_function }}(),
+        '{{ column.getField }}' => $this
+                                    ->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway
+                                        ->getNewMockModelInstance()
+                                        ->save()
+                                            ->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
 {% elseif column.getPhpType == 'int' and 'max_field_length' in column|keys %}
-        '{{ column.field }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 1) < column.getMaxFieldLength ? 10 ** (column.getMaxLength - 1) : column.getMaxFieldLength}}),
+        '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 1) < column.getMaxFieldLength ? 10 ** (column.getMaxLength - 1) : column.getMaxFieldLength}}),
 {% elseif column.getPhpType == 'int' %}
-        '{{ column.field }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 2) }}),
+        '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 2) }}),
 {% elseif column.getDbType == 'enum' and column.getPhpType == 'string' %}
-        '{{ column.field }}' => '{{ column.permitted_values[0] }}',
+        '{{ column.getField }}' => '{{ column.permitted_values[0] }}',
 {% elseif column.getDbType == 'datetime' and column.getPhpType == 'string' %}
-        '{{ column.field }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings. - MB
+        '{{ column.getField }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings. - MB
 {% elseif column.getPhpType == 'float' %}
-        '{{ column.field }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, -5, 5),
+        '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, -5, 5),
 {% elseif column.getMaxLength %}
-        '{{ column.field }}' => substr($this->faker->text({{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }} >= 5 ? {{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }} : 5), 0, {{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }}),
+        '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }} >= 5 ? {{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }} : 5), 0, {{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }}),
 {% else %}
-        '{{ column.field }}' => $this->faker->word,
+        '{{ column.getField }}' => $this->faker->word,
 {% endif %}
 {% endfor %}
       ];

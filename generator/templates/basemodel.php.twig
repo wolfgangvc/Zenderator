@@ -65,7 +65,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     /**
      * @returns Models\{{ related_object.getRemoteClass }}Model
      */
-    public function fetch{{ related_object.getName }}Object() : Models\{{ related_object.getRemoteClass }}Model
+    public function fetch{{ related_object.getRemoteClass }}Object() : Models\{{ related_object.getRemoteClass }}Model
     {
         /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
         ${{ related_object.getRemoteClass }}Service = App::Container()->get(Services\{{ related_object.getRemoteClass }}Service::class);
@@ -78,17 +78,17 @@ abstract class Base{{ class_name }}Model extends AbstractModel
 
 {% endfor %}
 
-{% if remote_constraints %}
+{% if remote_objects %}
     /*****************************************************
      * "Referenced By" Remote Constraint Object Fetchers *
      *****************************************************/
-{% for remote_constraint in remote_constraints %}
-    public function fetch{{ remote_constraint.getField }}Objects() : Models\{{ remote_constraint.local_model_class }}Model {
-        ${{ remote_constraint.local_model_class }}Service = App::Container()->get(Services\{{ remote_constraint.local_model_class }}Service::class);
-{% if remote_constraint.local_model_key == 'id' %}
-        return ${{ remote_constraint.local_model_class }}Service->getById($this->get{{ column.getField }}());
+{% for remote_object in remote_objects %}
+    public function fetch{{ remote_object.getLocalClass }}Objects() : Models\{{ remote_object.getLocalClass }}Model {
+        ${{ remote_object.local_model_class }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
+{% if remote_object.local_model_key == 'id' %}
+        return ${{ remote_object.local_model_class }}Service->getById($this->{{ column.getLocalBoundColumnGetter }}());
 {% else %}
-        return ${{ remote_constraint.local_model_class }}Service->getByField('{{ remote_constraint.local_model_key }}', $this->get{{ remote_constraint.remote_model_key }}());
+        return ${{ remote_object.local_model_class }}Service->getByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
 {% endif %}
     }
 

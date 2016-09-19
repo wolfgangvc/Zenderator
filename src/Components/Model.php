@@ -24,20 +24,100 @@ class Model extends Entity
     protected $autoIncrements;
 
     /**
-     * @return mixed
+     * @return DbAdaptor
      */
-    public function getNamespace()
+    public function getDbAdaptor(): DbAdaptor
     {
-        return $this->namespace;
+        return $this->dbAdaptor;
     }
 
     /**
-     * @param mixed $namespace
+     * @param DbAdaptor $dbAdaptor
      * @return Model
      */
-    public function setNamespace($namespace)
+    public function setDbAdaptor(DbAdaptor $dbAdaptor): Model
     {
-        $this->namespace = $namespace;
+        $this->dbAdaptor = $dbAdaptor;
+        return $this;
+    }
+
+    /**
+     * @return Column[]
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
+    }
+
+    public function getColumn($name): Column
+    {
+        if(isset($this->columns[$name])) {
+            return $this->columns[$name];
+        }
+        die("Cannot find a Column called {$name} in " . implode(", ", array_keys($this->getColumns())));
+    }
+
+    /**
+     * @param Column[] $columns
+     * @return Model
+     */
+    public function setColumns(array $columns): Model
+    {
+        $this->columns = $columns;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRelatedObjects(): array
+    {
+        return $this->relatedObjects;
+    }
+
+    /**
+     * @param array $relatedObjects
+     * @return Model
+     */
+    public function setRelatedObjects(array $relatedObjects): Model
+    {
+        $this->relatedObjects = $relatedObjects;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPrimaryKeys(): array
+    {
+        return $this->primaryKeys;
+    }
+
+    /**
+     * @param array $primaryKeys
+     * @return Model
+     */
+    public function setPrimaryKeys(array $primaryKeys): Model
+    {
+        $this->primaryKeys = $primaryKeys;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAutoIncrements()
+    {
+        return $this->autoIncrements;
+    }
+
+    /**
+     * @param mixed $autoIncrements
+     * @return Model
+     */
+    public function setAutoIncrements($autoIncrements)
+    {
+        $this->autoIncrements = $autoIncrements;
         return $this;
     }
 
@@ -45,6 +125,131 @@ class Model extends Entity
     {
         $this->dbAdaptor = $dbAdaptor;
         return $this;
+    }
+
+    /**
+     * @param \Zend\Db\Metadata\Object\ConstraintObject[] $zendConstraints
+     * @return Model
+     */
+    public function computeConstraints(array $zendConstraints)
+    {
+        echo "Computing the constraints of {$this->getClassName()}\n";
+        foreach ($zendConstraints as $zendConstraint) {
+            if ($zendConstraint->getType() == "FOREIGN KEY") {
+                $this->relatedObjects[] = RelatedModel::Factory()
+                    ->setSchema($zendConstraint->getReferencedTableSchema())
+                    ->setLocalTable($zendConstraint->getTableName())
+                    ->setRemoteTable($zendConstraint->getReferencedTableName())
+                    ->setBindings(
+                        $this->getDatabase(),
+                        $zendConstraint->getColumns()[0],
+                        Zenderator::schemaName2databaseName($zendConstraint->getReferencedTableSchema()),
+                        $zendConstraint->getReferencedColumns()[0]
+                    );
+            }
+            if ($zendConstraint->getType() == "PRIMARY KEY") {
+                $this->primaryKeys = $zendConstraint->getColumns();
+            }
+        }
+
+        // Sort related objects into their column objects also
+        if (count($this->relatedObjects) > 0) {
+            foreach ($this->relatedObjects as $relatedObject) {
+                /** @var $relatedObject RelatedModel */
+                $localBoundVariable = $this->transStudly2Camel->transform($relatedObject->getLocalBoundColumn());
+                $this->columns[$localBoundVariable]
+                    ->addRelatedObject($relatedObject);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName()
+    {
+        return
+            $this->transSnake2Studly->transform($this->getDatabase()) .
+            $this->transStudly2Studly->transform($this->getTable());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+
+    /**
+     * @param string $database
+     *
+     * @return Model
+     */
+    public function setDatabase(string $database)
+    {
+        echo "Set database: {$database}\n";
+        $this->database = $database;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    /**
+     * @param string $table
+     *
+     * @return Model
+     */
+    public function setTable(string $table)
+    {
+        $this->table = $table;
+        return $this;
+    }
+
+    /**
+     * @param Model[] $models
+     */
+    public function scanForRemoteRelations(array &$models)
+    {
+        echo "Scan: {$this->getClassName()}\n";
+        foreach($this->getColumns() as $column){
+            if (count($column->getRelatedObjects()) > 0) {
+                foreach ($column->getRelatedObjects() as $relatedObject) {
+                    echo " > r: {$relatedObject->getRemoteClass()} :: {$relatedObject->getRemoteBoundColumn()}\n";
+                    echo " > l: {$relatedObject->getLocalClass()} :: {$relatedObject->getLocalBoundColumn()}\n";
+                    echo "\n";
+                    /** @var Model $remoteModel */
+                    $models[$relatedObject->getRemoteClass()]
+                        ->getColumn($relatedObject->getRemoteBoundColumn())
+                            ->addRemoteObject($relatedObject);
+
+                }
+
+            }
+        }
+    }
+
+    /**
+     * @return RelatedModel[]
+     */
+    public function getRemoteObjects(): array
+    {
+        $remoteObjects = [];
+        foreach($this->getColumns() as $column){
+            if(count($column->getRemoteObjects()) > 0) {
+                foreach($column->getRemoteObjects() as $remoteObject) {
+                    $remoteObjects[] = $remoteObject;
+                }
+            }
+        }
+        return $remoteObjects;
     }
 
     /**
@@ -67,33 +272,12 @@ class Model extends Entity
     }
 
     /**
-     * @param \Zend\Db\Metadata\Object\ConstraintObject[] $zendConstraints
-     * @return Model
+     * @return array
+     * @todo verify this actually works.
      */
-    public function computeConstraints(array $zendConstraints)
-    {
-        echo "Computing the constraints of {$this->getClassName()}\n";
-        foreach ($zendConstraints as $zendConstraint) {
-            if ($zendConstraint->getType() == "FOREIGN KEY") {
-                $this->relatedObjects[] = RelatedModel::Factory()
-                    ->setSchema($zendConstraint->getReferencedTableSchema())
-                    ->setTable($zendConstraint->getReferencedTableName())
-                    ->setBindings(
-                        $this->getDatabase(),
-                        $zendConstraint->getColumns()[0],
-                        Zenderator::schemaName2databaseName($zendConstraint->getReferencedTableSchema()),
-                        $zendConstraint->getReferencedColumns()[0]
-                    );
-            }
-            if ($zendConstraint->getType() == "PRIMARY KEY") {
-                $this->primaryKeys = $zendConstraint->getColumns();
-            }
-        }
-        return $this;
-    }
-
     public function computeAutoIncrementColumns()
     {
+
         $sql = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
         $query = $this->getAdaptor()->query($sql);
         $columns = [];
@@ -102,25 +286,6 @@ class Model extends Entity
             $columns[] = $aiColumn['Field'];
         }
         return $columns;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    /**
-     * @param string $table
-     *
-     * @return Model
-     */
-    public function setTable(string $table)
-    {
-        $this->table = $table;
-        return $this;
     }
 
     /**
@@ -178,36 +343,6 @@ class Model extends Entity
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getClassName()
-    {
-        return
-            $this->transSnake2Studly->transform($this->getDatabase()) .
-            $this->transStudly2Studly->transform($this->getTable());
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDatabase()
-    {
-        return $this->database;
-    }
-
-    /**
-     * @param string $database
-     *
-     * @return Model
-     */
-    public function setDatabase(string $database)
-    {
-        echo "Set database: {$database}\n";
-        $this->database = $database;
-        return $this;
-    }
-
     public function getRenderDataset()
     {
         return [
@@ -225,12 +360,29 @@ class Model extends Entity
             'namespace_model' => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
             'columns' => $this->columns,
             'related_objects' => $this->relatedObjects, #$modelData['related_objects'],
-            'remote_constraints' => [], #isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
-            'remote_constraints_tables' => [],#isset($modelData['remote_constraints']) ? $this->makeConstraintTableList($modelData['remote_constraints']) : false,
+            'remote_objects' => $this->getRemoteObjects(),
 
             'primary_keys' => $this->primaryKeys,
             'primary_parameters' => [],#$modelData['primary_parameters'],
             'autoincrement_parameters' => [],#$modelData['autoincrement_parameters']
         ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+    /**
+     * @param mixed $namespace
+     * @return Model
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+        return $this;
     }
 }

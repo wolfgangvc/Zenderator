@@ -16,6 +16,11 @@ class Column extends Entity
     protected $permittedValues;
     protected $defaultValue;
 
+    /** @var RelatedModel[] */
+    protected $relatedObjects;
+    /** @var RelatedModel[] */
+    protected $remoteObjects;
+
     /**
      * @return mixed
      */
@@ -58,7 +63,8 @@ class Column extends Entity
         return $this;
     }
 
-    public function getPropertyFunction(){
+    public function getPropertyFunction()
+    {
         return $this->transCamel2Studly->transform($this->getField());
     }
 
@@ -203,4 +209,51 @@ class Column extends Entity
         $this->permittedValues = $permittedValues;
         return $this;
     }
+
+    /**
+     * @param RelatedModel $relatedModel
+     * @return $this
+     */
+    public function addRelatedObject(RelatedModel $relatedModel)
+    {
+        $this->relatedObjects[] = $relatedModel;
+        return $this;
+    }
+
+    /**
+     * @param RelatedModel $relatedModel
+     * @return $this
+     */
+    public function addRemoteObject(RelatedModel $relatedModel)
+    {
+        $this->remoteObjects[] = $relatedModel;
+        return $this;
+    }
+
+    public function hasRelatedObjects() : bool
+    {
+        return count($this->relatedObjects) > 0;
+    }
+
+    public function hasRemoteObjects() : bool
+    {
+        return count($this->remoteObjects) > 0;
+    }
+
+    /**
+     * @return RelatedModel[]
+     */
+    public function getRelatedObjects()
+    {
+        return $this->relatedObjects;
+    }
+
+    /**
+     * @return RelatedModel[]
+     */
+    public function getRemoteObjects()
+    {
+        return $this->remoteObjects;
+    }
+
 }
