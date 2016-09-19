@@ -106,6 +106,19 @@ class Model extends Entity
         return $this->primaryKeys;
     }
 
+    public function getPrimaryParameters(): array
+    {
+        $parameters = [];
+        foreach($this->getPrimaryKeys() as $primaryKey) {
+            foreach ($this->getColumns() as $column) {
+                if($primaryKey == $column->getField()) {
+                    $parameters[] = $column->getPropertyFunction();
+                }
+            }
+        }
+        return $parameters;
+    }
+
     /**
      * @param array $primaryKeys
      * @return Model
@@ -176,6 +189,12 @@ class Model extends Entity
                     ->addRelatedObject($relatedObject);
             }
         }
+
+        // Calculate autoincrement fields
+        $autoIncrements = Zenderator::getAutoincrementColumns($this->getAdaptor(), $this->getTable());
+        $this->setAutoIncrements($autoIncrements);
+
+        // Return a decked-out model
         return $this;
     }
 
@@ -204,7 +223,6 @@ class Model extends Entity
      */
     public function setDatabase(string $database)
     {
-        echo "Set database: {$database}\n";
         $this->database = $database;
         return $this;
     }
@@ -235,7 +253,7 @@ class Model extends Entity
     {
         #echo "Scan: {$this->getClassName()}\n";
         foreach($this->getColumns() as $column){
-            echo " > {$column->getField()}:\n";
+            #echo " > {$column->getField()}:\n";
             if (count($column->getRelatedObjects()) > 0) {
                 foreach ($column->getRelatedObjects() as $relatedObject) {
                     #echo "  > r: {$relatedObject->getRemoteClass()} :: {$relatedObject->getRemoteBoundColumn()}\n";
@@ -377,9 +395,9 @@ class Model extends Entity
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
             'remote_objects' => $this->getRemoteObjects(),
 
-            'primary_keys' => $this->primaryKeys,
-            'primary_parameters' => [],#$modelData['primary_parameters'],
-            'autoincrement_parameters' => [],#$modelData['autoincrement_parameters']
+            'primary_keys' => $this->getPrimaryKeys(),
+            'primary_parameters' => $this->getPrimaryParameters(),
+            'autoincrement_parameters' => $this->getAutoIncrements()
         ];
     }
 

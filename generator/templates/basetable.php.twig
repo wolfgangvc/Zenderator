@@ -88,7 +88,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% elseif column.getPhpType == 'float' %}
         '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, -5, 5),
 {% elseif column.getMaxLength %}
-        '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }} >= 5 ? {{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }} : 5), 0, {{ column.getMaxLength < 50000 ? column.getMaxLength : 50000 }}),
+        '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} >= 5 ? {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} : 5), 0, {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }}),
 {% else %}
         '{{ column.getField }}' => $this->faker->word,
 {% endif %}

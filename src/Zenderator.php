@@ -134,8 +134,7 @@ class Zenderator
         }
     }
 
-
-    private function getAutoincrementColumns(DbAdaptor $adapter, $table)
+    static public function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
         $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
         $query   = $adapter->query($sql);
@@ -193,13 +192,13 @@ class Zenderator
         }
 
         // Bit of Diag...
-        foreach($models as $oModel){
-            if(count($oModel->getRemoteObjects()) > 0) {
-                foreach ($oModel->getRemoteObjects() as $remoteObject) {
-                    echo " > {$oModel->getClassName()} has {$remoteObject->getLocalClass()} on {$remoteObject->getLocalBoundColumn()}:{$remoteObject->getRemoteBoundColumn()} (Function: {$remoteObject->getLocalFunctionName()})\n";
-                }
-            }
-        }
+        #foreach($models as $oModel){
+        #    if(count($oModel->getRemoteObjects()) > 0) {
+        #        foreach ($oModel->getRemoteObjects() as $remoteObject) {
+        #            echo " > {$oModel->getClassName()} has {$remoteObject->getLocalClass()} on {$remoteObject->getLocalBoundColumn()}:{$remoteObject->getRemoteBoundColumn()} (Function: {$remoteObject->getLocalFunctionName()})\n";
+        #        }
+        #    }
+        #}
 
         // Finally return some models.
         return $models;
