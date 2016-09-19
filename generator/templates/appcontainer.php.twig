@@ -4,7 +4,7 @@
 $this->container[\{{ model.namespace }}\Services\{{ model.class_name }}Service::class] = function (Slim\Container $c) {
     return new \{{ model.namespace }}\Services\{{ model.class_name }}Service(
         // Related Objects.
-{% for object in model.related_objects|sort %}
+{% for object in model.related_objects_shared|sort|unique %}
         $c->get(\{{ model.namespace }}\TableGateways\{{ object.getRemoteClass }}TableGateway::class),
 {% endfor %}
         // Remote Constraints.
@@ -31,7 +31,7 @@ $this->container[\{{ model.namespace }}\Controllers\{{ model.class_name }}Contro
 {% for model in models %}
 $this->container[\{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway::class] = function (Slim\Container $c) {
     return new \{{ model.namespace }}\TableGateways\{{ model.class_name }}TableGateway(
-{% for object in model.related_objects|sort %}
+{% for object in model.related_objects_shared|sort|unique %}
         $c->get(\{{ model.namespace }}\TableGateways\{{ object.getRemoteClass }}TableGateway::class),
 {% endfor %}
         $c->get('Faker'),

@@ -26,7 +26,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     private $databaseAdaptor;
 
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects_shared|sort|unique %}
     /** @var TableGateways\{{ related_object.getRemoteClass }}TableGateway */
     protected ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
@@ -34,20 +34,20 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
     /**
      * AbstractTableGateway constructor.
      *
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects_shared|sort|unique %}
      * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
      * @param Db $databaseConnector
      */
     public function __construct(
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects_shared|sort|unique %}
         TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
         \Faker\Generator $faker,
         Db $databaseConnector
     )
     {
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects_shared|sort|unique %}
         $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
         $this->faker = $faker;
@@ -62,7 +62,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     public function getNewMockModelInstance()
     {
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects|sort|unique %}
       ${{ related_object.getRemoteVariable }}ExampleObject = $this->{{ related_object.getRemoteVariable }}TableGateway->getNewMockModelInstance();
       $this->{{ related_object.getRemoteVariable }}TableGateway->save(${{ related_object.getRemoteVariable }}ExampleObject);
 
@@ -70,9 +70,8 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
-        // Type = {{ column.getDbType }} PHPType = {{ column.getPhpType }}
+        // {{ column.getField }}. Type = {{ column.getDbType }}. PHPType = {{ column.getPhpType }}. {% if(column.hasRelatedObjects) %}Has{% else %}Has no{% endif %} related objects.
 {% if column.hasRelatedObjects %}
-        // @todo this doesn't work this way any more - MB
         '{{ column.getField }}' => $this
                                     ->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway
                                         ->getNewMockModelInstance()
@@ -83,7 +82,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% elseif column.getPhpType == 'int' %}
         '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 2) }}),
 {% elseif column.getDbType == 'enum' and column.getPhpType == 'string' %}
-        '{{ column.getField }}' => '{{ column.permitted_values[0] }}',
+        '{{ column.getField }}' => '{{ column.getPermittedValues()[0] }}',
 {% elseif column.getDbType == 'datetime' and column.getPhpType == 'string' %}
         '{{ column.getField }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings. - MB
 {% elseif column.getPhpType == 'float' %}

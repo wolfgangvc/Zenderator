@@ -30,7 +30,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
     /**
      * Constructor.
      *
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects|sort|unique %}
      * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
@@ -39,7 +39,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
      * @param TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
      */
     public function __construct(
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects|sort|unique %}
         TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
@@ -48,7 +48,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
         TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
     )
     {
-{% for related_object in related_objects|sort %}
+{% for related_object in related_objects|sort|unique %}
         $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
 {% for remote_constraint in remote_constraints %}

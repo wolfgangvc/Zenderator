@@ -68,7 +68,7 @@ class Model extends Entity
     }
 
     /**
-     * @return array
+     * @return RelatedModel[]
      */
     public function getRelatedObjects(): array
     {
@@ -83,6 +83,19 @@ class Model extends Entity
     {
         $this->relatedObjects = $relatedObjects;
         return $this;
+    }
+
+    public function getRelatedObjectsSharedAssets()
+    {
+        $sharedAssets = [];
+        foreach($this->getRelatedObjects() as $relatedObject){
+            $sharedAssets[$relatedObject->getRemoteClass()] = $relatedObject;
+        }
+        #if(count($this->getRelatedObjects())) {
+        #    \Kint::dump($this->getRelatedObjects(), $sharedAssets);
+        #    exit;
+        #}
+        return $sharedAssets;
     }
 
     /**
@@ -133,10 +146,10 @@ class Model extends Entity
      */
     public function computeConstraints(array $zendConstraints)
     {
-        echo "Computing the constraints of {$this->getClassName()}\n";
+        #echo "Computing the constraints of {$this->getClassName()}\n";
         foreach ($zendConstraints as $zendConstraint) {
             if ($zendConstraint->getType() == "FOREIGN KEY") {
-                $this->relatedObjects[] = RelatedModel::Factory()
+                $newRelatedObject = RelatedModel::Factory()
                     ->setSchema($zendConstraint->getReferencedTableSchema())
                     ->setLocalTable($zendConstraint->getTableName())
                     ->setRemoteTable($zendConstraint->getReferencedTableName())
@@ -146,6 +159,7 @@ class Model extends Entity
                         Zenderator::schemaName2databaseName($zendConstraint->getReferencedTableSchema()),
                         $zendConstraint->getReferencedColumns()[0]
                     );
+                $this->relatedObjects[] = $newRelatedObject;
             }
             if ($zendConstraint->getType() == "PRIMARY KEY") {
                 $this->primaryKeys = $zendConstraint->getColumns();
@@ -157,6 +171,7 @@ class Model extends Entity
             foreach ($this->relatedObjects as $relatedObject) {
                 /** @var $relatedObject RelatedModel */
                 $localBoundVariable = $this->transStudly2Camel->transform($relatedObject->getLocalBoundColumn());
+                #echo "In {$this->getClassName()} column {$localBoundVariable} has a related object called {$relatedObject->getLocalClass()}::{$relatedObject->getRemoteClass()}\n";
                 $this->columns[$localBoundVariable]
                     ->addRelatedObject($relatedObject);
             }
@@ -218,20 +233,19 @@ class Model extends Entity
      */
     public function scanForRemoteRelations(array &$models)
     {
-        echo "Scan: {$this->getClassName()}\n";
+        #echo "Scan: {$this->getClassName()}\n";
         foreach($this->getColumns() as $column){
+            echo " > {$column->getField()}:\n";
             if (count($column->getRelatedObjects()) > 0) {
                 foreach ($column->getRelatedObjects() as $relatedObject) {
-                    echo " > r: {$relatedObject->getRemoteClass()} :: {$relatedObject->getRemoteBoundColumn()}\n";
-                    echo " > l: {$relatedObject->getLocalClass()} :: {$relatedObject->getLocalBoundColumn()}\n";
-                    echo "\n";
+                    #echo "  > r: {$relatedObject->getRemoteClass()} :: {$relatedObject->getRemoteBoundColumn()}\n";
+                    #echo "  > l: {$relatedObject->getLocalClass()} :: {$relatedObject->getLocalBoundColumn()}\n";
+                    #echo "\n";
                     /** @var Model $remoteModel */
                     $models[$relatedObject->getRemoteClass()]
                         ->getColumn($relatedObject->getRemoteBoundColumn())
                             ->addRemoteObject($relatedObject);
-
                 }
-
             }
         }
     }
@@ -359,7 +373,8 @@ class Model extends Entity
             'controller_route' => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
             'namespace_model' => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
             'columns' => $this->columns,
-            'related_objects' => $this->relatedObjects, #$modelData['related_objects'],
+            'related_objects' => $this->getRelatedObjects(),
+            'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
             'remote_objects' => $this->getRemoteObjects(),
 
             'primary_keys' => $this->primaryKeys,

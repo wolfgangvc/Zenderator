@@ -171,16 +171,37 @@ class Zenderator
                 $models[$oModel->getClassName()] = $oModel;
             }
         }
+
+        // Scan for remote relations
         foreach($models as $oModel){
             $oModel->scanForRemoteRelations($models);
         }
+
+        // Check for Conflicts.
+        $conflictCheck = [];
         foreach($models as $oModel){
             if(count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
-                    echo "{$oModel->getClassName()} has {$remoteObject->getLocalClass()} on {$remoteObject->getLocalBoundColumn()}:{$remoteObject->getRemoteBoundColumn()}\n";
+                    if(!isset($conflictCheck[$remoteObject->getLocalClass()])) {
+                        $conflictCheck[$remoteObject->getLocalClass()] = $remoteObject;
+                    }else{
+                        $conflictCheck[$remoteObject->getLocalClass()]->markClassConflict(true);
+                        $remoteObject->markClassConflict(true);
+                    }
                 }
             }
         }
+
+        // Bit of Diag...
+        foreach($models as $oModel){
+            if(count($oModel->getRemoteObjects()) > 0) {
+                foreach ($oModel->getRemoteObjects() as $remoteObject) {
+                    echo " > {$oModel->getClassName()} has {$remoteObject->getLocalClass()} on {$remoteObject->getLocalBoundColumn()}:{$remoteObject->getRemoteBoundColumn()} (Function: {$remoteObject->getLocalFunctionName()})\n";
+                }
+            }
+        }
+
+        // Finally return some models.
         return $models;
     }
 
