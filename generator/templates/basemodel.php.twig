@@ -17,17 +17,16 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
 {% endif %}
 
+{% if autoincrement_keys %}
+    protected $_autoincrement_keys = ['{{ autoincrement_keys|join('\', \'')|raw }}'];
+{% endif %}
+
 {% for column in columns %}
 {% if column.default_value %}
     protected ${{ column.getField }} = '{{ column.default_value }}';
 {% else %}
     protected ${{ column.getField }};
 {% endif %}
-{% endfor %}
-
-    //@todo Rejig this to use an array called $original instead of lots of elements. Its annoying as it stands. -MB
-{% for column in columns %}
-    protected $original_{{ column.getField }};
 {% endfor %}
 
     /**

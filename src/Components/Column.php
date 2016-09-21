@@ -15,11 +15,29 @@ class Column extends Entity
     protected $maxDecimalPlaces;
     protected $permittedValues;
     protected $defaultValue;
-
+    protected $isAutoIncrement = false;
     /** @var RelatedModel[] */
     protected $relatedObjects;
     /** @var RelatedModel[] */
     protected $remoteObjects;
+
+    /**
+     * @return boolean
+     */
+    public function isAutoIncrement(): bool
+    {
+        return $this->isAutoIncrement;
+    }
+
+    /**
+     * @param boolean $isAutoIncrement
+     * @return Column
+     */
+    public function setIsAutoIncrement(bool $isAutoIncrement): Column
+    {
+        $this->isAutoIncrement = $isAutoIncrement;
+        return $this;
+    }
 
     /**
      * @return mixed

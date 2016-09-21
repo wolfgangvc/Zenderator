@@ -72,7 +72,9 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
         // {{ column.getField }}. Type = {{ column.getDbType }}. PHPType = {{ column.getPhpType }}. {% if(column.hasRelatedObjects) %}Has{% else %}Has no{% endif %} related objects.
-{% if column.hasRelatedObjects %}
+{% if column.isAutoIncrement %}
+        '{{ column.getField }}' => null,
+{% elseif column.hasRelatedObjects %}
         '{{ column.getField }}' => $this
                                     ->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway
                                         ->getNewMockModelInstance()

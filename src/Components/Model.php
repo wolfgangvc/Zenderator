@@ -334,6 +334,9 @@ class Model extends Entity
      */
     public function computeColumns(array $columns)
     {
+        $autoIncrementColumns = Zenderator::getAutoincrementColumns($this->dbAdaptor, $this->getTable());
+        //\Kint::dump($autoIncrementColumns);exit;
+
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
             $oColumn = Column::Factory()
@@ -342,6 +345,13 @@ class Model extends Entity
                 ->setPermittedValues($column->getErrata('permitted_values'))
                 ->setMaxDecimalPlaces($column->getNumericScale())
                 ->setDefaultValue($column->getColumnDefault());
+
+            /**
+             * If this column is in the AutoIncrement list, mark it as such
+             */
+            if (in_array($oColumn->getField(), $autoIncrementColumns)){
+                $oColumn->setIsAutoIncrement(true);
+            }
 
             /**
              * Calculate Max Length for field.
@@ -387,7 +397,7 @@ class Model extends Entity
             'variable_name' => $this->transStudly2Camel->transform($this->getClassName()),
             'name' => $this->getClassName(),
             'object_name_plural' => Inflect::pluralize($this->getClassName()),
-            'object_name_singular' => Inflect::singularize($this->getClassName()),
+            'object_name_singular' => $this->getClassName(),
             'controller_route' => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
             'namespace_model' => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
             'columns' => $this->columns,
@@ -397,6 +407,8 @@ class Model extends Entity
 
             'primary_keys' => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
+            'autoincrement_keys' => $this->getAutoIncrements(),
+            // @todo: work out why there are two.
             'autoincrement_parameters' => $this->getAutoIncrements()
         ];
     }

@@ -25,8 +25,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
             );
             $this->waypoint("API PUT REST REQUEST");
             $body = (string) $response->getBody();
-            $this->assertEquals(200, $response->getStatusCode(), "Response was not expected 200.");// Request body is:\n\n" . var_export($new{{ class_name }}Array, true) . "\n\nResponse body is:\n\n" . $body . "\n\n");
-            $this->waypoint("Get & Parse Response");
+            $this->assertTrue(in_array($response->getStatusCode(), [200,400]), "Response was not expected 200 or 400. Response body is: \n\n" . $body . "\n\n");            $this->waypoint("Get & Parse Response");
             $this->assertNotNull(
                 json_decode((string) $body),
                 "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}->__toArray()) . "\""
@@ -67,8 +66,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $response = $this->request("PUT", "/v1/{{ controller_route}}", $new{{ class_name }});
         $this->waypoint("API PUT REST REQUEST");
         $body = (string) $response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), "Response was not expected 200. Response body is: \n\n" . $body . "\n\n");
-        $this->waypoint("Get & Parse Response");
+        $this->assertTrue(in_array($response->getStatusCode(), [200,400]), "Response was not expected 200 or 400. Response body is: \n\n" . $body . "\n\n");        $this->waypoint("Get & Parse Response");
         $this->assertNotNull(
             json_decode((string) $body),
             "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}) . "\""
@@ -89,8 +87,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $response = $this->request("GET", "/v1/{{ controller_route}}/{$id}");
         $this->waypoint("API GET REST REQUEST");
         $body = (string) $response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), "Response was not expected 200. Response body is: \n\n" . $body . "\n\n");
-        $this->waypoint("Get & Parse Response");
+        $this->assertTrue(in_array($response->getStatusCode(), [200,400]), "Response was not expected 200 or 400. Response body is: \n\n" . $body . "\n\n");        $this->waypoint("Get & Parse Response");
         $this->assertNotNull(
             json_decode((string) $body),
             "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
@@ -115,8 +112,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $response = $this->request("GET", "/v1/{{ controller_route}}");
         $this->waypoint("API REST REQUEST");
         $body = (string) $response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), "Response was not expected 200. Response body is: \n\n" . $body . "\n\n");
-        $this->waypoint("Get & Parse Response");
+        $this->assertTrue(in_array($response->getStatusCode(), [200,400]), "Response was not expected 200 or 400. Response body is: \n\n" . $body . "\n\n");        $this->waypoint("Get & Parse Response");
         $this->assertNotNull(
             json_decode((string) $body),
             "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
@@ -139,8 +135,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
     {
         $response = $this->request("DELETE", "/v1/{{ controller_route}}/{$id}");
         $body = (string) $response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), "Response was not expected 200. Response body is: \n\n" . $body . "\n\n");
-        $this->assertNotNull(
+        $this->assertTrue(in_array($response->getStatusCode(), [200,400]), "Response was not expected 200 or 400. Response body is: \n\n" . $body . "\n\n");        $this->assertNotNull(
             json_decode((string) $body),
             "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
         );

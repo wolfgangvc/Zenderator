@@ -21,9 +21,10 @@ use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
 {
+    static $databaseConfigs;
     private $rootOfApp;
-    private $config;
-    private $composer; // @todo rename $composerConfig
+        private $config; // @todo rename $composerConfig
+private $composer;
     private $namespace;
     /** @var \Twig_Loader_Filesystem */
     private $loader;
@@ -33,9 +34,7 @@ class Zenderator
     private $adapters;
     /** @var Metadata[] */
     private $metadatas;
-
     private $ignoredTables;
-
     /** @var CaseTransformer */
     private $transSnake2Studly;
     /** @var CaseTransformer */
@@ -51,36 +50,10 @@ class Zenderator
     /** @var CaseTransformer */
     private $transCamel2Snake;
 
-    static $databaseConfigs;
-
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
         $this->setUp($databaseConfigs);
-    }
-
-    public function makeZenderator()
-    {
-        $models = $this->makeModelSchemas();
-        $this->makeCoreFiles($models);
-        $this->cleanCode();
-    }
-
-    public function makeSDK($outputPath = APP_ROOT)
-    {
-        $models = $this->makeModelSchemas();
-        $this->makeSDKFiles($models, $outputPath);
-        $this->cleanCode();
-    }
-
-    static public function schemaName2databaseName($schemaName){
-        foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
-            $adapter  = new DbAdaptor($databaseConfig);
-            if($schemaName == $adapter->getCurrentSchema()) {
-                return $dbName;
-            }
-        }
-        throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
     }
 
     private function setUp($databaseConfigs)
@@ -122,16 +95,14 @@ class Zenderator
         }
     }
 
-    private function renderToFile(bool $overwrite, string $path, string $template, array $data)
-    {
-        $output = $this->twig->render($template, $data);
-        if (!file_exists(dirname($path))) {
-            mkdir(dirname($path), 0777, true);
+    static public function schemaName2databaseName($schemaName){
+        foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
+            $adapter  = new DbAdaptor($databaseConfig);
+            if($schemaName == $adapter->getCurrentSchema()) {
+                return $dbName;
+            }
         }
-        if (!file_exists($path) || $overwrite) {
-            #echo "  > Writing to {$path}\n";
-            file_put_contents($path, $output);
-        }
+        throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
     }
 
     static public function getAutoincrementColumns(DbAdaptor $adapter, $table)
@@ -144,6 +115,13 @@ class Zenderator
             $columns[] = $aiColumn['Field'];
         }
         return $columns;
+    }
+
+    public function makeZenderator()
+    {
+        $models = $this->makeModelSchemas();
+        $this->makeCoreFiles($models);
+        $this->cleanCode();
     }
 
     private function makeModelSchemas()
@@ -263,6 +241,51 @@ class Zenderator
         }
     }
 
+    private function renderToFile(bool $overwrite, string $path, string $template, array $data)
+    {
+        $output = $this->twig->render($template, $data);
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0777, true);
+        }
+        if (!file_exists($path) || $overwrite) {
+            #echo "  > Writing to {$path}\n";
+            file_put_contents($path, $output);
+        }
+    }
+
+    private function cleanCode()
+    {
+        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
+            $this->cleanCodePHPCSFixer();
+        }
+        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
+            $this->cleanCodePSR2();
+        }
+        $this->cleanCodeComposerAutoloader();
+    }
+
+    private function cleanCodePHPCSFixer()
+    {
+        require(__DIR__ . "/../generator/phpcsfixerfier");
+    }
+
+    private function cleanCodePSR2()
+    {
+        require(__DIR__ . "/../generator/psr2ifier");
+    }
+
+    private function cleanCodeComposerAutoloader()
+    {
+        require(__DIR__ . "/../generator/composer-optimise");
+    }
+
+    public function makeSDK($outputPath = APP_ROOT)
+    {
+        $models = $this->makeModelSchemas();
+        $this->makeSDKFiles($models, $outputPath);
+        $this->cleanCode();
+    }
+    
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
         $packs            = [];
@@ -362,32 +385,6 @@ class Zenderator
 
             #\Kint::dump($renderData);
         }
-    }
-
-    private function cleanCode()
-    {
-        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
-            $this->cleanCodePHPCSFixer();
-        }
-        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
-            $this->cleanCodePSR2();
-        }
-        $this->cleanCodeComposerAutoloader();
-    }
-
-    private function cleanCodePHPCSFixer()
-    {
-        require(__DIR__ . "/../generator/phpcsfixerfier");
-    }
-
-    private function cleanCodePSR2()
-    {
-        require(__DIR__ . "/../generator/psr2ifier");
-    }
-    
-    private function cleanCodeComposerAutoloader()
-    {
-        require(__DIR__ . "/../generator/composer-optimise");
     }
 
     private function getRoutes()
