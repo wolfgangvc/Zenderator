@@ -51,7 +51,7 @@ class Model extends Entity
 
     public function getColumn($name): Column
     {
-        if(isset($this->columns[$name])) {
+        if (isset($this->columns[$name])) {
             return $this->columns[$name];
         }
         die("Cannot find a Column called {$name} in " . implode(", ", array_keys($this->getColumns())));
@@ -88,7 +88,7 @@ class Model extends Entity
     public function getRelatedObjectsSharedAssets()
     {
         $sharedAssets = [];
-        foreach($this->getRelatedObjects() as $relatedObject){
+        foreach ($this->getRelatedObjects() as $relatedObject) {
             $sharedAssets[$relatedObject->getRemoteClass()] = $relatedObject;
         }
         #if(count($this->getRelatedObjects())) {
@@ -109,9 +109,9 @@ class Model extends Entity
     public function getPrimaryParameters(): array
     {
         $parameters = [];
-        foreach($this->getPrimaryKeys() as $primaryKey) {
+        foreach ($this->getPrimaryKeys() as $primaryKey) {
             foreach ($this->getColumns() as $column) {
-                if($primaryKey == $column->getField()) {
+                if ($primaryKey == $column->getField()) {
                     $parameters[] = $column->getPropertyFunction();
                 }
             }
@@ -252,7 +252,7 @@ class Model extends Entity
     public function scanForRemoteRelations(array &$models)
     {
         #echo "Scan: {$this->getClassName()}\n";
-        foreach($this->getColumns() as $column){
+        foreach ($this->getColumns() as $column) {
             #echo " > {$column->getField()}:\n";
             if (count($column->getRelatedObjects()) > 0) {
                 foreach ($column->getRelatedObjects() as $relatedObject) {
@@ -262,7 +262,7 @@ class Model extends Entity
                     /** @var Model $remoteModel */
                     $models[$relatedObject->getRemoteClass()]
                         ->getColumn($relatedObject->getRemoteBoundColumn())
-                            ->addRemoteObject($relatedObject);
+                        ->addRemoteObject($relatedObject);
                 }
             }
         }
@@ -274,9 +274,9 @@ class Model extends Entity
     public function getRemoteObjects(): array
     {
         $remoteObjects = [];
-        foreach($this->getColumns() as $column){
-            if(count($column->getRemoteObjects()) > 0) {
-                foreach($column->getRemoteObjects() as $remoteObject) {
+        foreach ($this->getColumns() as $column) {
+            if (count($column->getRemoteObjects()) > 0) {
+                foreach ($column->getRemoteObjects() as $remoteObject) {
                     $remoteObjects[] = $remoteObject;
                 }
             }
@@ -349,7 +349,7 @@ class Model extends Entity
             /**
              * If this column is in the AutoIncrement list, mark it as such
              */
-            if (in_array($oColumn->getField(), $autoIncrementColumns)){
+            if (in_array($oColumn->getField(), $autoIncrementColumns)) {
                 $oColumn->setIsAutoIncrement(true);
             }
 

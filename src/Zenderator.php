@@ -23,8 +23,8 @@ class Zenderator
 {
     static $databaseConfigs;
     private $rootOfApp;
-        private $config; // @todo rename $composerConfig
-private $composer;
+    private $config; // @todo rename $composerConfig
+    private $composer;
     private $namespace;
     /** @var \Twig_Loader_Filesystem */
     private $loader;
@@ -65,12 +65,12 @@ private $composer;
         $this->config = file_get_contents($this->rootOfApp . "/zenderator.yml");
         $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
 
-        $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
-        $namespaces      = array_keys((array) $this->composer->autoload->{'psr-4'});
+        $this->composer = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
+        $namespaces = array_keys((array)$this->composer->autoload->{'psr-4'});
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
-        $this->twig   = new \Twig_Environment($this->loader);
+        $this->twig = new \Twig_Environment($this->loader);
 
         $this->twig->addExtension(
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
@@ -80,25 +80,26 @@ private $composer;
             'tbl_migration',
         ];
 
-        $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+        $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
         $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-        $this->transCamel2Studly  = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
-        $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
-        $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
-        $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $this->transSnake2Camel = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+        $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+        $this->transCamel2Snake = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         foreach ($databaseConfigs as $dbName => $databaseConfig) {
-            $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
+            $this->adapters[$dbName] = new DbAdaptor($databaseConfig);
             $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
             $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
         }
     }
 
-    static public function schemaName2databaseName($schemaName){
+    static public function schemaName2databaseName($schemaName)
+    {
         foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
-            $adapter  = new DbAdaptor($databaseConfig);
-            if($schemaName == $adapter->getCurrentSchema()) {
+            $adapter = new DbAdaptor($databaseConfig);
+            if ($schemaName == $adapter->getCurrentSchema()) {
                 return $dbName;
             }
         }
@@ -107,8 +108,8 @@ private $composer;
 
     static public function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
-        $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
-        $query   = $adapter->query($sql);
+        $sql = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
+        $query = $adapter->query($sql);
         $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
@@ -150,18 +151,18 @@ private $composer;
         }
 
         // Scan for remote relations
-        foreach($models as $oModel){
+        foreach ($models as $oModel) {
             $oModel->scanForRemoteRelations($models);
         }
 
         // Check for Conflicts.
         $conflictCheck = [];
-        foreach($models as $oModel){
-            if(count($oModel->getRemoteObjects()) > 0) {
+        foreach ($models as $oModel) {
+            if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
-                    if(!isset($conflictCheck[$remoteObject->getLocalClass()])) {
+                    if (!isset($conflictCheck[$remoteObject->getLocalClass()])) {
                         $conflictCheck[$remoteObject->getLocalClass()] = $remoteObject;
-                    }else{
+                    } else {
                         $conflictCheck[$remoteObject->getLocalClass()]->markClassConflict(true);
                         $remoteObject->markClassConflict(true);
                     }
@@ -185,10 +186,11 @@ private $composer;
     /**
      * @param Model[] $models
      */
-    private function makeCoreFiles(array $models){
+    private function makeCoreFiles(array $models)
+    {
         echo "Generating Core files for " . count($models) . " models";
         $allModelData = [];
-        foreach($models as $model){
+        foreach ($models as $model) {
             $allModelData[$model->getClassName()] = $model->getRenderDataset();
             // "Model" suite
             echo " > {$model->getClassName()}\n";
@@ -234,7 +236,7 @@ private $composer;
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
             $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "routes.php.twig", [
-                'models'        => $allModelData,
+                'models' => $allModelData,
                 'app_container' => APP_CORE_NAME,
             ]);
             echo " [DONE]\n\n";
@@ -285,17 +287,19 @@ private $composer;
         $this->makeSDKFiles($models, $outputPath);
         $this->cleanCode();
     }
-    
+
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
-        $packs            = [];
-        $routeCount       = 0;
+        $packs = [];
+        $routeCount = 0;
         $sharedRenderData = [
-            'app_name'      => APP_NAME,
+            'app_name' => APP_NAME,
             'app_container' => APP_CORE_NAME,
         ];
 
-        foreach ($this->getRoutes() as $route) {
+        $routes = $this->getRoutes();
+
+        foreach ($routes as $route) {
             if ($route['name']) {
                 if (isset($route['class'])) {
                     $packs[$route['class']][] = $route;
@@ -308,98 +312,97 @@ private $composer;
 
         echo "Generating SDK for {$routeCount} routes...\n";
         // "SDK" suite
-        if (in_array("SDK", $this->config['templates'])) {
-            foreach ($packs as $packName => $routes) {
-                echo " > Pack: {$packName}...\n";
-                $routeRenderData = [
-                    'pack_name'  => $packName,
-                    'routes'     => $routes,
-                ];
-                $properties = [];
-                foreach ($routes as $route) {
-                    foreach ($route['properties'] as $property) {
-                        $properties[] = $property;
-                    }
-                }
-                $properties                    = array_unique($properties);
-                $routeRenderData['properties'] = $properties;
-
-                $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
-                #\Kint::dump($routeRenderData);
-
-                // Access Layer
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
-
-                // Models
-                $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
-
-                // Tests
-                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
-
-                if (!file_exists($outputPath . "/tests/fixtures")) {
-                    mkdir($outputPath . "/tests/fixtures", null, true);
-                }
-            }
-
-            $renderData = array_merge(
-                $sharedRenderData,
-                [
-                    'packs'         => $packs,
-                    'config'        => $this->config
-                ]
-            );
-
-            echo "Generating Abstract Objects:";
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Client Container:";
-            $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Composer.json:";
-            $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Test Bootstrap:";
-            $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating phpunit.xml:";
-            $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Exceptions:";
-            $derivedExceptions = [
-                'ObjectNotFoundException'
+        foreach ($packs as $packName => $routes) {
+            echo " > Pack: {$packName}...\n";
+            $routeRenderData = [
+                'pack_name' => $packName,
+                'routes' => $routes,
             ];
-            foreach ($derivedExceptions as $derivedException) {
-                $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
+            $properties = [];
+            foreach ($routes as $route) {
+                foreach ($route['properties'] as $property) {
+                    $properties[] = $property;
+                }
             }
-            $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
-            echo " [DONE]\n";
+            $properties = array_unique($properties);
+            $routeRenderData['properties'] = $properties;
 
-            #\Kint::dump($renderData);
+            $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
+            #\Kint::dump($routeRenderData);
+
+            // Access Layer
+            $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
+
+            // Models
+            $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
+
+            // Tests
+            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
+
+            if (!file_exists($outputPath . "/tests/fixtures")) {
+                mkdir($outputPath . "/tests/fixtures", null, true);
+            }
         }
+
+        $renderData = array_merge(
+            $sharedRenderData,
+            [
+                'packs' => $packs,
+                'config' => $this->config
+            ]
+        );
+
+        echo "Generating Abstract Objects:";
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Client Container:";
+        $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Composer.json:";
+        $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Test Bootstrap:";
+        $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating phpunit.xml:";
+        $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Exceptions:";
+        $derivedExceptions = [
+            'ObjectNotFoundException'
+        ];
+        foreach ($derivedExceptions as $derivedException) {
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
+        }
+        $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        #\Kint::dump($renderData);
+
     }
 
     private function getRoutes()
     {
         $response = $this->makeRequest("GET", "/v1");
-        $body     = (string) $response->getBody();
-        $body     = json_decode($body, true);
+        $body = (string)$response->getBody();
+        $body = json_decode($body, true);
         return $body['Routes'];
     }
 
     /**
      * @param string $method
      * @param string $path
-     * @param array  $post
-     * @param bool   $isJsonRequest
+     * @param array $post
+     * @param bool $isJsonRequest
      *
      * @return Response
      */
@@ -408,7 +411,7 @@ private $composer;
         /**
          * @var \Slim\App $app
          */
-        $app         = App::$instance;
+        $app = App::$instance;
         $calledClass = get_called_class();
 
         if (defined("$calledClass")) {
@@ -422,18 +425,18 @@ private $composer;
 
         $env = Environment::mock(
             [
-                'SCRIPT_NAME'    => '/index.php',
-                'REQUEST_URI'    => $path,
+                'SCRIPT_NAME' => '/index.php',
+                'REQUEST_URI' => $path,
                 'REQUEST_METHOD' => $method,
-                'RAND'           => rand(0, 100000000),
+                'RAND' => rand(0, 100000000),
             ]
         );
-        $uri     = Uri::createFromEnvironment($env);
+        $uri = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies      = [];
+        $cookies = [];
         $serverParams = $env->all();
-        $body         = new RequestBody();
+        $body = new RequestBody();
         if (!is_array($post) && $post != null) {
             $body->write($post);
             $body->rewind();
@@ -444,6 +447,7 @@ private $composer;
         $request = new Request($method, $uri, $headers, $cookies, $serverParams, $body);
         if ($isJsonRequest) {
             $request = $request->withHeader("Content-type", "application/json");
+            $request = $request->withHeader("Accept", "application/json");
         }
         $response = new Response();
         // Invoke app

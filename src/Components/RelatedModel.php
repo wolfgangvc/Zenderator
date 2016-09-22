@@ -14,7 +14,8 @@ class RelatedModel extends Entity
     protected $hasClassConflict = false;
 
 
-    public function markClassConflict(bool $conflict = true){
+    public function markClassConflict(bool $conflict = true)
+    {
         $this->hasClassConflict = $conflict;
         return $this;
     }
@@ -23,6 +24,7 @@ class RelatedModel extends Entity
     {
         return $this->hasClassConflict;
     }
+
     /**
      * @return mixed
      */
@@ -125,12 +127,12 @@ class RelatedModel extends Entity
 
     public function getLocalFunctionName()
     {
-        if($this->hasClassConflict()) {
+        if ($this->hasClassConflict()) {
             return
                 $this->getLocalClass() .
                 "By" .
                 $this->transCamel2Studly->transform($this->localBoundColumn);
-        }else{
+        } else {
             return $this->getLocalClass();
         }
     }
@@ -166,7 +168,8 @@ class RelatedModel extends Entity
         return $this->remoteBoundColumn;
     }
 
-    public function getRemoteBoundColumnGetter(){
+    public function getRemoteBoundColumnGetter()
+    {
         return "get" . $this->transCamel2Studly->transform($this->getRemoteBoundColumn());
     }
 
@@ -210,7 +213,8 @@ class RelatedModel extends Entity
         string $localColumn,
         string $remoteSchema,
         string $remoteColumn
-    ){
+    )
+    {
         return $this
             ->setLocalBoundSchema($localSchema)
             ->setLocalBoundColumn($localColumn)
