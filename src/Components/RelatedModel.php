@@ -35,6 +35,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $remoteTable
+     *
      * @return RelatedModel
      */
     public function setRemoteTable($remoteTable)
@@ -53,6 +54,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $localBoundSchema
+     *
      * @return RelatedModel
      */
     public function setLocalBoundSchema($localBoundSchema)
@@ -71,6 +73,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $remoteBoundSchema
+     *
      * @return RelatedModel
      */
     public function setRemoteBoundSchema($remoteBoundSchema)
@@ -89,6 +92,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $schema
+     *
      * @return RelatedModel
      */
     public function setSchema($schema)
@@ -152,6 +156,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $localBoundColumn
+     *
      * @return RelatedModel
      */
     public function setLocalBoundColumn($localBoundColumn)
@@ -175,6 +180,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $remoteBoundColumn
+     *
      * @return RelatedModel
      */
     public function setRemoteBoundColumn($remoteBoundColumn)
@@ -193,6 +199,7 @@ class RelatedModel extends Entity
 
     /**
      * @param mixed $localTable
+     *
      * @return RelatedModel
      */
     public function setLocalTable($localTable)
@@ -206,6 +213,7 @@ class RelatedModel extends Entity
      * @param $localColumn
      * @param $remoteSchema
      * @param $remoteColumn
+     *
      * @return RelatedModel
      */
     public function setBindings(

@@ -17,10 +17,10 @@ class Model extends Entity
     /** @var string */
     protected $table;
     /** @var Column[] */
-    protected $columns = [];
-    protected $constraints = [];
+    protected $columns        = [];
+    protected $constraints    = [];
     protected $relatedObjects = [];
-    protected $primaryKeys = [];
+    protected $primaryKeys    = [];
     protected $autoIncrements;
 
     /**
@@ -33,6 +33,7 @@ class Model extends Entity
 
     /**
      * @param DbAdaptor $dbAdaptor
+     *
      * @return Model
      */
     public function setDbAdaptor(DbAdaptor $dbAdaptor): Model
@@ -59,6 +60,7 @@ class Model extends Entity
 
     /**
      * @param Column[] $columns
+     *
      * @return Model
      */
     public function setColumns(array $columns): Model
@@ -77,6 +79,7 @@ class Model extends Entity
 
     /**
      * @param array $relatedObjects
+     *
      * @return Model
      */
     public function setRelatedObjects(array $relatedObjects): Model
@@ -121,6 +124,7 @@ class Model extends Entity
 
     /**
      * @param array $primaryKeys
+     *
      * @return Model
      */
     public function setPrimaryKeys(array $primaryKeys): Model
@@ -139,6 +143,7 @@ class Model extends Entity
 
     /**
      * @param mixed $autoIncrements
+     *
      * @return Model
      */
     public function setAutoIncrements($autoIncrements)
@@ -155,6 +160,7 @@ class Model extends Entity
 
     /**
      * @param \Zend\Db\Metadata\Object\ConstraintObject[] $zendConstraints
+     *
      * @return Model
      */
     public function computeConstraints(array $zendConstraints)
@@ -305,13 +311,14 @@ class Model extends Entity
 
     /**
      * @return array
+     *
      * @todo verify this actually works.
      */
     public function computeAutoIncrementColumns()
     {
 
-        $sql = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
-        $query = $this->getAdaptor()->query($sql);
+        $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
+        $query   = $this->getAdaptor()->query($sql);
         $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
@@ -330,6 +337,7 @@ class Model extends Entity
 
     /**
      * @param \Zend\Db\Metadata\Object\ColumnObject[] $columns
+     *
      * @return $this
      */
     public function computeColumns(array $columns)
@@ -339,7 +347,7 @@ class Model extends Entity
 
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
-            $oColumn = Column::Factory()
+            $oColumn       = Column::Factory()
                 ->setField($column->getName())
                 ->setDbType(reset($typeFragments))
                 ->setPermittedValues($column->getErrata('permitted_values'))
@@ -347,7 +355,7 @@ class Model extends Entity
                 ->setDefaultValue($column->getColumnDefault());
 
             /**
-             * If this column is in the AutoIncrement list, mark it as such
+             * If this column is in the AutoIncrement list, mark it as such.
              */
             if (in_array($oColumn->getField(), $autoIncrementColumns)) {
                 $oColumn->setIsAutoIncrement(true);
@@ -388,24 +396,24 @@ class Model extends Entity
     public function getRenderDataset()
     {
         return [
-            'namespace' => $this->getNamespace(),
-            'database' => $this->getDatabase(),
-            'table' => $this->getTable(),
-            'app_name' => APP_NAME,
-            'app_container' => APP_CORE_NAME,
-            'class_name' => $this->getClassName(),
-            'variable_name' => $this->transStudly2Camel->transform($this->getClassName()),
-            'name' => $this->getClassName(),
-            'object_name_plural' => Inflect::pluralize($this->getClassName()),
-            'object_name_singular' => $this->getClassName(),
-            'controller_route' => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
-            'namespace_model' => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
-            'columns' => $this->columns,
-            'related_objects' => $this->getRelatedObjects(),
+            'namespace'              => $this->getNamespace(),
+            'database'               => $this->getDatabase(),
+            'table'                  => $this->getTable(),
+            'app_name'               => APP_NAME,
+            'app_container'          => APP_CORE_NAME,
+            'class_name'             => $this->getClassName(),
+            'variable_name'          => $this->transStudly2Camel->transform($this->getClassName()),
+            'name'                   => $this->getClassName(),
+            'object_name_plural'     => Inflect::pluralize($this->getClassName()),
+            'object_name_singular'   => $this->getClassName(),
+            'controller_route'       => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
+            'namespace_model'        => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
+            'columns'                => $this->columns,
+            'related_objects'        => $this->getRelatedObjects(),
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
-            'remote_objects' => $this->getRemoteObjects(),
+            'remote_objects'         => $this->getRemoteObjects(),
 
-            'primary_keys' => $this->getPrimaryKeys(),
+            'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
             // @todo: work out why there are two.
@@ -423,6 +431,7 @@ class Model extends Entity
 
     /**
      * @param mixed $namespace
+     *
      * @return Model
      */
     public function setNamespace($namespace)

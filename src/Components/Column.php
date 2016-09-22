@@ -22,7 +22,7 @@ class Column extends Entity
     protected $remoteObjects;
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function isAutoIncrement(): bool
     {
@@ -30,7 +30,8 @@ class Column extends Entity
     }
 
     /**
-     * @param boolean $isAutoIncrement
+     * @param bool $isAutoIncrement
+     *
      * @return Column
      */
     public function setIsAutoIncrement(bool $isAutoIncrement): Column
@@ -49,6 +50,7 @@ class Column extends Entity
 
     /**
      * @param mixed $phpType
+     *
      * @return Column
      */
     public function setPhpType($phpType)
@@ -96,6 +98,7 @@ class Column extends Entity
 
     /**
      * @param mixed $maxDecimalPlaces
+     *
      * @return Column
      */
     public function setMaxDecimalPlaces($maxDecimalPlaces)
@@ -114,6 +117,7 @@ class Column extends Entity
 
     /**
      * @param mixed $defaultValue
+     *
      * @return Column
      */
     public function setDefaultValue($defaultValue)
@@ -170,8 +174,10 @@ class Column extends Entity
 
     /**
      * @param mixed $dbType
-     * @return Column
+     *
      * @throws DBTypeNotTranslatedException
+     *
+     * @return Column
      */
     public function setDbType($dbType)
     {
@@ -230,6 +236,7 @@ class Column extends Entity
 
     /**
      * @param RelatedModel $relatedModel
+     *
      * @return $this
      */
     public function addRelatedObject(RelatedModel $relatedModel)
@@ -240,6 +247,7 @@ class Column extends Entity
 
     /**
      * @param RelatedModel $relatedModel
+     *
      * @return $this
      */
     public function addRemoteObject(RelatedModel $relatedModel)
