@@ -17,16 +17,16 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
 {% endif %}
 
-{% for column in columns %}
-{% if column.default_value %}
-    protected ${{ column.field }} = '{{ column.default_value }}';
-{% else %}
-    protected ${{ column.field }};
+{% if autoincrement_keys %}
+    protected $_autoincrement_keys = ['{{ autoincrement_keys|join('\', \'')|raw }}'];
 {% endif %}
-{% endfor %}
 
 {% for column in columns %}
-    protected $original_{{ column.field }};
+{% if column.default_value %}
+    protected ${{ column.getField }} = '{{ column.default_value }}';
+{% else %}
+    protected ${{ column.getField }};
+{% endif %}
 {% endfor %}
 
     /**
@@ -41,48 +41,53 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     /**
      * @returns {{ column.phptype }}
      */
-    public function get{{ column.field }}() {% if column.phptype %}{# Sadly can't use this until nullable return types turns up. : {{ column.phptype }} #}{% endif %}
+    public function get{{ column.getPropertyFunction }}() {% if column.phptype %}{# Sadly can't use this until nullable return types turns up. : {{ column.phptype }} #}{% endif %}
     {
-        return $this->{{ column.field }};
+        return $this->{{ column.getField }};
     }
 
     /**
      * @returns {{ class_name }}Model
      */
-    public function set{{ column.field }}({{ column.phptype }} ${{ column.field }} = null)
+    public function set{{ column.getPropertyFunction }}({{ column.phptype }} ${{ column.getField }} = null)
     {
-        $this->{{ column.field }} = ${{ column.field }};
+        $this->{{ column.getField }} = ${{ column.getField }};
         return $this;
     }
 
-{% if 'constraints' in column|keys %}
+{% endfor %}
+
+    /*****************************************************
+     * "Referenced To" Remote Constraint Object Fetchers *
+     *****************************************************/
+{% for related_object in related_objects %}
     /**
-     * @returns Models\{{ column.constraints.remote_model_class }}Model
+     * @returns Models\{{ related_object.getRemoteClass }}Model
      */
-    public function fetch{{ column.field }}Object() : Models\{{ column.constraints.remote_model_class }}Model
+    public function fetch{{ related_object.getLocalFunctionName }}Object() : Models\{{ related_object.getRemoteClass }}Model
     {
-        ${{ column.constraints.remote_model_class }}Service = App::Container()->get(Services\{{ column.constraints.remote_model_class }}Service::class);
-{% if column.constraints.remote_model_key == 'id' %}
-        return ${{ column.constraints.remote_model_class }}Service->getById($this->get{{ column.field }}());
+        /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
+        ${{ related_object.getRemoteClass }}Service = App::Container()->get(Services\{{ related_object.getRemoteClass }}Service::class);
+{% if related_object.getRemoteBoundColumn == 'id' %}
+        return ${{ related_object.getRemoteClass }}Service->getById($this->{{ related_object.getLocalBoundColumnGetter }}());
 {% else %}
-        return ${{ column.constraints.remote_model_class }}Service->getByField('{{ column.constraints.remote_model_key }}', $this->get{{ column.field }}());
+        return ${{ related_object.getRemoteClass }}Service->getByField('{{ related_object.getRemoteBoundColumn }}', $this->{{ column.getLocalBoundColumnGetter }}());
 {% endif %}
     }
 
-{% endif %}
 {% endfor %}
 
-{% if remote_constraints %}
+{% if remote_objects %}
     /*****************************************************
      * "Referenced By" Remote Constraint Object Fetchers *
      *****************************************************/
-{% for remote_constraint in remote_constraints %}
-    public function fetch{{ remote_constraint.field }}Objects() : Models\{{ remote_constraint.local_model_class }}Model {
-        ${{ remote_constraint.local_model_class }}Service = App::Container()->get(Services\{{ remote_constraint.local_model_class }}Service::class);
-{% if remote_constraint.local_model_key == 'id' %}
-        return ${{ remote_constraint.local_model_class }}Service->getById($this->get{{ column.field }}());
+{% for remote_object in remote_objects %}
+    public function fetch{{ remote_object.getLocalFunctionName }}Objects() : Models\{{ remote_object.getLocalClass }}Model {
+        ${{ remote_object.local_model_class }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
+{% if remote_object.local_model_key == 'id' %}
+        return ${{ remote_object.local_model_class }}Service->getById($this->{{ column.getLocalBoundColumnGetter }}());
 {% else %}
-        return ${{ remote_constraint.local_model_class }}Service->getByField('{{ remote_constraint.local_model_key }}', $this->get{{ remote_constraint.remote_model_key }}());
+        return ${{ remote_object.local_model_class }}Service->getByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
 {% endif %}
     }
 
@@ -119,7 +124,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     {
         return [
 {% for column in columns %}
-            '{{ column.field }}',
+            '{{ column.getField }}',
 {% endfor %}
         ];
     }

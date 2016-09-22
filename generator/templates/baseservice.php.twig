@@ -8,19 +8,20 @@ use Zend\Db\ResultSet\ResultSet;
 
 {% include '_overwrite_warning.twig' %}
 
+// @todo: Make all Services implement a ServicesInterface. - MB
 abstract class Base{{ class_name }}Service extends AbstractService
 {
 
     // Related Objects Table Gateways
-{% for object in related_objects|sort %}
-    /** @var TableGateways\{{ object.remote_model_class }}TableGateway */
-    protected ${{ object.remote_model_variable }}TableGateway;
+{% for related_object in related_objects_shared|sort|unique %}
+    /** @var TableGateways\{{ related_object.getRemoteClass }}TableGateway */
+    protected ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
 
     // Remote Constraints Table Gateways
 {% for remote_constraint in remote_constraints %}
-    /** @var TableGateways\{{ remote_constraint.local_model_class }}TableGateway */
-    protected ${{ remote_constraint.local_model_variable }}TableGateway;
+    /** @var TableGateways\{{ remote_constraint.getLocalClass }}TableGateway */
+    protected ${{ remote_constraint.getLocalVariable }}TableGateway;
 {% endfor %}
 
     // Self Table Gateway
@@ -30,29 +31,29 @@ abstract class Base{{ class_name }}Service extends AbstractService
     /**
      * Constructor.
      *
-{% for object in related_objects|sort %}
-     * @param TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway
+{% for related_object in related_objects_shared|sort|unique %}
+     * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
-     * @param TableGateways\{{ remote_constraint.local_model_class }}TableGateway ${{ remote_constraint.local_model_variable }}TableGateway
+     * @param TableGateways\{{ remote_constraint.getLocalClass }}TableGateway ${{ remote_constraint.getLocalVariable }}TableGateway
 {% endfor %}
      * @param TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
      */
     public function __construct(
-{% for object in related_objects|sort %}
-        TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
+{% for related_object in related_objects_shared|sort|unique %}
+        TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
-        TableGateways\{{ remote_constraint.local_model_class }}TableGateway ${{ remote_constraint.local_model_variable }}TableGateway,
+        TableGateways\{{ remote_constraint.getLocalClass }}TableGateway ${{ remote_constraint.getLocalVariable }}TableGateway,
 {% endfor %}
         TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
     )
     {
-{% for object in related_objects|sort %}
-        $this->{{ object.remote_model_variable }}TableGateway = ${{ object.remote_model_variable }}TableGateway;
+{% for related_object in related_objects_shared|sort|unique %}
+        $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
-        $this->{{ remote_constraint.local_model_variable }}TableGateway = ${{ remote_constraint.local_model_variable }}TableGateway;
+        $this->{{ remote_constraint.getLocalVariable }}TableGateway = ${{ remote_constraint.getLocalVariable }}TableGateway;
 {% endfor %}
         $this->{{ variable_name }}TableGateway = ${{ variable_name }}TableGateway;
     }

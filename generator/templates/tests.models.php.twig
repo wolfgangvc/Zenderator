@@ -29,9 +29,9 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $data['{{ column.field }}'] = self::getFaker()->word;
 {% endif %}
 {% endfor %}
-$this->testInstance = new {{ class_name }}Model($data);
+        $this->testInstance = new {{ class_name }}Model($data);
 {% for column in columns %}
-    $this->assertEquals($data['{{ column.field }}'], $this->testInstance->get{{ column.field }}());
+        $this->assertEquals($data['{{ column.getField }}'], $this->testInstance->get{{ column.getPropertyFunction }}());
 {% endfor %}
     }
 
@@ -78,8 +78,22 @@ $this->testInstance = new {{ class_name }}Model($data);
         /** @var Models\{{ class_name }}Model $savedModel */
         $mockModel = $table->getNewMockModelInstance();
         $savedModel = $mockModel->save();
-        $this->assertEquals($mockModel, $savedModel);
- }
+
+        $mockModelArray = $mockModel->__toArray();
+        $savedModelArray = $savedModel->__toArray();
+
+        // Remove auto increments from test.
+        foreach($mockModel->getAutoIncrementKeys() as $autoIncrementKey => $discard){
+            foreach($mockModelArray as $key => $value){
+                if(strtolower($key) == strtolower($autoIncrementKey)){
+                    unset($mockModelArray[$key]);
+                    unset($savedModelArray[$key]);
+                }
+            }
+        }
+
+        $this->assertEquals($mockModelArray, $savedModelArray);
+    }
 
 {% if columns.id is defined %}
     /**
