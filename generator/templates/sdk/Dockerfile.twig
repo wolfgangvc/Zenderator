@@ -1,0 +1,9 @@
+FROM php:7.0-cli
+RUN apt-get update && apt-get install -y \
+    libxml2 libxml2-dev \
+    libpcre3-dev \
+    --no-install-recommends && rm -r /var/lib/apt/lists/*
+RUN docker-php-ext-install mysqli pdo pdo_mysql soap xml json
+
+COPY . /app
+WORKDIR /app

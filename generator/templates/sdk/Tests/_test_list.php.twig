@@ -1,9 +1,12 @@
     /**
-    * @vcr unittest_{{ pack_name|lower }}.cassette
-    **/
+     * @vcr unittest_{{ pack_name|lower }}.cassette
+     **/
     public function test{{ route.function|capitalize }}()
     {
         $response = $this->{{ pack_name|lower }}->{{ route.function }}();
+        if($response == false){
+            $this->markTestSkipped("There was no data returned calling {{ route.function }}() on {{ pack_name|lower }}.");
+        }
         $element = $response[rand(0,count($response) - 1)];
         $this->assertEquals('Segura\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
         return $response;

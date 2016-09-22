@@ -73,6 +73,9 @@ class Zenderator
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
         );
 
+        $fct = new \Twig_SimpleFunction('var_export', 'var_export');
+        $this->twig->addFunction($fct);
+
         $this->ignoredTables = [
             'tbl_migration',
         ];
@@ -290,8 +293,9 @@ class Zenderator
         $packs            = [];
         $routeCount       = 0;
         $sharedRenderData = [
-            'app_name'      => APP_NAME,
-            'app_container' => APP_CORE_NAME,
+            'app_name'         => APP_NAME,
+            'app_container'    => APP_CORE_NAME,
+            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
         ];
 
         $routes = $this->getRoutes();
@@ -369,8 +373,14 @@ class Zenderator
         $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
         echo " [DONE]\n";
 
-        echo "Generating phpunit.xml:";
+        echo "Generating phpunit.xml, documentation, etc:";
         $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Readme.md", "sdk/readme.md.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/.gitignore", "sdk/gitignore.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Dockerfile", "sdk/Dockerfile.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/test-compose.yml", "sdk/docker-compose.yml.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/run-tests.sh", "sdk/run-tests.sh.twig", $renderData);
+        chmod($outputPath . "/run-tests.sh", 0755);
         echo " [DONE]\n";
 
         echo "Generating Exceptions:";

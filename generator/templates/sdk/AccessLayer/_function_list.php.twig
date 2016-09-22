@@ -5,11 +5,21 @@
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
-        $response = $this->request("{{ route.method }}", $endpoint);
+        $method = "{{ route.method }}";
+        $response = $this->request($method, $endpoint);
         $body = $response->getBody()->getContents();
         if(json_decode($body) === null){
             throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
         }
         $body = json_decode($body, true);
+        if(!isset($body['{{ route.plural }}'])){
+            // @todo make exception less generic - MB
+            throw new Exceptions\SDKException(
+                "Could not find element '{{ route.plural }}' in response from API.\n" .
+                "Endpoint: {$endpoint}\n" .
+                "Method: {$method}\n" .
+                "Available Keys were: ['" . implode("', '", array_keys($body)) . "'].\n"
+            );
+        }
         return $this->hydrate($body['{{ route.plural }}']);
     }
