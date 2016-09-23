@@ -3,4 +3,4 @@ require_once("vendor/autoload.php");
 ini_set('memory_limit','3000M');
 \VCR\VCR::configure()
     ->setStorage('json')
-    ->setMode('once');
+    ->setMode('new_episodes');

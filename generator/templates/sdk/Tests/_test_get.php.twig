@@ -1,6 +1,7 @@
     /**
-    * @depends testCreate
-    **/
+     * @depends testCreate
+     * @vcr unittest_{{ pack_name|lower }}_get.cassette
+     **/
     public function test{{ route.function|capitalize }}(Models\{{ route.singular }}Model ${{ route.singular }})
     {
         $idToGet = ${{ route.singular }}->getId();
