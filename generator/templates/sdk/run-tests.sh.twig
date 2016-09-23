@@ -1,0 +1,2 @@
+#!/bin/bash
+docker-compose -f test-compose.yml run lib{{ app_name|lower }} ./vendor/bin/phpunit

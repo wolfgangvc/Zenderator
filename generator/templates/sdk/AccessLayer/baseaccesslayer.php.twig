@@ -16,6 +16,11 @@ abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
 
     private function hydrate($raw{{ routes[0].singular }})
     {
+        // if the entity is an array and is empty, return false. Nothing to hydrate.
+        if(is_array($raw{{ routes[0].singular }}) && empty($raw{{ routes[0].singular }})){
+            return false;
+        }
+
         if(
             // If the data given IS an array
             is_array($raw{{ routes[0].singular }}) &&

@@ -2,6 +2,7 @@
 namespace {{ namespace }}\TableGateways\Base;
 use \Segura\AppCore\Abstracts\TableGateway as AbstractTableGateway;
 use \Segura\AppCore\Abstracts\Model;
+use \Segura\AppCore\Db;
 use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
@@ -9,72 +10,90 @@ use \Zend\Db\ResultSet\ResultSet;
 
 {% include '_overwrite_warning.twig' %}
 
+// @todo: Make all TableGateways implement a TableGatewayInterface. -MB
 abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {
     protected $table = '{{ table }}';
+
+    protected $database = '{{ database }}';
 
     protected $model = '{{ namespace_model }}';
 
     /** @var \Faker\Generator */
     protected $faker;
 
-{% for object in related_objects|sort %}
-    /** @var TableGateways\{{ object.remote_model_class }}TableGateway */
-    protected ${{ object.remote_model_variable }}TableGateway;
+    /** @var Db */
+    private $databaseConnector;
+
+    private $databaseAdaptor;
+
+{% for related_object in related_objects_shared|sort|unique %}
+    /** @var TableGateways\{{ related_object.getRemoteClass }}TableGateway */
+    protected ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
 
     /**
      * AbstractTableGateway constructor.
      *
-{% for object in related_objects|sort %}
-     * @param TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
+{% for related_object in related_objects_shared|sort|unique %}
+     * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
-     * @param AdapterInterface $adapter
+     * @param Db $databaseConnector
      */
     public function __construct(
-{% for object in related_objects|sort %}
-        TableGateways\{{ object.remote_model_class }}TableGateway ${{ object.remote_model_variable }}TableGateway,
+{% for related_object in related_objects_shared|sort|unique %}
+        TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
         \Faker\Generator $faker,
-        AdapterInterface $adapter
+        Db $databaseConnector
     )
     {
-{% for object in related_objects|sort %}
-        $this->{{ object.remote_model_variable }}TableGateway = ${{ object.remote_model_variable }}TableGateway;
+{% for related_object in related_objects_shared|sort|unique %}
+        $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
         $this->faker = $faker;
+        $this->databaseConnector = $databaseConnector;
 
+        /** @var $adaptor AdapterInterface */
+        // @todo rename all uses of 'adaptor' to 'adapter'. I cannot spell - MB
+        $this->databaseAdaptor = $this->databaseConnector->getDatabase($this->database);
         $resultSetPrototype = new ResultSet(ResultSet::TYPE_ARRAYOBJECT, new $this->model);
-        return parent::__construct($this->table, $adapter, null, $resultSetPrototype);
+        return parent::__construct($this->table, $this->databaseAdaptor, null, $resultSetPrototype);
     }
 
     public function getNewMockModelInstance()
     {
-{% for object in related_objects|sort %}
-      ${{ object.remote_model_variable }}ExampleObject = $this->{{ object.remote_model_variable }}TableGateway->getNewMockModelInstance();
-      $this->{{ object.remote_model_variable }}TableGateway->save(${{ object.remote_model_variable }}ExampleObject);
+{% for related_object in related_objects|sort|unique %}
+      ${{ related_object.getRemoteVariable }}ExampleObject = $this->{{ related_object.getRemoteVariable }}TableGateway->getNewMockModelInstance();
+      $this->{{ related_object.getRemoteVariable }}TableGateway->save(${{ related_object.getRemoteVariable }}ExampleObject);
 
 {% endfor %}
 
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
-        // Type = {{ column.type }} PHPType = {{ column.phptype }}
-{% if 'constraints' in column|keys %}
-        '{{ column.field }}' => $this->{{ column.constraints.remote_model_variable }}TableGateway->getNewMockModelInstance()->save()->get{{ column.constraints.remote_model_key_get_function }}(),
-{% elseif column.phptype == 'int' and 'max_field_length' in column|keys %}
-        '{{ column.field }}' => $this->faker->numberBetween(1, {{ 10 ** column.max_length - 1 < column.max_field_length ? 10 ** column.max_length - 1 : column.max_field_length}}),
-{% elseif column.phptype == 'int' %}
-        '{{ column.field }}' => $this->faker->numberBetween(1, {{ 10 ** column.max_length - 2 }}),
-{% elseif column.type == 'enum' and column.phptype == 'string' %}
-        '{{ column.field }}' => '{{ column.permitted_values[0] }}',
-{% elseif column.type == 'datetime' and column.phptype == 'string' %}
-        '{{ column.field }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings.
-{% elseif column.phptype == 'float' %}
-        '{{ column.field }}' => $this->faker->randomFloat({{ column.max_decimal_places }}, -5, 5),
-{% elseif column.max_length %}
-        '{{ column.field }}' => substr($this->faker->text({{ column.max_length < 50000 ? column.max_length : 50000 }} >= 5 ? {{ column.max_length < 50000 ? column.max_length : 50000 }} : 5), 0, {{ column.max_length < 50000 ? column.max_length : 50000 }}),
+        // {{ column.getField }}. Type = {{ column.getDbType }}. PHPType = {{ column.getPhpType }}. {% if(column.hasRelatedObjects) %}Has{% else %}Has no{% endif %} related objects.
+{% if column.isAutoIncrement %}
+        '{{ column.getField }}' => null,
+{% elseif column.hasRelatedObjects %}
+        '{{ column.getField }}' => $this
+                                    ->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway
+                                        ->getNewMockModelInstance()
+                                        ->save()
+                                            ->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+{% elseif column.getPhpType == 'int' and 'max_field_length' in column|keys %}
+        '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 1) < column.getMaxFieldLength ? 10 ** (column.getMaxLength - 1) : column.getMaxFieldLength}}),
+{% elseif column.getPhpType == 'int' %}
+        '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 2) }}),
+{% elseif column.getDbType == 'enum' and column.getPhpType == 'string' %}
+        '{{ column.getField }}' => '{{ column.getPermittedValues()[0] }}',
+{% elseif column.getDbType == 'datetime' and column.getPhpType == 'string' %}
+        '{{ column.getField }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings. - MB
+{% elseif column.getPhpType == 'float' %}
+        '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, -5, 5),
+{% elseif column.getMaxLength %}
+        '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} >= 5 ? {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} : 5), 0, {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }}),
 {% else %}
-        '{{ column.field }}' => $this->faker->word,
+        '{{ column.getField }}' => $this->faker->word,
 {% endif %}
 {% endfor %}
       ];

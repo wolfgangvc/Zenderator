@@ -19,7 +19,7 @@ $app->group("/v1", function () {
         'plural'     => '{{ object_name_plural }}',
         'properties' => [
 {% for column in columns %}
-          '{{ column.field }}',
+          '{{ column.getPropertyFunction }}',
 {% endfor %}
         ],
       ]));
@@ -35,7 +35,7 @@ $app->group("/v1", function () {
         'plural'     => '{{ object_name_plural }}',
         'properties' => [
 {% for column in columns %}
-          '{{ column.field }}',
+          '{{ column.getPropertyFunction }}',
 {% endfor %}
         ],
         'example'   => $DIContainer->get('{{ class_name }}MockModel')->__toArray(),
@@ -52,7 +52,7 @@ $app->group("/v1", function () {
         'plural'     => '{{ object_name_plural }}',
         'properties' => [
 {% for column in columns %}
-          '{{ column.field }}',
+          '{{ column.getPropertyFunction }}',
 {% endfor %}
         ],
       ]));
@@ -68,7 +68,7 @@ $app->group("/v1", function () {
         'plural'     => '{{ object_name_plural }}',
         'properties' => [
 {% for column in columns %}
-          '{{ column.field }}',
+          '{{ column.getPropertyFunction }}',
 {% endfor %}
         ],
       ]));

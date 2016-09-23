@@ -7,6 +7,10 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true">
 
+    <php>
+        <ini name="memory_limit" value="3000M"/>
+    </php>
+
     <testsuites>
 {% for pack in packs|keys %}
         <testsuite name="models">

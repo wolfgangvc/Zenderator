@@ -1,6 +1,7 @@
     /**
-    * @depends testGet
-    **/
+     * @depends testGet
+     * @vcr unittest_{{ pack_name|lower }}_delete.cassette
+     **/
     public function test{{ route.function|capitalize }}(${{ route.singular }})
     {
         $response = $this->{{ pack_name|lower }}->{{ route.function }}(${{ route.singular }}->getId());
@@ -11,10 +12,12 @@
 
     /**
      * @depends test{{ route.function|capitalize }}
-     * @expectedException Segura\SDK\SCMAPI\Exceptions\ObjectNotFoundException
+     * @expectedException Segura\SDK\{{ app_name }}\Exceptions\ObjectNotFoundException
      * @expectedExceptionMessage Cannot find record by ID
-     */
+     * @vcr unittest_{{ pack_name|lower }}_verifydeleted.cassette
+     **/
     public function test{{ route.function|capitalize }}VerifyDeleted(${{ route.singular}})
     {
-        $this->{{ pack_name|lower }}->get(${{ route.singular }}->getId());
+        $id = ${{ route.singular }}->getId();
+        $found = $this->{{ pack_name|lower }}->get($id);
     }

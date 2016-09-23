@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-if(!defined("APP_ROOT")){
+if (!defined("APP_ROOT")) {
     define("APP_ROOT", realpath(__DIR__ . "/../../../../"));
 }
 $begin = microtime(true);
@@ -51,7 +51,7 @@ foreach ($pathsToPSR2 as $pathToPSR2) {
     echo " > {$pathToPSR2} ... ";
     if (file_exists($pathToPSR2)) {
         phpcsfixerfy($pathToPSR2, $phpCsFixerRules);
-    }else{
+    } else {
         echo "\n";
         echo "  > Skipping, files or directory does not exist.\n";
     }

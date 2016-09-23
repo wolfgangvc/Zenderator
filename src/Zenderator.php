@@ -3,7 +3,6 @@ namespace Zenderator;
 
 use Camel\CaseTransformer;
 use Camel\Format;
-use Composer\Semver\Constraint\Constraint;
 use Segura\AppCore\App;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
@@ -11,33 +10,34 @@ use Slim\Http\Request;
 use Slim\Http\RequestBody;
 use Slim\Http\Response;
 use Slim\Http\Uri;
-use Thru\Inflection\Inflect;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
-use Zend\Db\Metadata\Object\ConstraintObject;
+use Zenderator\Components\Model;
+use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
 {
+    static $databaseConfigs;
     private $rootOfApp;
-    private $config;
-    private $composer; // @todo rename $composerConfig
+    private $config; // @todo rename $composerConfig
+    private $composer;
     private $namespace;
     /** @var \Twig_Loader_Filesystem */
     private $loader;
     /** @var \Twig_Environment */
     private $twig;
-    /** @var Adapter */
-    private $adapter;
-    /** @var Metadata */
-    private $metadata;
-
+    /** @var Adapter[] */
+    private $adapters;
+    /** @var Metadata[] */
+    private $metadatas;
     private $ignoredTables;
-
     /** @var CaseTransformer */
     private $transSnake2Studly;
     /** @var CaseTransformer */
     private $transStudly2Camel;
+    /** @var CaseTransformer */
+    private $transStudly2Studly;
     /** @var CaseTransformer */
     private $transCamel2Studly;
     /** @var CaseTransformer */
@@ -47,28 +47,15 @@ class Zenderator
     /** @var CaseTransformer */
     private $transCamel2Snake;
 
-    public function __construct($rootOfApp, $databaseConfiguration)
+    public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
-        $this->setUp($databaseConfiguration);
+        $this->setUp($databaseConfigs);
     }
 
-    public function makeZenderator()
+    private function setUp($databaseConfigs)
     {
-        $models = $this->makeModelSchemas();
-        $this->makeCoreFiles($models);
-        $this->cleanCode();
-    }
-
-    public function makeSDK($outputPath = APP_ROOT)
-    {
-        $models = $this->makeModelSchemas();
-        $this->makeSDKFiles($models, $outputPath);
-        $this->cleanCode();
-    }
-
-    private function setUp($databaseConfiguration)
-    {
+        self::$databaseConfigs = $databaseConfigs;
         if (!file_exists($this->rootOfApp . "/zenderator.yml")) {
             die("Missing Zenderator config /zenderator.yml\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
         }
@@ -76,7 +63,7 @@ class Zenderator
         $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
 
         $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
-        $namespaces      = array_keys((array) $this->composer->autoload->{'psr-4'});
+        $namespaces      = array_keys((array)$this->composer->autoload->{'psr-4'});
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
@@ -86,55 +73,40 @@ class Zenderator
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
         );
 
+        $fct = new \Twig_SimpleFunction('var_export', 'var_export');
+        $this->twig->addFunction($fct);
+
         $this->ignoredTables = [
             'tbl_migration',
         ];
 
-        $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
-        $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
-        $this->transSnake2Camel  = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
-        $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
-        $this->transCamel2Snake  = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+        $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
+        $this->transCamel2Studly  = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+        $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+        $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
-        $this->adapter  = new DbAdaptor($databaseConfiguration);
-        $this->metadata = new Metadata($this->adapter);
-        $this->adapter->query('set global innodb_stats_on_metadata=0;');
-    }
-
-    private function renderToFile(bool $overwrite, string $path, string $template, array $data)
-    {
-        $output = $this->twig->render($template, $data);
-        if (!file_exists(dirname($path))) {
-            mkdir(dirname($path), 0777, true);
-        }
-        if (!file_exists($path) || $overwrite) {
-            echo "  > Writing to {$path}\n";
-            file_put_contents($path, $output);
+        foreach ($databaseConfigs as $dbName => $databaseConfig) {
+            $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
+            $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
+            $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
         }
     }
 
-    private function pluraliseClassName($className)
+    static public function schemaName2databaseName($schemaName)
     {
-        $transCamel2Snake         = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
-        $transSnake2Studly        = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $words                    = explode("_", $transCamel2Snake->transform($className));
-        $words[count($words) - 1] = Inflect::pluralize($words[count($words) - 1]);
-        $output                   = $transSnake2Studly->transform(implode("_", $words));
-        #\Kint::dump($className, $words, $output);
-        return $output;
-    }
-
-    private function sanitiseModelNameToClassName($modelName)
-    {
-        if (substr($modelName, 0, 2) == "ld") {
-            return substr($modelName, 2);
-        } else {
-            return $modelName;
+        foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
+            $adapter = new DbAdaptor($databaseConfig);
+            if ($schemaName == $adapter->getCurrentSchema()) {
+                return $dbName;
+            }
         }
+        throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
     }
 
-    private function getAutoincrementColumns(DbAdaptor $adapter, $table)
+    static public function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
         $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
         $query   = $adapter->query($sql);
@@ -145,409 +117,141 @@ class Zenderator
         }
         return $columns;
     }
-    
+
+    public function makeZenderator()
+    {
+        $models = $this->makeModelSchemas();
+        $this->makeCoreFiles($models);
+        $this->cleanCode();
+    }
+
     private function makeModelSchemas()
     {
-        global $argv;
-        /**
-         * @var $tables \Zend\Db\Metadata\Object\TableObject[]
-         */
-        $tables = $this->metadata->getTables();
-
-        echo "Collecting " . count($tables) . " entities data.\n";
-
+        /** @var Model[] $models */
         $models = [];
-        foreach ($tables as $table) {
-            if (in_array($table->getName(), $this->ignoredTables)) {
-                continue;
-            }
-            #echo " ??? " . strtolower($table->getName()) . " != " . strtolower($argv[1]) . "\n";
-            if (isset($argv[1]) && strtolower($table->getName()) != strtolower($argv[1])) {
-                continue;
-            }
-            $constraints = [];
-            foreach ($table->getConstraints() as $constraint) {
-                /** @var ConstraintObject $constraint */
-                if ($constraint->getType() == "FOREIGN KEY") {
-                    $columnAffected               = $constraint->getColumns()[0];
-                    $constraints[$columnAffected] = $constraint;
-
-                    $remoteClassName = $this->sanitiseModelNameToClassName($constraint->getReferencedTableName());
-                    #echo " *** Detected that {$remoteClassName} has a remote constraint with {$constraint->getTableName()}\n";
-                    $models[$remoteClassName]['remote_constraints'][] = $constraint;
-                }
-            }
-
+        foreach ($this->adapters as $dbName => $adapter) {
+            echo "Adaptor: {$dbName}\n";
             /**
-             * @var int                                   $i
-             * @var \Zend\Db\Metadata\Object\ColumnObject $column
+             * @var $tables \Zend\Db\Metadata\Object\TableObject[]
              */
-            foreach ($table->getColumns() as $i => $column) {
-                $typeFragments = explode(" ", $column->getDataType());
+            $tables = $this->metadatas[$dbName]->getTables();
 
-                /**
-                 * Get field properties.
-                 */
-                $models[$table->getName()]['columns'][$column->getName()] = [
-                    'field'            => $this->transCamel2Studly->transform($column->getName()),
-                    'type'             => reset($typeFragments),
-                    'permitted_values' => $column->getErrata('permitted_values'),
-                ];
+            echo "Collecting " . count($tables) . " entities data.\n";
 
-                /**
-                 * Calculate Max Length for field.
-                 */
-                if (in_array($column->getDataType(), ['int','bigint','tinyint'])) {
-                    $maxLength = $column->getNumericPrecision();
-                } else {
-                    $maxLength = $column->getCharacterMaximumLength();
-                }
-                switch ($column->getDataType()) {
-                    case 'bigint':
-                        $maxFieldLength = 9223372036854775807;
-                        break;
-                    case 'int':
-                        $maxFieldLength = 2147483647;
-                        break;
-                    case 'mediumint':
-                        $maxFieldLength = 8388607;
-                        break;
-                    case 'smallint':
-                        $maxFieldLength = 32767;
-                        break;
-                    case 'tinyint':
-                        $maxFieldLength = 127;
-                        break;
-                    default:
-                        $maxFieldLength = null;
-                }
+            foreach ($tables as $table) {
+                $oModel = Components\Model::Factory()
+                    ->setNamespace($this->namespace)
+                    ->setAdaptor($adapter)
+                    ->setDatabase($dbName)
+                    ->setTable($table->getName())
+                    ->computeColumns($table->getColumns())
+                    ->computeConstraints($table->getConstraints());
+                $models[$oModel->getClassName()] = $oModel;
+            }
+        }
 
-                /**
-                 * Max field lengths.
-                 */
-                $models[$table->getName()]['columns'][$column->getName()]['max_length'] = $maxLength;
-                if ($maxFieldLength != null) {
-                    $models[$table->getName()]['columns'][$column->getName()]['max_field_length'] = $maxFieldLength;
-                }
+        // Scan for remote relations
+        foreach ($models as $oModel) {
+            $oModel->scanForRemoteRelations($models);
+        }
 
-                /**
-                 * If there is a default set in the schema, use it.
-                 */
-                if ($column->getColumnDefault()) {
-                    $models[$table->getName()]['columns'][$column->getName()]['default_value'] = $column->getColumnDefault();
-                }
-
-                $models[$table->getName()]['columns'][$column->getName()]['max_decimal_places'] = $column->getNumericScale();
-
-                /**
-                 * Get relationship constraints.
-                 */
-                if (isset($constraints[$column->getName()])) {
-                    $models[$table->getName()]['columns'][$column->getName()]['constraints'] = $this->makeConstraintArray($constraints[$column->getName()]);
-                }
-                $models[$table->getName()]['table'] = $table;
-
-                /**
-                 * Get Primary Keys.
-                 */
-                $primaryKeys             = [];
-                $primaryParameters       = [];
-                $autoincrementParameters = [];
-                foreach ($table->getConstraints() as $constraint) {
-                    if ($constraint->getType() == 'PRIMARY KEY') {
-                        $primaryKeys = $constraint->getColumns();
+        // Check for Conflicts.
+        $conflictCheck = [];
+        foreach ($models as $oModel) {
+            if (count($oModel->getRemoteObjects()) > 0) {
+                foreach ($oModel->getRemoteObjects() as $remoteObject) {
+                    if (!isset($conflictCheck[$remoteObject->getLocalClass()])) {
+                        $conflictCheck[$remoteObject->getLocalClass()] = $remoteObject;
+                    } else {
+                        $conflictCheck[$remoteObject->getLocalClass()]->markClassConflict(true);
+                        $remoteObject->markClassConflict(true);
                     }
                 }
-
-                foreach ($this->getAutoincrementColumns($this->adapter, $table->getName()) as $column) {
-                    $autoincrementParameters[] = $this->transCamel2Studly->transform($column);
-                }
-
-                $models[$table->getName()]['primary_keys']             = $primaryKeys;
-                $models[$table->getName()]['primary_parameters']       = $primaryParameters;
-                $models[$table->getName()]['autoincrement_parameters'] = $autoincrementParameters;
             }
         }
 
-        foreach ($models as $modelName => $modelData) {
-            if (isset($argv[1]) && strtolower($modelName) != strtolower($argv[1])) {
-                continue;
-            }
+        // Bit of Diag...
+        #foreach($models as $oModel){
+        #    if(count($oModel->getRemoteObjects()) > 0) {
+        #        foreach ($oModel->getRemoteObjects() as $remoteObject) {
+        #            echo " > {$oModel->getClassName()} has {$remoteObject->getLocalClass()} on {$remoteObject->getLocalBoundColumn()}:{$remoteObject->getRemoteBoundColumn()} (Function: {$remoteObject->getLocalFunctionName()})\n";
+        #        }
+        #    }
+        #}
 
-            echo " > {$modelName}\n";
-            $models[$modelName]['className'] = $this->sanitiseModelNameToClassName($modelName);
-
-            // Decide on column types.
-            $columns = [];
-            foreach ($modelData['columns'] as $key => $value) {
-                switch ($value['type']) {
-                    case 'float':
-                    case 'decimal':
-                        $value['phptype'] = 'float';
-                        break;
-                    case 'int':
-                    case 'bigint':
-                    case 'tinyint':
-                        $value['phptype'] = 'int';
-                        break;
-                    case 'varchar':
-                    case 'smallblob':
-                    case 'blob':
-                    case 'longblob':
-                    case 'smalltext':
-                    case 'text':
-                    case 'longtext':
-                        $value['phptype'] = 'string';
-                        break;
-                    case 'enum':
-                        $value['phptype'] = 'string';
-                        break;
-                    case 'datetime':
-                        $value['phptype'] = 'string';
-                        break;
-                    default:
-                        echo " > Type not translated: {$value['type']}\n";
-                }
-
-                $columns[$key] = $value;
-            }
-            $models[$modelName]['columns'] = $columns;
-
-            $relatedObjects = [];
-            foreach ($columns as $column) {
-                if (isset($column['constraints'])) {
-                    $relatedObjects[$column['constraints']['remote_model_class']] = $column['constraints'];
-                }
-            }
-            $models[$modelName]['related_objects'] = $relatedObjects;
-        }
+        // Finally return some models.
         return $models;
     }
 
-    private function filterConstraints($remoteConstraints)
+    /**
+     * @param Model[] $models
+     */
+    private function makeCoreFiles(array $models)
     {
-        $constraints = [];
-        //\Kint::dump($remoteConstraints);exit;
-        foreach ($remoteConstraints as $remoteConstraint) {
-            /** @var ConstraintObject $remoteConstraint */
-            // Decide if there's a collision...
-            $collisionCount = 0;
-            foreach ($remoteConstraints as $collidingConstraint) {
-                /** @var ConstraintObject $collidingConstraint */
-                if ($collidingConstraint->getTableName() == $remoteConstraint->getTableName()) {
-                    $collisionCount++;
-                }
-            }
-
-            if ($collisionCount > 1) {
-                $constraintName = $remoteConstraint->getTableName() . "By" . $this->transCamel2Studly->transform($remoteConstraint->getColumns()[0]);
-            } else {
-                $constraintName = $remoteConstraint->getTableName();
-            }
-            echo " * Constraint Name: {$constraintName}\n";
-            $constraints[$constraintName] = $remoteConstraint;
-        }
-        return $constraints;
-    }
-
-    private function makeCoreFiles($models)
-    {
-        $tables = $this->metadata->getTables();
-
-        echo "Generating " . count($tables) . " models.\n";
-
-        $renderData = [];
-
-        foreach ($models as $modelName => $modelData) {
-            if (isset($modelData['remote_constraints'])) {
-                $modelData['remote_constraints'] = $this->filterConstraints($modelData['remote_constraints']);
-            }
-
-            $className              = $modelData['className'];
-            $renderData[$modelName] = [
-                'namespace'                => $this->namespace,
-                'app_name'                 => APP_NAME,
-                'app_container'            => APP_CORE_NAME,
-                'class_name'               => $className,
-                'variable_name'            => $this->transStudly2Camel->transform($className),
-                'name'                     => $modelName,
-                'object_name_plural'       => $this->pluraliseClassName($className),
-                'object_name_singular'     => $className,
-                'controller_route'         => $this->transCamel2Snake->transform(Inflect::pluralize($className)),
-                'namespace_model'          => "{$this->namespace}\\Models\\{$className}Model",
-                'columns'                  => $modelData['columns'],
-                'related_objects'          => $modelData['related_objects'],
-                'remote_constraints'       => isset($modelData['remote_constraints']) ? $this->makeConstraintArray($modelData['remote_constraints']) : false,
-                'table'                    => $modelName,
-                'primary_keys'             => $modelData['primary_keys'],
-                'primary_parameters'       => $modelData['primary_parameters'],
-                'autoincrement_parameters' => $modelData['autoincrement_parameters']
-            ];
-
-            \Kint::dump($renderData[$modelName]['remote_constraints']);
-
+        echo "Generating Core files for " . count($models) . " models";
+        $allModelData = [];
+        foreach ($models as $model) {
+            $allModelData[$model->getClassName()] = $model->getRenderDataset();
             // "Model" suite
+            echo " > {$model->getClassName()}\n";
+
+            #\Kint::dump($model->getRenderDataset());
             if (in_array("Models", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$className}Model.php", "basemodel.php.twig", $renderData[$modelName]);
-                $this->renderToFile(false, APP_ROOT . "/src/Models/{$className}Model.php", "model.php.twig", $renderData[$modelName]);
-                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$className}Test.php", "tests.models.php.twig", $renderData[$modelName]);
-                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$className}TableGateway.php", "basetable.php.twig", $renderData[$modelName]);
-                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$className}TableGateway.php", "table.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "basemodel.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "model.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "tests.models.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "basetable.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "table.php.twig", $model->getRenderDataset());
             }
 
             // "Service" suite
             if (in_array("Services", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$className}Service.php", "baseservice.php.twig", $renderData[$modelName]);
-                $this->renderToFile(false, APP_ROOT . "/src/Services/{$className}Service.php", "service.php.twig", $renderData[$modelName]);
-                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$className}Test.php", "tests.service.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "baseservice.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "service.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "tests.service.php.twig", $model->getRenderDataset());
             }
 
             // "Controller" suite
             if (in_array("Controllers", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$className}Controller.php", "basecontroller.php.twig", $renderData[$modelName]);
-                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$className}Controller.php", "controller.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "basecontroller.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "controller.php.twig", $model->getRenderDataset());
             }
 
             // "Endpoint" test suite
             if (in_array("Endpoints", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$className}EndpointTest.php", "tests.endpoints.php.twig", $renderData[$modelName]);
+                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "tests.endpoints.php.twig", $model->getRenderDataset());
             }
 
             // "Routes" suit
             if (in_array("Routes", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$className}Route.php", "route.php.twig", $renderData[$modelName]);
-            }
-
-            #\Kint::dump($renderData[$modelName]);
-
-            // "JS" suit
-            if (in_array("JsLib", $this->config['templates'])) {
-                echo "Generating JS Lib...";
-                $this->renderToFile(true, APP_ROOT . "/public/jslib/api.js", "jslib.js.twig", [
-                    'models'         => $renderData,
-                    'date_generated' => date("Y-m-d H:i:s")
-                ]);
-                echo "\n > Wrote to " . APP_ROOT . "/public/jslib/api.js";
-                echo " [DONE]\n";
-                copy(APP_ROOT . "/public/jslib/api.js", APP_ROOT . "/other/api_js_testrig/api.js");
-                echo " > Copied to " . APP_ROOT . "/public/jslib/api.js";
-                echo " [DONE]\n\n";
+                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "route.php.twig", $model->getRenderDataset());
             }
         }
 
         echo "Generating App Container:";
-        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $renderData, 'config' => $this->config]);
-        echo " [DONE]\n";
+        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
+        echo " [DONE]\n\n";
 
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
             $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "routes.php.twig", [
-                'models'        => $renderData,
+                'models'        => $allModelData,
                 'app_container' => APP_CORE_NAME,
             ]);
-            echo " [DONE]\n";
+            echo " [DONE]\n\n";
         }
     }
 
-    private function makeSDKFiles($models, $outputPath = APP_ROOT)
+    private function renderToFile(bool $overwrite, string $path, string $template, array $data)
     {
-        $packs            = [];
-        $routeCount       = 0;
-        $sharedRenderData = [
-            'app_name'      => APP_NAME,
-            'app_container' => APP_CORE_NAME,
-        ];
-
-        foreach ($this->getRoutes() as $route) {
-            if ($route['name']) {
-                if (isset($route['class'])) {
-                    $packs[$route['class']][] = $route;
-                    $routeCount++;
-                } else {
-                    echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
-                }
-            }
+        $output = $this->twig->render($template, $data);
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0777, true);
         }
-
-        echo "Generating SDK for {$routeCount} routes...\n";
-        // "SDK" suite
-        if (in_array("SDK", $this->config['templates'])) {
-            foreach ($packs as $packName => $routes) {
-                echo " > Pack: {$packName}...\n";
-                $routeRenderData = [
-                    'pack_name'  => $packName,
-                    'routes'     => $routes,
-                ];
-                $properties = [];
-                foreach ($routes as $route) {
-                    foreach ($route['properties'] as $property) {
-                        $properties[] = $property;
-                    }
-                }
-                $properties                    = array_unique($properties);
-                $routeRenderData['properties'] = $properties;
-
-                $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
-                #\Kint::dump($routeRenderData);
-
-                // Access Layer
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
-
-                // Models
-                $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
-                $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
-
-                // Tests
-                $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
-
-                if(!file_exists($outputPath . "/tests/fixtures")){
-                    mkdir($outputPath . "/tests/fixtures", null, true);
-                }
-            }
-
-            $renderData = array_merge(
-                $sharedRenderData,
-                [
-                    'packs'         => $packs,
-                    'config'        => $this->config
-                ]
-            );
-
-            echo "Generating Abstract Objects:";
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
-            $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Client Container:";
-            $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Composer.json:";
-            $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Test Bootstrap:";
-            $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating phpunit.xml:";
-            $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
-            echo " [DONE]\n";
-
-            echo "Generating Exceptions:";
-            $derivedExceptions = [
-                'ObjectNotFoundException'
-            ];
-            foreach($derivedExceptions as $derivedException) {
-                $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
-            }
-            $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
-            echo " [DONE]\n";
-
-            #\Kint::dump($renderData);
+        if (!file_exists($path) || $overwrite) {
+            #echo "  > Writing to {$path}\n";
+            file_put_contents($path, $output);
         }
     }
 
@@ -571,16 +275,132 @@ class Zenderator
     {
         require(__DIR__ . "/../generator/psr2ifier");
     }
-    
+
     private function cleanCodeComposerAutoloader()
     {
         require(__DIR__ . "/../generator/composer-optimise");
     }
 
+    public function makeSDK($outputPath = APP_ROOT)
+    {
+        $models = $this->makeModelSchemas();
+        $this->makeSDKFiles($models, $outputPath);
+        $this->cleanCode();
+    }
+
+    private function makeSDKFiles($models, $outputPath = APP_ROOT)
+    {
+        $packs            = [];
+        $routeCount       = 0;
+        $sharedRenderData = [
+            'app_name'         => APP_NAME,
+            'app_container'    => APP_CORE_NAME,
+            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
+        ];
+
+        $routes = $this->getRoutes();
+
+        foreach ($routes as $route) {
+            if ($route['name']) {
+                if (isset($route['class'])) {
+                    $packs[$route['class']][] = $route;
+                    $routeCount++;
+                } else {
+                    echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
+                }
+            }
+        }
+
+        echo "Generating SDK for {$routeCount} routes...\n";
+        // "SDK" suite
+        foreach ($packs as $packName => $routes) {
+            echo " > Pack: {$packName}...\n";
+            $routeRenderData = [
+                'pack_name' => $packName,
+                'routes'    => $routes,
+            ];
+            $properties = [];
+            foreach ($routes as $route) {
+                foreach ($route['properties'] as $property) {
+                    $properties[] = $property;
+                }
+            }
+            $properties                    = array_unique($properties);
+            $routeRenderData['properties'] = $properties;
+
+            $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
+            #\Kint::dump($routeRenderData);
+
+            // Access Layer
+            $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
+
+            // Models
+            $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
+
+            // Tests
+            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
+
+            if (!file_exists($outputPath . "/tests/fixtures")) {
+                mkdir($outputPath . "/tests/fixtures", null, true);
+            }
+        }
+
+        $renderData = array_merge(
+            $sharedRenderData,
+            [
+                'packs'  => $packs,
+                'config' => $this->config
+            ]
+        );
+
+        echo "Generating Abstract Objects:";
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Client Container:";
+        $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Composer.json:";
+        $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Test Bootstrap:";
+        $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating phpunit.xml, documentation, etc:";
+        $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Readme.md", "sdk/readme.md.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/.gitignore", "sdk/gitignore.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Dockerfile", "sdk/Dockerfile.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/test-compose.yml", "sdk/docker-compose.yml.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/run-tests.sh", "sdk/run-tests.sh.twig", $renderData);
+        chmod($outputPath . "/run-tests.sh", 0755);
+        echo " [DONE]\n";
+
+        echo "Generating Exceptions:";
+        $derivedExceptions = [
+            'ObjectNotFoundException'
+        ];
+        foreach ($derivedExceptions as $derivedException) {
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
+        }
+        $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        #\Kint::dump($renderData);
+
+    }
+
     private function getRoutes()
     {
         $response = $this->makeRequest("GET", "/v1");
-        $body     = (string) $response->getBody();
+        $body     = (string)$response->getBody();
         $body     = json_decode($body, true);
         return $body['Routes'];
     }
@@ -634,6 +454,7 @@ class Zenderator
         $request = new Request($method, $uri, $headers, $cookies, $serverParams, $body);
         if ($isJsonRequest) {
             $request = $request->withHeader("Content-type", "application/json");
+            $request = $request->withHeader("Accept", "application/json");
         }
         $response = new Response();
         // Invoke app
@@ -642,31 +463,5 @@ class Zenderator
         #echo "Response: " . (string) $response->getBody()."\n";
 
         return $response;
-    }
-
-    private function makeConstraintArray($zendConstraint, $name = null)
-    {
-        if (is_array($zendConstraint)) {
-            $result = [];
-            foreach ($zendConstraint as $name => $zendConstraintElement) {
-                $result[$name] = $this->makeConstraintArray($zendConstraintElement, $name);
-            }
-            return $result;
-        } elseif ($zendConstraint instanceof ConstraintObject) {
-            $constraintArray = [
-                'field'                         => $name,
-                'local_model_class'             => $this->sanitiseModelNameToClassName($zendConstraint->getTableName()),
-                'remote_model_class'            => $this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName()),
-                'local_model_variable'          => $this->transStudly2Camel->transform($this->sanitiseModelNameToClassName($zendConstraint->getTableName())),
-                'remote_model_variable'         => $this->transStudly2Camel->transform($this->sanitiseModelNameToClassName($zendConstraint->getReferencedTableName())),
-                'local_model_key'               => $zendConstraint->getColumns()[0],
-                'remote_model_key'              => $zendConstraint->getReferencedColumns()[0],
-                'local_model_key_get_function'  => $this->transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
-                'remote_model_key_get_function' => $this->transSnake2Studly->transform($zendConstraint->getReferencedColumns()[0]),
-            ];
-            return $constraintArray;
-        } else {
-            throw new \Exception("makeConstraintArray has been passed a non-Zend Constraint.");
-        }
     }
 }

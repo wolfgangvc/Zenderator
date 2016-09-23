@@ -5,17 +5,24 @@
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
-        $response = $this->request(
-            "{{ route.method }}",
-            $endpoint,
-            [
-                'body' => json_encode($propertyArray),
-            ]
-        );
-        $body = $response->getBody()->getContents();
-        if(json_decode($body) === null){
-            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+        $method = "{{ route.method }}";
+        try{
+            $response = $this->request(
+                $method,
+                $endpoint,
+                [
+                    'body' => json_encode($propertyArray),
+                ]
+            );
+            $body = $response->getBody()->getContents();
+            if(json_decode($body) === null){
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
+            return $this->hydrate($body['{{ route.singular }}']);
+        }catch(\GuzzleHttp\Exception\ServerException $serverException){
+            $requestBody = $serverException->getRequest()->getBody()->getContents();
+            $responseBody = $serverException->getResponse()->getBody()->getContents();
+            throw new Exceptions\SDKException("Server error: {$method} {$endpoint}\nRequest:\n{$requestBody}Response:\n{$responseBody}");
         }
-        $body = json_decode($body, true);
-        return $this->hydrate($body['{{ route.singular }}']);
     }

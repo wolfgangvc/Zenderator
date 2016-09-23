@@ -2,10 +2,12 @@
 <?php
 
 $rootOfApp = __DIR__ . "/../../../../";
+
 require_once($rootOfApp . "/bootstrap.php");
+$databaseConfigs = require($rootOfApp . "/config/mysql.php");
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
-    $databaseConfiguration
+    $databaseConfigs
 );
 $exportPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
 

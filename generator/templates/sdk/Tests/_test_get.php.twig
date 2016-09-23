@@ -1,10 +1,12 @@
     /**
-    * @depends testCreate
-    **/
+     * @depends testCreate
+     * @vcr unittest_{{ pack_name|lower }}_get.cassette
+     **/
     public function test{{ route.function|capitalize }}(Models\{{ route.singular }}Model ${{ route.singular }})
     {
+        $idToGet = ${{ route.singular }}->getId();
         $requested{{ route.singular }} = $this->{{ pack_name|lower }}->{{ route.function }}(
-            ${{ route.singular }}->getId()
+            $idToGet
         );
 
         $this->assertEquals(${{ route.singular }}->getId(), $requested{{ route.singular }}->getId());
