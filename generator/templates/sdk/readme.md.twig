@@ -1,3 +1,12 @@
 # {{ app_name }}
 
-Generated documentation for {{ app_name }} goes here.
+{% for class, class_packs in packs %}
+## {{ class }}
+
+```
+    use \Segura\SDK\{{ app_name }}\Client as SDKClient;
+    $sdkClient      = new SDKClient();
+    ${{ class }} = $sdkClient->get{{ class }}();
+```
+
+{% endfor %}

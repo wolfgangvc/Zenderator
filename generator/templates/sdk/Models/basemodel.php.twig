@@ -18,11 +18,19 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
         return $this->{{ property }};
     }
 
-    public function set{{ property }}()
+    public function set{{ property }}(${{ property }})
     {
-        $this->{{ property }};
+        $this->{{ property }} = ${{ property }};
         return $this;
     }
 
 {% endfor %}
+
+    public function __toArray(){
+        return [
+{% for property in properties %}
+            "{{ property }}" => $this->get{{ property }}(),
+{% endfor %}
+        ];
+    }
 }
