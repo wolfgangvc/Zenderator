@@ -21,6 +21,7 @@
   ],
   "require": {
     "segura/appcore": "*",
+    "segura/sessions": "*",
     "slim/slim": "^3.2",
     "raveren/kint": "^1.0",
     "zendframework/zend-db": "^2.7",
@@ -31,7 +32,6 @@
     "mattketmo/camel": "^1.1",
     "thru.io/uuid": "^2.0",
     "thru.io/inflection": "^1.0",
-    "segura/sessions": "dev-master",
     "monolog/monolog": "^1.19.0",
     "predis/predis": "^1.0",
     "jimmiw/php-time-ago": "^0.4.11",
