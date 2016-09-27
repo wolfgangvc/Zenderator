@@ -9,4 +9,13 @@ abstract class AbstractModel
             $this->$key = $value;
         }
     }
+
+    /**
+     * @return self
+     */
+    static public function factory()
+    {
+        $calledClass = get_called_class();
+        return new $calledClass;
+    }
 }
