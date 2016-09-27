@@ -209,9 +209,14 @@ class Model extends Entity
      */
     public function getClassName()
     {
-        return
-            $this->transSnake2Studly->transform($this->getDatabase()) .
-            $this->transStudly2Studly->transform($this->getTable());
+        if(Zenderator::isUsingClassPrefixes()){
+            return
+                $this->transSnake2Studly->transform($this->getDatabase()) .
+                $this->transStudly2Studly->transform($this->getTable());
+        }else{
+            return
+                $this->transStudly2Studly->transform($this->getTable());
+        }
     }
 
     /**

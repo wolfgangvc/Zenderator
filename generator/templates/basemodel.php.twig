@@ -64,7 +64,7 @@ abstract class Base{{ class_name }}Model extends AbstractModel
     /**
      * @returns Models\{{ related_object.getRemoteClass }}Model
      */
-    public function fetch{{ related_object.getLocalFunctionName }}Object() : Models\{{ related_object.getRemoteClass }}Model
+    public function fetch{{ related_object.getRemoteFunctionName }}Object() : Models\{{ related_object.getRemoteClass }}Model
     {
         /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
         ${{ related_object.getRemoteClass }}Service = App::Container()->get(Services\{{ related_object.getRemoteClass }}Service::class);

@@ -23,6 +23,7 @@ class Zenderator
     private $config; // @todo rename $composerConfig
     private $composer;
     private $namespace;
+    static private $useClassPrefixes = false;
     /** @var \Twig_Loader_Filesystem */
     private $loader;
     /** @var \Twig_Environment */
@@ -51,6 +52,21 @@ class Zenderator
     {
         $this->rootOfApp = $rootOfApp;
         $this->setUp($databaseConfigs);
+    }
+
+    static public function classPrefixesOn()
+    {
+        self::$useClassPrefixes = true;
+    }
+
+    static public function classPrefixesOff()
+    {
+        self::$useClassPrefixes = false;
+    }
+
+    static public function isUsingClassPrefixes() : bool
+    {
+        return self::$useClassPrefixes;
     }
 
     private function setUp($databaseConfigs)
@@ -87,6 +103,19 @@ class Zenderator
         $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
         $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
         $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+
+        // Check for old-style config.
+        if(isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])){
+            die("Database configs have changed in Zenderator!\nYou need to update your mysql.php config!\n\n");
+        }
+
+        // Decide if we're gonna use class prefixes. You don't want to do this if you have a single DB,
+        // or you'll get classes called DefaultThing instead of just Thing.
+        if(isset($databaseConfigs['Default']) && count($databaseConfigs) == 1){
+            self::classPrefixesOff();
+        }else{
+            self::classPrefixesOn();
+        }
 
         foreach ($databaseConfigs as $dbName => $databaseConfig) {
             $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
@@ -160,10 +189,12 @@ class Zenderator
         foreach ($models as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
-                    if (!isset($conflictCheck[$remoteObject->getLocalClass()])) {
-                        $conflictCheck[$remoteObject->getLocalClass()] = $remoteObject;
-                    } else {
-                        $conflictCheck[$remoteObject->getLocalClass()]->markClassConflict(true);
+
+                    echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
+                    if(!isset($conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()])) {
+                        $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()] = $remoteObject;
+                    }else{
+                        $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()]->markClassConflict(true);
                         $remoteObject->markClassConflict(true);
                     }
                 }
