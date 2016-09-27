@@ -2,6 +2,8 @@
 
 namespace Zenderator\Components;
 
+use Zenderator\Zenderator;
+
 class RelatedModel extends Entity
 {
     protected $schema;
@@ -13,9 +15,9 @@ class RelatedModel extends Entity
     protected $remoteBoundColumn;
     protected $hasClassConflict = false;
 
-
-    public function markClassConflict(bool $conflict = true)
+    public function markClassConflict(bool $conflict)
     {
+        echo "  > Marked {$this->getLocalClass()}/{$this->getRemoteClass()} in conflict.\n";
         $this->hasClassConflict = $conflict;
         return $this;
     }
@@ -104,28 +106,28 @@ class RelatedModel extends Entity
     public function getRemoteClass()
     {
         return
-            $this->transCamel2Studly->transform($this->remoteBoundSchema) .
+            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "" .
             $this->transCamel2Studly->transform($this->remoteTable);
     }
 
     public function getRemoteVariable()
     {
         return
-            $this->transCamel2Camel->transform($this->remoteBoundSchema) .
+            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Camel->transform($this->remoteBoundSchema) : "" .
             $this->transCamel2Studly->transform($this->remoteTable);
     }
 
     public function getLocalClass()
     {
         return
-            $this->transCamel2Studly->transform($this->localBoundSchema) .
+            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->localBoundSchema) : "" .
             $this->transCamel2Studly->transform($this->localTable);
     }
 
     public function getLocalVariable()
     {
         return
-            $this->transCamel2Camel->transform($this->localBoundSchema) .
+            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Camel->transform($this->localBoundSchema) : "" .
             $this->transCamel2Studly->transform($this->localTable);
     }
 
@@ -138,6 +140,18 @@ class RelatedModel extends Entity
                 $this->transCamel2Studly->transform($this->localBoundColumn);
         } else {
             return $this->getLocalClass();
+        }
+    }
+
+    public function getRemoteFunctionName()
+    {
+        if ($this->hasClassConflict()) {
+            return
+                $this->getRemoteClass() .
+                "By" .
+                $this->transCamel2Studly->transform($this->localBoundColumn);
+        } else {
+            return $this->getRemoteClass();
         }
     }
 
