@@ -210,7 +210,7 @@ class Model extends Entity
     public function getClassName()
     {
         return
-            Zenderator::isUsingClassPrefixes() ? $this->transSnake2Studly->transform($this->getDatabase()) : '' .
+            (Zenderator::isUsingClassPrefixes() ? $this->transSnake2Studly->transform($this->getDatabase()) : '') .
             $this->transStudly2Studly->transform($this->getTable());
     }
 

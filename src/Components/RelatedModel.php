@@ -106,28 +106,28 @@ class RelatedModel extends Entity
     public function getRemoteClass()
     {
         return
-            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "" .
+            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
             $this->transCamel2Studly->transform($this->remoteTable);
     }
 
     public function getRemoteVariable()
     {
         return
-            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Camel->transform($this->remoteBoundSchema) : "" .
+            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
             $this->transCamel2Studly->transform($this->remoteTable);
     }
 
     public function getLocalClass()
     {
         return
-            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->localBoundSchema) : "" .
+            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
             $this->transCamel2Studly->transform($this->localTable);
     }
 
     public function getLocalVariable()
     {
         return
-            Zenderator::isUsingClassPrefixes() ? $this->transCamel2Camel->transform($this->localBoundSchema) : "" .
+            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
             $this->transCamel2Studly->transform($this->localTable);
     }
 
