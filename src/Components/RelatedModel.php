@@ -105,30 +105,42 @@ class RelatedModel extends Entity
 
     public function getRemoteClass()
     {
-        return
-            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
-            $this->transCamel2Studly->transform($this->remoteTable);
+        if(Zenderator::isUsingClassPrefixes()){
+            return  $this->transCamel2Studly->transform($this->remoteBoundSchema) .
+                    $this->transCamel2Studly->transform($this->remoteTable);
+        }else{
+            return  $this->transCamel2Studly->transform($this->remoteTable);
+        }
     }
 
     public function getRemoteVariable()
     {
-        return
-            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
-            $this->transCamel2Studly->transform($this->remoteTable);
+        if(Zenderator::isUsingClassPrefixes()){
+            return  $this->transCamel2Camel->transform($this->remoteBoundSchema) .
+                    $this->transCamel2Studly->transform($this->remoteTable);
+        }else{
+            return  $this->transCamel2Camel->transform($this->remoteTable);
+        }
     }
 
     public function getLocalClass()
     {
-        return
-            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
-            $this->transCamel2Studly->transform($this->localTable);
+        if(Zenderator::isUsingClassPrefixes()){
+            return  $this->transCamel2Studly->transform($this->localBoundSchema) .
+                    $this->transCamel2Studly->transform($this->localTable);
+        }else{
+            return  $this->transCamel2Studly->transform($this->localTable);
+        }
     }
 
     public function getLocalVariable()
     {
-        return
-            (Zenderator::isUsingClassPrefixes() ? $this->transCamel2Studly->transform($this->remoteBoundSchema) : "") .
-            $this->transCamel2Studly->transform($this->localTable);
+        if(Zenderator::isUsingClassPrefixes()){
+            return  $this->transCamel2Camel->transform($this->localBoundSchema) .
+                    $this->transCamel2Studly->transform($this->localTable);
+        }else{
+            return  $this->transCamel2Camel->transform($this->localTable);
+        }
     }
 
     public function getLocalFunctionName()
