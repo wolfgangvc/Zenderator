@@ -2,6 +2,7 @@
 
 namespace Zenderator\Components;
 
+use Thru\Inflection\Inflect;
 use Zenderator\Zenderator;
 
 class RelatedModel extends Entity
@@ -147,11 +148,11 @@ class RelatedModel extends Entity
     {
         if ($this->hasClassConflict()) {
             return
-                $this->getLocalClass() .
+                Inflect::singularize($this->getLocalClass()) .
                 "By" .
                 $this->transCamel2Studly->transform($this->localBoundColumn);
         } else {
-            return $this->getLocalClass();
+            return Inflect::singularize($this->getLocalClass());
         }
     }
 
@@ -159,11 +160,11 @@ class RelatedModel extends Entity
     {
         if ($this->hasClassConflict()) {
             return
-                $this->getRemoteClass() .
+                Inflect::singularize($this->getRemoteClass()) .
                 "By" .
                 $this->transCamel2Studly->transform($this->localBoundColumn);
         } else {
-            return $this->getRemoteClass();
+            return Inflect::singularize($this->getRemoteClass());
         }
     }
 
