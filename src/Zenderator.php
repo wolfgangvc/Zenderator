@@ -72,10 +72,15 @@ class Zenderator
     private function setUp($databaseConfigs)
     {
         self::$databaseConfigs = $databaseConfigs;
-        if (!file_exists($this->rootOfApp . "/zenderator.yml")) {
-            die("Missing Zenderator config /zenderator.yml\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
+        if (file_exists($this->rootOfApp . "/zenderator.yml")) {
+            $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml";
+        }else if(file_exists($this->rootOfApp . "/zenderator.yml.dist")){
+            $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml.dist";
+        }else{
+            die("Missing Zenderator config /zenderator.yml or /zenderator.yml.dist\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
         }
-        $this->config = file_get_contents($this->rootOfApp . "/zenderator.yml");
+
+        $this->config = file_get_contents($zenderatorConfigPath);
         $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
 
         $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
