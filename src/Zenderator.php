@@ -190,7 +190,7 @@ class Zenderator
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
 
-                    echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
+                    #echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
                     if(!isset($conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()])) {
                         $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()] = $remoteObject;
                     }else{
@@ -219,7 +219,7 @@ class Zenderator
      */
     private function makeCoreFiles(array $models)
     {
-        echo "Generating Core files for " . count($models) . " models";
+        echo "Generating Core files for " . count($models) . " models... \n";
         $allModelData = [];
         foreach ($models as $model) {
             $allModelData[$model->getClassName()] = $model->getRenderDataset();
