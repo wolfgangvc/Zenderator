@@ -3,10 +3,12 @@ namespace Segura\SDK\{{ app_name }}\Abstracts;
 
 abstract class AbstractModel
 {
-    public function __construct(array $raw)
+    public function __construct(array $raw = null)
     {
-        foreach($raw as $key => $value){
-            $this->$key = $value;
+        if(raw) {
+            foreach ($raw as $key => $value) {
+                $this->$key = $value;
+            }
         }
     }
 
