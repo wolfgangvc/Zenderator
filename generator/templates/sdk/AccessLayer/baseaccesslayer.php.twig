@@ -14,29 +14,29 @@ abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
 
 {% endfor %}
 
-    private function hydrate($raw{{ routes[0].singular }})
+    private function hydrate($raw{{ routes['create'].singular }})
     {
         // if the entity is an array and is empty, return false. Nothing to hydrate.
-        if(is_array($raw{{ routes[0].singular }}) && empty($raw{{ routes[0].singular }})){
+        if(is_array($raw{{ routes['create'].singular }}) && empty($raw{{ routes['create'].singular }})){
             return false;
         }
 
         if(
             // If the data given IS an array
-            is_array($raw{{ routes[0].singular }}) &&
+            is_array($raw{{ routes['create'].singular }}) &&
             // And Is NOT an associative array
-            !(array_keys($raw{{ routes[0].singular }}) !== range(0, count($raw{{ routes[0].singular }}) - 1)) &&
+            !(array_keys($raw{{ routes['create'].singular }}) !== range(0, count($raw{{ routes['create'].singular }}) - 1)) &&
             // And is NOT an empty array...
-            !count($raw{{ routes[0].singular }}) == 0
+            !count($raw{{ routes['create'].singular }}) == 0
         ){
             // Then we have to hydrate each element. Recursively. Aww yeah.
             $array = [];
-            foreach($raw{{ routes[0].singular }} as $index => ${{ routes[0].singular|lower }}){
-                $array[$index] = $this->hydrate(${{ routes[0].singular|lower }});
+            foreach($raw{{ routes['create'].singular }} as $index => ${{ routes['create'].singular|lower }}){
+                $array[$index] = $this->hydrate(${{ routes['create'].singular|lower }});
             }
             return $array;
         }else{
-            return new Models\{{ routes[0].singular }}Model($raw{{ routes[0].singular }});
+            return new Models\{{ routes['create'].singular }}Model($raw{{ routes['create'].singular }});
         }
     }
 }
