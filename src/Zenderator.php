@@ -452,10 +452,13 @@ class Zenderator
     private function makeRequest(string $method, string $path, $post = null, $isJsonRequest = true)
     {
         /**
-         * @var \Slim\App $app
+         * @var \Slim\App           $app
+         * @var \Segura\AppCore\App $applicationInstance
          */
-        $app         = App::$instance;
-        $calledClass = get_called_class();
+        $applicationInstance = App::Instance();
+        $calledClass         = get_called_class();
+
+        $app = $applicationInstance->getApp();
 
         if (defined("$calledClass")) {
             $modelName = $calledClass::MODEL_NAME;
