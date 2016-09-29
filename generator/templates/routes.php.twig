@@ -1,5 +1,4 @@
 <?php
-$app = \{{ app_container }}::Instance()->getApp();
 {% for model in models %}
-require_once(__DIR__ . "/Routes/Generated/{{ model.class_name }}Route.php");
+require(__DIR__ . "/Routes/Generated/{{ model.class_name }}Route.php");
 {% endfor %}
