@@ -52,6 +52,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
         $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
         $this->faker = $faker;
+        $this->faker->seed(644194800);
         $this->databaseConnector = $databaseConnector;
 
         /** @var $adaptor AdapterInterface */
