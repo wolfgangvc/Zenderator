@@ -1,12 +1,61 @@
 # {{ app_name }}
 
-{% for class, class_packs in packs %}
-## {{ class }}
+## Installing
+Firstly, it is likely that this library is in a private repository, so to install it into your application, you will
+first need to add it to your composer.json's `Repositories` block. This should look something like this.
+```
+    ...
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:segurasystems/Lib{{ app_name }}.git"
+        },
+        ...
+    ],
+    ...
+```
+
+Then, simply either install it using `composer require segura/lib{{ app_name|lower }}`, or by adding the following block
+to your composer.json:
+
+```
+    ...
+    "require": {
+        "segura/lib{{ app_name|lower }}": "version-here",
+        ...
+    },
+    ...
+```
+
+## Usage
+{% for class, class_pack in packs %}
+### {{ class }}
 
 ```
     use \Segura\SDK\{{ app_name }}\Client as SDKClient;
+    use \Segura\SDK\{{ app_name }}\Models;
     $sdkClient      = new SDKClient();
     ${{ class }} = $sdkClient->get{{ class }}();
+
+    // Listing all elements
+    $listOf{{ class }} = ${{ class }}->list();
+
+    // Creating a new element
+    $new{{ class }} = Models\{{ class }}Model::factory()
+{% for property, value in class_pack['create']['example'] %}
+        ->set{{ property }}({{ var_export(value) }}){% if loop.last %};{% endif %}
+
+{% endfor %}
+
+    // Storing that new element
+    $stored{{ class }} = ${{ class }}->createFromObject($new{{ class }});
+
+    // Getting a specific element by ID
+    $fetched{{ class }} = ${{ class }}->get($new{{ class }}->getId());
+
+    // Deleting that element
+    ${{ class }}->delete($fetched{{ class }}->getId());
+
 ```
 
 {% endfor %}

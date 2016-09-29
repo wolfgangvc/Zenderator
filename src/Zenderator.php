@@ -339,7 +339,7 @@ class Zenderator
         foreach ($routes as $route) {
             if ($route['name']) {
                 if (isset($route['class'])) {
-                    $packs[$route['class']][] = $route;
+                    $packs[$route['class']][$route['function']] = $route;
                     $routeCount++;
                 } else {
                     echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
@@ -410,6 +410,7 @@ class Zenderator
         echo " [DONE]\n";
 
         echo "Generating phpunit.xml, documentation, etc:";
+        \Kint::dump($renderData);
         $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/Readme.md", "sdk/readme.md.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/.gitignore", "sdk/gitignore.twig", $renderData);
