@@ -5,7 +5,7 @@ abstract class AbstractModel
 {
     public function __construct(array $raw = null)
     {
-        if(raw) {
+        if($raw) {
             foreach ($raw as $key => $value) {
                 $this->$key = $value;
             }
