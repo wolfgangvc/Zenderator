@@ -6,7 +6,7 @@ use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
 
-{% include '_overwrite_warning.twig' %}
+{% include '../_overwrite_warning.twig' %}
 
 // @todo: Make all Services implement a ServicesInterface. - MB
 abstract class Base{{ class_name }}Service extends AbstractService

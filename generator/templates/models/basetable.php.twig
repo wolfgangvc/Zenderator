@@ -8,7 +8,7 @@ use \{{ namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
 use \Zend\Db\ResultSet\ResultSet;
 
-{% include '_overwrite_warning.twig' %}
+{% include '../_overwrite_warning.twig' %}
 
 // @todo: Make all TableGateways implement a TableGatewayInterface. -MB
 abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
