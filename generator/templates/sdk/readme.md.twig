@@ -3,7 +3,7 @@
 ## Installing
 Firstly, it is likely that this library is in a private repository, so to install it into your application, you will
 first need to add it to your composer.json's `Repositories` block. This should look something like this.
-```
+```JSON
     ...
     "repositories": [
         {
@@ -18,7 +18,7 @@ first need to add it to your composer.json's `Repositories` block. This should l
 Then, simply either install it using `composer require segura/lib{{ app_name|lower }}`, or by adding the following block
 to your composer.json:
 
-```
+```JSON
     ...
     "require": {
         "segura/lib{{ app_name|lower }}": "version-here",
@@ -31,7 +31,7 @@ to your composer.json:
 {% for class, class_pack in packs %}
 ### {{ class }}
 
-```
+```php
     use \Segura\SDK\{{ app_name }}\Client as SDKClient;
     use \Segura\SDK\{{ app_name }}\Models;
     $sdkClient      = new SDKClient();
