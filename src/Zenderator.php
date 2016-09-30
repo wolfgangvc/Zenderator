@@ -236,7 +236,7 @@ class Zenderator
                 $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "models/model.php.twig", $model->getRenderDataset());
                 $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "models/tests.models.php.twig", $model->getRenderDataset());
                 $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "models/basetable.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "models/ table.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "models/table.php.twig", $model->getRenderDataset());
             }
 
             // "Service" suite
