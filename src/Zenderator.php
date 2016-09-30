@@ -410,7 +410,6 @@ class Zenderator
         echo " [DONE]\n";
 
         echo "Generating phpunit.xml, documentation, etc:";
-        \Kint::dump($renderData);
         $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/Readme.md", "sdk/readme.md.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/.gitignore", "sdk/gitignore.twig", $renderData);
