@@ -54,17 +54,17 @@ class Zenderator
         $this->setUp($databaseConfigs);
     }
 
-    static public function classPrefixesOn()
+    public static function classPrefixesOn()
     {
         self::$useClassPrefixes = true;
     }
 
-    static public function classPrefixesOff()
+    public static function classPrefixesOff()
     {
         self::$useClassPrefixes = false;
     }
 
-    static public function isUsingClassPrefixes() : bool
+    public static function isUsingClassPrefixes() : bool
     {
         return self::$useClassPrefixes;
     }
@@ -74,9 +74,9 @@ class Zenderator
         self::$databaseConfigs = $databaseConfigs;
         if (file_exists($this->rootOfApp . "/zenderator.yml")) {
             $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml";
-        }else if(file_exists($this->rootOfApp . "/zenderator.yml.dist")){
+        } elseif (file_exists($this->rootOfApp . "/zenderator.yml.dist")) {
             $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml.dist";
-        }else{
+        } else {
             die("Missing Zenderator config /zenderator.yml or /zenderator.yml.dist\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
         }
 
@@ -110,15 +110,15 @@ class Zenderator
         $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         // Check for old-style config.
-        if(isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])){
+        if (isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])) {
             die("Database configs have changed in Zenderator!\nYou need to update your mysql.php config!\n\n");
         }
 
         // Decide if we're gonna use class prefixes. You don't want to do this if you have a single DB,
         // or you'll get classes called DefaultThing instead of just Thing.
-        if(isset($databaseConfigs['Default']) && count($databaseConfigs) == 1){
+        if (isset($databaseConfigs['Default']) && count($databaseConfigs) == 1) {
             self::classPrefixesOff();
-        }else{
+        } else {
             self::classPrefixesOn();
         }
 
@@ -129,7 +129,7 @@ class Zenderator
         }
     }
 
-    static public function schemaName2databaseName($schemaName)
+    public static function schemaName2databaseName($schemaName)
     {
         foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
             $adapter = new DbAdaptor($databaseConfig);
@@ -140,7 +140,7 @@ class Zenderator
         throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
     }
 
-    static public function getAutoincrementColumns(DbAdaptor $adapter, $table)
+    public static function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
         $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
         $query   = $adapter->query($sql);
@@ -194,11 +194,10 @@ class Zenderator
         foreach ($models as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
-
                     #echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
-                    if(!isset($conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()])) {
+                    if (!isset($conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()])) {
                         $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()] = $remoteObject;
-                    }else{
+                    } else {
                         $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()]->markClassConflict(true);
                         $remoteObject->markClassConflict(true);
                     }
@@ -233,45 +232,45 @@ class Zenderator
 
             #\Kint::dump($model->getRenderDataset());
             if (in_array("Models", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "basemodel.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "model.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "tests.models.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "basetable.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "table.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "models/basemodel.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "models/model.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "models/tests.models.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "models/basetable.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "models/ table.php.twig", $model->getRenderDataset());
             }
 
             // "Service" suite
             if (in_array("Services", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "baseservice.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "service.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "tests.service.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "services/baseservice.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "services/service.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "services/tests.service.php.twig", $model->getRenderDataset());
             }
 
             // "Controller" suite
             if (in_array("Controllers", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "basecontroller.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "controller.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "controllers/basecontroller.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "controllers/controller.php.twig", $model->getRenderDataset());
             }
 
             // "Endpoint" test suite
             if (in_array("Endpoints", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "tests.endpoints.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "api-endpoints/tests.endpoints.php.twig", $model->getRenderDataset());
             }
 
             // "Routes" suit
             if (in_array("Routes", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "route.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "router/route.php.twig", $model->getRenderDataset());
             }
         }
 
         echo "Generating App Container:";
-        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
+        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "dependency-injector/appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
         echo " [DONE]\n\n";
 
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
-            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "routes.php.twig", [
+            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "router/routes.php.twig", [
                 'models'        => $allModelData,
                 'app_container' => APP_CORE_NAME,
             ]);
@@ -430,7 +429,6 @@ class Zenderator
         echo " [DONE]\n";
 
         #\Kint::dump($renderData);
-
     }
 
     private function getRoutes()
