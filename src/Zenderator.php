@@ -54,17 +54,17 @@ class Zenderator
         $this->setUp($databaseConfigs);
     }
 
-    static public function classPrefixesOn()
+    public static function classPrefixesOn()
     {
         self::$useClassPrefixes = true;
     }
 
-    static public function classPrefixesOff()
+    public static function classPrefixesOff()
     {
         self::$useClassPrefixes = false;
     }
 
-    static public function isUsingClassPrefixes() : bool
+    public static function isUsingClassPrefixes() : bool
     {
         return self::$useClassPrefixes;
     }
@@ -74,9 +74,9 @@ class Zenderator
         self::$databaseConfigs = $databaseConfigs;
         if (file_exists($this->rootOfApp . "/zenderator.yml")) {
             $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml";
-        }else if(file_exists($this->rootOfApp . "/zenderator.yml.dist")){
+        } elseif (file_exists($this->rootOfApp . "/zenderator.yml.dist")) {
             $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml.dist";
-        }else{
+        } else {
             die("Missing Zenderator config /zenderator.yml or /zenderator.yml.dist\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
         }
 
@@ -110,15 +110,15 @@ class Zenderator
         $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         // Check for old-style config.
-        if(isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])){
+        if (isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])) {
             die("Database configs have changed in Zenderator!\nYou need to update your mysql.php config!\n\n");
         }
 
         // Decide if we're gonna use class prefixes. You don't want to do this if you have a single DB,
         // or you'll get classes called DefaultThing instead of just Thing.
-        if(isset($databaseConfigs['Default']) && count($databaseConfigs) == 1){
+        if (isset($databaseConfigs['Default']) && count($databaseConfigs) == 1) {
             self::classPrefixesOff();
-        }else{
+        } else {
             self::classPrefixesOn();
         }
 
@@ -129,7 +129,7 @@ class Zenderator
         }
     }
 
-    static public function schemaName2databaseName($schemaName)
+    public static function schemaName2databaseName($schemaName)
     {
         foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
             $adapter = new DbAdaptor($databaseConfig);
@@ -140,7 +140,7 @@ class Zenderator
         throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
     }
 
-    static public function getAutoincrementColumns(DbAdaptor $adapter, $table)
+    public static function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
         $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
         $query   = $adapter->query($sql);
@@ -194,11 +194,10 @@ class Zenderator
         foreach ($models as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
-
                     #echo "Base{$remoteObject->getLocalClass()}Model::fetch{$remoteObject->getRemoteClass()}Object\n";
-                    if(!isset($conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()])) {
+                    if (!isset($conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()])) {
                         $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()] = $remoteObject;
-                    }else{
+                    } else {
                         $conflictCheck[$remoteObject->getLocalClass()][$remoteObject->getRemoteClass()]->markClassConflict(true);
                         $remoteObject->markClassConflict(true);
                     }
@@ -233,45 +232,45 @@ class Zenderator
 
             #\Kint::dump($model->getRenderDataset());
             if (in_array("Models", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "basemodel.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "model.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "tests.models.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "basetable.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "table.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Models/Base/Base{$model->getClassName()}Model.php", "Models/basemodel.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Models/{$model->getClassName()}Model.php", "Models/model.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Models/Generated/{$model->getClassName()}Test.php", "Models/tests.models.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/TableGateways/Base/Base{$model->getClassName()}TableGateway.php", "Models/basetable.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/TableGateways/{$model->getClassName()}TableGateway.php", "Models/table.php.twig", $model->getRenderDataset());
             }
 
             // "Service" suite
             if (in_array("Services", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "baseservice.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "service.php.twig", $model->getRenderDataset());
-                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "tests.service.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Services/Base/Base{$model->getClassName()}Service.php", "Services/baseservice.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Services/{$model->getClassName()}Service.php", "Services/service.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Services/Generated/{$model->getClassName()}Test.php", "Services/tests.service.php.twig", $model->getRenderDataset());
             }
 
             // "Controller" suite
             if (in_array("Controllers", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "basecontroller.php.twig", $model->getRenderDataset());
-                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "controller.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Controllers/Base/Base{$model->getClassName()}Controller.php", "Controllers/basecontroller.php.twig", $model->getRenderDataset());
+                $this->renderToFile(false, APP_ROOT . "/src/Controllers/{$model->getClassName()}Controller.php", "Controllers/controller.php.twig", $model->getRenderDataset());
             }
 
             // "Endpoint" test suite
             if (in_array("Endpoints", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "tests.endpoints.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $model->getRenderDataset());
             }
 
             // "Routes" suit
             if (in_array("Routes", $this->config['templates'])) {
-                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "route.php.twig", $model->getRenderDataset());
+                $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
         }
 
         echo "Generating App Container:";
-        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
+        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "DependencyInjector/appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
         echo " [DONE]\n\n";
 
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
-            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "routes.php.twig", [
+            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", [
                 'models'        => $allModelData,
                 'app_container' => APP_CORE_NAME,
             ]);
@@ -368,15 +367,15 @@ class Zenderator
             #\Kint::dump($routeRenderData);
 
             // Access Layer
-            $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "sdk/AccessLayer/accesslayer.php.twig", $routeRenderData);
-            $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "sdk/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/AccessLayer/{$packName}AccessLayer.php", "SDK/AccessLayer/accesslayer.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/AccessLayer/Base/Base{$packName}AccessLayer.php", "SDK/AccessLayer/baseaccesslayer.php.twig", $routeRenderData);
 
             // Models
-            $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "sdk/Models/basemodel.php.twig", $routeRenderData);
-            $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "sdk/Models/model.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/Models/Base/Base{$packName}Model.php", "SDK/Models/basemodel.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "SDK/Models/model.php.twig", $routeRenderData);
 
             // Tests
-            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "sdk/Tests/client.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/client.php.twig", $routeRenderData);
 
             if (!file_exists($outputPath . "/tests/fixtures")) {
                 mkdir($outputPath . "/tests/fixtures", null, true);
@@ -392,30 +391,30 @@ class Zenderator
         );
 
         echo "Generating Abstract Objects:";
-        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "sdk/Abstracts/abstractaccesslayer.php.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "sdk/Abstracts/abstractclient.php.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "sdk/Abstracts/abstractmodel.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "SDK/Abstracts/abstractaccesslayer.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "SDK/Abstracts/abstractclient.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "SDK/Abstracts/abstractmodel.php.twig", $renderData);
         echo " [DONE]\n";
 
         echo "Generating Client Container:";
-        $this->renderToFile(true, $outputPath . "/src/Client.php", "sdk/client.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Client.php", "SDK/client.php.twig", $renderData);
         echo " [DONE]\n";
 
         echo "Generating Composer.json:";
-        $this->renderToFile(true, $outputPath . "/composer.json", "sdk/composer.json.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/composer.json", "SDK/composer.json.twig", $renderData);
         echo " [DONE]\n";
 
         echo "Generating Test Bootstrap:";
-        $this->renderToFile(true, $outputPath . "/bootstrap.php", "sdk/bootstrap.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/bootstrap.php", "SDK/bootstrap.php.twig", $renderData);
         echo " [DONE]\n";
 
         echo "Generating phpunit.xml, documentation, etc:";
-        $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "sdk/phpunit.xml.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Readme.md", "sdk/readme.md.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/.gitignore", "sdk/gitignore.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Dockerfile", "sdk/Dockerfile.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/test-compose.yml", "sdk/docker-compose.yml.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/run-tests.sh", "sdk/run-tests.sh.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "SDK/phpunit.xml.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Readme.md", "SDK/readme.md.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/.gitignore", "SDK/gitignore.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Dockerfile", "SDK/Dockerfile.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/test-compose.yml", "SDK/docker-compose.yml.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/run-tests.sh", "SDK/run-tests.sh.twig", $renderData);
         chmod($outputPath . "/run-tests.sh", 0755);
         echo " [DONE]\n";
 
@@ -424,13 +423,12 @@ class Zenderator
             'ObjectNotFoundException'
         ];
         foreach ($derivedExceptions as $derivedException) {
-            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "sdk/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
         }
-        $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "sdk/Exceptions/SDKException.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "SDK/Exceptions/SDKException.php.twig", $renderData);
         echo " [DONE]\n";
 
         #\Kint::dump($renderData);
-
     }
 
     private function getRoutes()

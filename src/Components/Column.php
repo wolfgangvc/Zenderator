@@ -281,6 +281,4 @@ class Column extends Entity
     {
         return $this->remoteObjects;
     }
-
-
 }

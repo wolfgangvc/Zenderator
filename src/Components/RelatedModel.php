@@ -106,40 +106,40 @@ class RelatedModel extends Entity
 
     public function getRemoteClass()
     {
-        if(Zenderator::isUsingClassPrefixes()){
+        if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Studly->transform($this->remoteBoundSchema) .
                     $this->transCamel2Studly->transform($this->remoteTable);
-        }else{
+        } else {
             return  $this->transCamel2Studly->transform($this->remoteTable);
         }
     }
 
     public function getRemoteVariable()
     {
-        if(Zenderator::isUsingClassPrefixes()){
+        if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Camel->transform($this->remoteBoundSchema) .
                     $this->transCamel2Studly->transform($this->remoteTable);
-        }else{
+        } else {
             return  $this->transCamel2Camel->transform($this->remoteTable);
         }
     }
 
     public function getLocalClass()
     {
-        if(Zenderator::isUsingClassPrefixes()){
+        if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Studly->transform($this->localBoundSchema) .
                     $this->transCamel2Studly->transform($this->localTable);
-        }else{
+        } else {
             return  $this->transCamel2Studly->transform($this->localTable);
         }
     }
 
     public function getLocalVariable()
     {
-        if(Zenderator::isUsingClassPrefixes()){
+        if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Camel->transform($this->localBoundSchema) .
                     $this->transCamel2Studly->transform($this->localTable);
-        }else{
+        } else {
             return  $this->transCamel2Camel->transform($this->localTable);
         }
     }
@@ -248,8 +248,8 @@ class RelatedModel extends Entity
         string $localColumn,
         string $remoteSchema,
         string $remoteColumn
-    )
-    {
+    ) {
+    
         return $this
             ->setLocalBoundSchema($localSchema)
             ->setLocalBoundColumn($localColumn)
