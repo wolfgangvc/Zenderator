@@ -19,7 +19,7 @@ abstract class AbstractAccessLayer
     /**
      * AbstractAccessLayer constructor.
      * @param GuzzleClient $guzzleClient
-     * @parma SDKClient $sdkClient
+     * @param SDKClient $sdkClient
      */
     public function __construct(
         GuzzleClient $guzzleClient,
@@ -27,6 +27,23 @@ abstract class AbstractAccessLayer
     ){
         $this->guzzleClient = $guzzleClient;
         $this->sdkClient = $sdkClient;
+        $this->setBaseUrl($sdkClient->getBaseUrl());
+    }
+
+    /**
+     * Set the Base URL for requests.
+     * @param string $baseUrl
+     * @returns self
+     */
+    public function setBaseUrl($baseUrl = "{{ default_base_url }}")
+    {
+        $this->baseUrl = $baseUrl;
+        return $this;
+    }
+
+    public function getBaseUrl()
+    {
+        return $this->baseUrl;
     }
 
     /**
