@@ -9,7 +9,7 @@ abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
 {
 
 {% for route in routes %}
-{% set test_file = "sdk/AccessLayer/" ~ "_function_" ~ route.function ~ ".php.twig" %}
+{% set test_file = "SDK/AccessLayer/" ~ "_function_" ~ route.function ~ ".php.twig" %}
 {% include test_file %}
 
 {% endfor %}
