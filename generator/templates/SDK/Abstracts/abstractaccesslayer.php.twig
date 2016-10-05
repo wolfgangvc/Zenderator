@@ -52,6 +52,8 @@ abstract class AbstractAccessLayer
     * @param array  $options
     *
     * @return mixed|ResponseInterface
+    *
+    * @throws Exceptions\SDKException
     */
     protected function request(
         $method = "GET",
