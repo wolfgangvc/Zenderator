@@ -1,76 +1,74 @@
 <?php
+$DIContainer = \{{ app_container }}::Instance()->getContainer();
+$exampleObjectArray = $DIContainer->get('{{ class_name }}MockModel')->__toArray();
 
-$app->group("/v1", function () {
-  /** @var $this Slim\App */
-
-  $this->group("/{{ controller_route }}", function() {
-    /** @var $this Slim\App */
-
-    $DIContainer = \{{ app_container }}::Instance()->getContainer();
-
-    $this->get("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':listRequest')
-      ->setName(json_encode([
-        'name'       => "{{ class_name }} List",
-        'class'      => '{{ class_name }}',
-        'function'   => 'list',
-        'endpoint'   => '/v1/{{ controller_route }}',
-        'method'     => 'GET',
-        'singular'   => '{{ object_name_singular }}',
-        'plural'     => '{{ object_name_plural }}',
-        'properties' => [
+$router = \Segura\AppCore\Router\Router::Instance()
+    ->addRoute(
+        \Segura\AppCore\Router\Route::Factory()
+            ->setName('{{ class_name }} List')
+            ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':listRequest')
+            ->setClass('{{ class_name }}')
+            ->setFunction('list')
+            ->setHttpEndpoint('/v1/{{ controller_route }}')
+            ->setHttpMethod('GET')
+            ->setSingular('{{ object_name_singular }}')
+            ->setPlural('{{ object_name_plural }}')
+            ->setProperties([
 {% for column in columns %}
-          '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}',
 {% endfor %}
-        ],
-      ]));
-
-    $this->put("",            \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':createRequest')
-      ->setName(json_encode([
-        'name'       => "{{ class_name }} Create",
-        'class'      => '{{ class_name }}',
-        'function'   => 'create',
-        'endpoint'   => '/v1/{{ controller_route }}',
-        'method'     => 'PUT',
-        'singular'   => '{{ object_name_singular }}',
-        'plural'     => '{{ object_name_plural }}',
-        'properties' => [
+            ])
+            ->setExampleEntity($exampleObjectArray)
+    )
+    ->addRoute(
+        \Segura\AppCore\Router\Route::Factory()
+            ->setName('{{ class_name }} Create')
+            ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':createRequest')
+            ->setClass('{{ class_name }}')
+            ->setFunction('create')
+            ->setHttpEndpoint('/v1/{{ controller_route }}')
+            ->setHttpMethod('PUT')
+            ->setSingular('{{ object_name_singular }}')
+            ->setPlural('{{ object_name_plural }}')
+            ->setProperties([
 {% for column in columns %}
-          '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}',
 {% endfor %}
-        ],
-        'example'   => $DIContainer->get('{{ class_name }}MockModel')->__toArray(),
-      ]));
-
-    $this->get("/{id}",       \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':getRequest')
-      ->setName(json_encode([
-        'name'       => "{{ class_name }} Get",
-        'class'      => '{{ class_name }}',
-        'function'   => 'get',
-        'endpoint'   => '/v1/{{ controller_route }}/id',
-        'method'     => 'GET',
-        'singular'   => '{{ object_name_singular }}',
-        'plural'     => '{{ object_name_plural }}',
-        'properties' => [
+            ])
+            ->setExampleEntity($exampleObjectArray)
+    )
+    ->addRoute(
+        \Segura\AppCore\Router\Route::Factory()
+            ->setName('{{ class_name }} Get')
+            ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':getRequest')
+            ->setClass('{{ class_name }}')
+            ->setFunction('get')
+            ->setHttpEndpoint('/v1/{{ controller_route }}/id')
+            ->setHttpMethod('GET')
+            ->setSingular('{{ object_name_singular }}')
+            ->setPlural('{{ object_name_plural }}')
+            ->setProperties([
 {% for column in columns %}
-          '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}',
 {% endfor %}
-        ],
-      ]));
-
-    $this->delete("/{id}",    \{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':deleteRequest')
-      ->setName(json_encode([
-        'name'       => "{{ class_name }} Delete",
-        'class'      => '{{ class_name }}',
-        'function'   => 'delete',
-        'endpoint'   => '/v1/{{ controller_route }}/id',
-        'method'     => 'DELETE',
-        'singular'   => '{{ object_name_singular }}',
-        'plural'     => '{{ object_name_plural }}',
-        'properties' => [
+            ])
+            ->setExampleEntity($exampleObjectArray)
+    )
+    ->addRoute(
+        \Segura\AppCore\Router\Route::Factory()
+            ->setName('{{ class_name }} Delete')
+            ->setCallback(\{{ namespace }}\Controllers\{{ class_name }}Controller::class . ':deleteRequest')
+            ->setClass('{{ class_name }}')
+            ->setFunction('delete')
+            ->setHttpEndpoint('/v1/{{ controller_route }}/id')
+            ->setHttpMethod('DELETE')
+            ->setSingular('{{ object_name_singular }}')
+            ->setPlural('{{ object_name_plural }}')
+            ->setProperties([
 {% for column in columns %}
-          '{{ column.getPropertyFunction }}',
+                '{{ column.getPropertyFunction }}',
 {% endfor %}
-        ],
-      ]));
-  });
-});
+            ])
+    );
+
+
