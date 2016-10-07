@@ -4,6 +4,7 @@ namespace Zenderator;
 use Camel\CaseTransformer;
 use Camel\Format;
 use Segura\AppCore\App;
+use Segura\AppCore\Router\Router;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
@@ -356,8 +357,10 @@ class Zenderator
             ];
             $properties = [];
             foreach ($routes as $route) {
-                foreach ($route['properties'] as $property) {
-                    $properties[] = $property;
+                if(isset($route['properties'])) {
+                    foreach ($route['properties'] as $property) {
+                        $properties[] = $property;
+                    }
                 }
             }
             $properties                    = array_unique($properties);
@@ -466,6 +469,7 @@ class Zenderator
         }
         require(APP_ROOT . "/src/RoutesExtra.php");
 
+        Router::Instance()->populateRoutes($app);
 
         $env = Environment::mock(
             [

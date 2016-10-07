@@ -35,7 +35,7 @@ abstract class AbstractAccessLayer
      * @param string $baseUrl
      * @returns self
      */
-    public function setBaseUrl($baseUrl = "{{ default_base_url }}")
+    public function setBaseUrl($baseUrl)
     {
         $this->baseUrl = $baseUrl;
         return $this;

@@ -20,7 +20,7 @@ class {{ pack_name }}Test extends \PHPUnit_Framework_TestCase{
     }
 
 {% for route in routes %}
-{% set test_file = "SDK/Tests/" ~ "_test_" ~ route.function ~ ".php.twig" %}
+{% set test_file = "SDK/Tests/" ~ "_test_" ~ route.template ~ ".php.twig" %}
 {% include test_file %}
 {% endfor %}
 }
