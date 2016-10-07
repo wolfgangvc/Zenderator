@@ -24,6 +24,15 @@ class Model extends Entity
     protected $autoIncrements;
 
     /**
+     * @return self
+     */
+    public static function Factory()
+    {
+        $class = get_called_class();
+        return new $class;
+    }
+
+    /**
      * @return DbAdaptor
      */
     public function getDbAdaptor(): DbAdaptor

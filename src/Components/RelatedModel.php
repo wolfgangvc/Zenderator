@@ -16,6 +16,15 @@ class RelatedModel extends Entity
     protected $remoteBoundColumn;
     protected $hasClassConflict = false;
 
+    /**
+     * @return self
+     */
+    public static function Factory()
+    {
+        $class = get_called_class();
+        return new $class;
+    }
+
     public function markClassConflict(bool $conflict)
     {
         echo "  > Marked {$this->getLocalClass()}/{$this->getRemoteClass()} in conflict.\n";

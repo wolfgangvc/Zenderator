@@ -22,6 +22,15 @@ class Column extends Entity
     protected $remoteObjects;
 
     /**
+     * @return self
+     */
+    public static function Factory()
+    {
+        $class = get_called_class();
+        return new $class;
+    }
+
+    /**
      * @return bool
      */
     public function isAutoIncrement(): bool
