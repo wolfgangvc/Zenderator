@@ -4,7 +4,11 @@
 $rootOfApp = __DIR__ . "/../../../../";
 
 require_once($rootOfApp . "/bootstrap.php");
-$databaseConfigs = require($rootOfApp . "/config/mysql.php");
+$mysqlConfigLocation = $rootOfApp . "/config/mysql.php";
+if(!file_exists($mysqlConfigLocation){
+    die("Cannot find MySQL Config as expected at {$mysqlConfigLocation}\n\n");
+}
+$databaseConfigs = require($mysqlConfigLocation);
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfigs
