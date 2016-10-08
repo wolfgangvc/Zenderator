@@ -40,13 +40,4 @@ class Entity
 
         $this->transField2Property = $this->transCamel2Camel;
     }
-
-    /**
-     * @return self
-     */
-    public static function Factory()
-    {
-        $class = get_called_class();
-        return new $class;
-    }
 }

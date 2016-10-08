@@ -3,13 +3,13 @@ namespace Segura\SDK\{{ app_name }}\Abstracts;
 
 abstract class AbstractClient
 {
-    protected $baseUrl;
+    protected $baseUrl = "{{ default_base_url }}";
     /**
      * Set the Base URL for requests.
      * @param string $baseUrl
      * @returns self
      */
-    public function setBaseUrl($baseUrl = "{{ default_base_url }}")
+    public function setBaseUrl($baseUrl)
     {
         $this->baseUrl = $baseUrl;
         return $this;

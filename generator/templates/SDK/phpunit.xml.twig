@@ -12,11 +12,11 @@
     </php>
 
     <testsuites>
+        <testsuite name="access_layer">
 {% for pack in packs|keys %}
-        <testsuite name="models">
             <file>tests/AccessLayer/{{ pack }}Test.php</file>
-        </testsuite>
 {% endfor %}
+        </testsuite>
     </testsuites>
 
     <logging>

@@ -1,0 +1,10 @@
+    /**
+     * @vcr unittest_{{ pack_name|lower }}_{{ route.function|lower }}.cassette
+     **/
+    public function test{{ route.function|capitalize }}()
+    {
+        $response = $this->{{ pack_name|lower }}->{{ route.function }}();
+
+        $this->assertEquals("Okay", $response->Status);
+    }
+
