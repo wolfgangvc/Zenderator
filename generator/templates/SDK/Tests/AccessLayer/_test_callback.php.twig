@@ -3,6 +3,9 @@
      **/
     public function test{{ route.function|capitalize }}()
     {
+        // @todo: I need to think about how I want to autogenerate these. -MB
+        $this->markTestIncomplete("I need to think about how I want to autogenerate these.");
+
         $response = $this->{{ pack_name|lower }}->{{ route.function }}();
 
         $this->assertEquals("Okay", $response->Status);

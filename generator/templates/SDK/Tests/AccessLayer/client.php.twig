@@ -1,5 +1,5 @@
 <?php
-namespace Segura\SDK\{{ app_name }}\Test;
+namespace Segura\SDK\{{ app_name }}\Test\AccessLayer;
 
 use Segura\SDK\{{ app_name }}\AccessLayer\{{ pack_name }}AccessLayer;
 use Segura\SDK\{{ app_name }}\Client as SDKClient;
@@ -20,7 +20,7 @@ class {{ pack_name }}Test extends \PHPUnit_Framework_TestCase{
     }
 
 {% for route in routes %}
-{% set test_file = "SDK/Tests/" ~ "_test_" ~ route.template ~ ".php.twig" %}
+{% set test_file = "SDK/Tests/AccessLayer/" ~ "_test_" ~ route.template ~ ".php.twig" %}
 {% include test_file %}
 {% endfor %}
 }

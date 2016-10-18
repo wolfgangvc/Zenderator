@@ -378,7 +378,7 @@ class Zenderator
             $this->renderToFile(true, $outputPath . "/src/Models/{$packName}Model.php", "SDK/Models/model.php.twig", $routeRenderData);
 
             // Tests
-            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/client.php.twig", $routeRenderData);
+            $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
 
             if (!file_exists($outputPath . "/tests/fixtures")) {
                 mkdir($outputPath . "/tests/fixtures", null, true);
