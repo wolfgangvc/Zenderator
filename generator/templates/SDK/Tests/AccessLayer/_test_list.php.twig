@@ -11,3 +11,18 @@
         $this->assertEquals('Segura\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
         return $response;
     }
+
+    /**
+     * @vcr unittest_{{ pack_name|lower }}_list.cassette
+     **/
+    public function test{{ route.function|capitalize }}LimitOne()
+    {
+        $response = $this->{{ pack_name|lower }}->{{ route.function }}(1, 0);
+        if($response == false){
+            $this->markTestSkipped("There was no data returned calling {{ route.function }}() on {{ pack_name|lower }}.");
+        }
+        $element = $response[rand(0,count($response) - 1)];
+        $this->assertEquals('Segura\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
+        $this->assertEquals(1, count($response));
+        return $response;
+    }

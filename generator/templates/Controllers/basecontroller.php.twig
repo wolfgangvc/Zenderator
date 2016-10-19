@@ -19,4 +19,12 @@ abstract class Base{{ class_name }}Controller extends AbstractCrudController
     {
         $this->service = ${{ variable_name }};
     }
+
+    /**
+     * @returns Services\{{ class_name }}Service
+     */
+    public function getService()
+    {
+        return parent::getService();
+    }
 }

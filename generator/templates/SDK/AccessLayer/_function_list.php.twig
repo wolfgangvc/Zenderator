@@ -1,13 +1,27 @@
     /**
+     * @param $limit integer The maximum number of {{ route.singular }}Model to get
+     * @param $offset integer Get items starting at the nth item.
      * @return Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}()
+    public function {{ route.function }}($limit = null, $offset = null)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
         $method = "{{ route.method }}";
-        $response = $this->request($method, $endpoint);
+        $filterArray = [
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+        $response = $this->request(
+            $method,
+            $endpoint,
+            [
+                'headers' => [
+                    'filter' => json_encode($filterArray),
+                ]
+            ]
+        );
         $body = $response->getBody()->getContents();
         if(json_decode($body) === null){
             throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));

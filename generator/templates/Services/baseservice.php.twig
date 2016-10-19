@@ -71,10 +71,10 @@ abstract class Base{{ class_name }}Service extends AbstractService
     /**
      * @return Models\{{ class_name }}Model[]
      */
-    public function getAll()
+    public function getAll($limit = null, $offset = null)
     {
         ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll();
+        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll($limit, $offset);
         $return = [];
 
         if ($all{{ class_name }}s instanceof ResultSet) {
