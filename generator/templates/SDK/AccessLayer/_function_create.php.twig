@@ -24,7 +24,7 @@
             $requestBody = $serverException->getRequest()->getBody()->getContents();
             $responseBody = $serverException->getResponse()->getBody()->getContents();
             throw new Exceptions\SDKException("Server error: {$method} {$endpoint}\nRequest:\n{$requestBody}Response:\n{$responseBody}");
-        }catch(ClientException $clientException){
+        }catch(\GuzzleHttp\Exception\ClientException $clientException){
             $requestBody  = $clientException->getRequest()->getBody()->getContents();
             $responseBody = $clientException->getResponse()->getBody()->getContents();
             throw new Exceptions\SDKException("Server error:  {$method} {$endpoint}\nRequest:\n{$requestBody}Response:\n{$responseBody}");
