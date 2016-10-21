@@ -66,7 +66,7 @@ abstract class AbstractAccessLayer
             return $this->guzzleClient->request(
                 $method,
                 $url,
-                array_merge(
+                array_merge_recursive(
                     [
                         'headers' => [
                             'User-Agent' => 'lib{{ app_name }}/dev-master',

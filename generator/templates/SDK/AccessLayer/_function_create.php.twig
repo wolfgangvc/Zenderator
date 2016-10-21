@@ -12,6 +12,7 @@
                 $endpoint,
                 [
                     'body' => json_encode($propertyArray),
+
                 ]
             );
             $body = $response->getBody()->getContents();

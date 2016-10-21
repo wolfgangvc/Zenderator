@@ -30,6 +30,9 @@
             $method,
             $endpoint,
             [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
 {% if route.callbackProperties %}
                 'body' => json_encode($propertyArray),
 {% endif %}
