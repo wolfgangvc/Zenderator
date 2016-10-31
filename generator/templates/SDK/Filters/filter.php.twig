@@ -2,7 +2,6 @@
 
 namespace Segura\SDK\{{ app_name }}\Filters;
 
-
 class Filter
 {
     protected $order;
@@ -87,12 +86,25 @@ class Filter
         return $this;
     }
 
+    /**
+     * @param $column
+     * @param $value
+     * @param string $condition
+     * @return $this
+     */
+    public function addWhere($column, $value, $condition = '=')
+    {
+        $this->wheres[] = new FilterCondition($column, $value, $condition);
+        return $this;
+    }
+
     public function getHeaders()
     {
-        return [
+        return array_filter([
             'limit' => $this->getLimit(),
             'offset' => $this->getOffset(),
-        ];
+            'wheres' => $this->getWheres(),
+        ]);
     }
 
     public function getHeaderJson()

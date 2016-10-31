@@ -2,14 +2,14 @@
 $DIContainer = \{{ app_container }}::Instance()->getContainer();
 $tableGateway = $DIContainer->get(\Segura\Api\TableGateways\{{ class_name }}TableGateway::class);
 try{
-    $exampleObject = $tableGateway->fetchRandom();
+    $exampleExistingObject = $tableGateway->fetchRandom();
 }catch(Segura\AppCore\Exceptions\TableGatewayException $tge){
-    $exampleObject = $DIContainer->get('{{ class_name }}MockModel')->save();
+    $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
 }
-if(!$exampleObject instanceof \Segura\Api\Models\{{ class_name }}Model){
-    $exampleObject = $DIContainer->get('{{ class_name }}MockModel')->save();
+if(!$exampleExistingObject instanceof \Segura\Api\Models\{{ class_name }}Model){
+    $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
 }
-$exampleObjectArray = $exampleObject->__toArray();
+$exampleObjectToCreate = $DIContainer->get('{{ class_name }}MockModel');
 
 $router = \Segura\AppCore\Router\Router::Instance()
     ->addRoute(
@@ -29,7 +29,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
-            ->setExampleEntity($exampleObjectArray)
+            ->setExampleEntity($exampleExistingObject->__toArray())
     )
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()
@@ -48,7 +48,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
-            ->setExampleEntity($exampleObjectArray)
+            ->setExampleEntity($exampleObjectToCreate->__toArray())
     )
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()
@@ -67,7 +67,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
-            ->setExampleEntity($exampleObjectArray)
+            ->setExampleEntity($exampleExistingObject->__toArray())
     )
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()

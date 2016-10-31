@@ -1,0 +1,102 @@
+<?php
+
+namespace Segura\SDK\{{ app_name }}\Filters;
+
+use Segura\SDK\Api\Exceptions\FilterConditionNotFoundException;
+
+class FilterCondition implements \JsonSerializable
+{
+    const CONDITION_EQUAL = '=';
+    const CONDITION_GREATER_THAN = '>';
+    const CONDITION_LESS_THAN = '<';
+    const CONDITION_GREATER_THAN_OR_EQUAL = '>=';
+    const CONDITION_LESS_THAN_OR_EQUAL = '<=';
+    const CONDITION_LIKE = 'LIKE';
+
+    protected $column;
+    protected $value;
+    protected $condition;
+
+    public function __construct($column, $value, $condition = self::CONDITION_EQUAL)
+    {
+        $this
+            ->setColumn($column)
+            ->setValue($value)
+            ->setCondition($condition);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getColumn()
+    {
+        return $this->column;
+    }
+
+    /**
+     * @param mixed $column
+     * @return FilterCondition
+     */
+    public function setColumn($column)
+    {
+        $this->column = $column;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @param mixed $value
+     * @return FilterCondition
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCondition(): string
+    {
+        return $this->condition;
+    }
+
+    /**
+     * @param string $condition
+     * @throws FilterConditionNotFoundException
+     * @return FilterCondition
+     */
+    public function setCondition(string $condition): FilterCondition
+    {
+        switch ($condition){
+            case self::CONDITION_EQUAL:
+            case self::CONDITION_GREATER_THAN:
+            case self::CONDITION_LESS_THAN:
+            case self::CONDITION_GREATER_THAN_OR_EQUAL:
+            case self::CONDITION_LESS_THAN_OR_EQUAL:
+            case self::CONDITION_LIKE:
+                break;
+            default:
+                throw new FilterConditionNotFoundException("Unsupported condition: '{$condition}");
+        }
+        $this->condition = $condition;
+        return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'column' => $this->getColumn(),
+            'condition' => $this->getCondition(),
+            'value' => $this->getValue(),
+        ];
+    }
+}

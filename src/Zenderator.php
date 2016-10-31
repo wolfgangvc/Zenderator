@@ -415,6 +415,7 @@ class Zenderator
 
         echo "Generating Filter Objects:";
         $this->renderToFile(true, $outputPath . "/src/Filters/Filter.php", "SDK/Filters/filter.php.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/src/Filters/FilterCondition.php", "SDK/Filters/filtercondition.php.twig", $renderData);
         echo " [DONE]\n";
 
         echo "Generating Client Container:";
@@ -441,7 +442,8 @@ class Zenderator
 
         echo "Generating Exceptions:";
         $derivedExceptions = [
-            'ObjectNotFoundException'
+            'ObjectNotFoundException',
+            'FilterConditionNotFoundException',
         ];
         foreach ($derivedExceptions as $derivedException) {
             $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));

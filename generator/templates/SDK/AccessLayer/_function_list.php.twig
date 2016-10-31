@@ -8,14 +8,16 @@
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
         $method = "{{ route.method }}";
+        $headers = [
+            'Filter' => $filter instanceof Filter ? $filter->getHeaderJson() : null ,
+            'Accept' => 'application/json',
+        ];
+        //\Kint::dump($endpoint, $method, $headers);
         $response = $this->request(
             $method,
             $endpoint,
             [
-                'headers' => [
-                    'Filter' => $filter instanceof Filter ? $filter->getHeaderJson() : null ,
-                    'Accept' => 'application/json',
-                ]
+                'headers' => $headers
             ]
         );
         $body = $response->getBody()->getContents();

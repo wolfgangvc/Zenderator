@@ -2,14 +2,18 @@
 namespace {{ namespace }}\Services\Base;
 
 use Segura\AppCore\Abstracts\Service as AbstractService;
+use Segura\AppCore\Interfaces\ServiceInterface as ServiceInterface;
 use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Select;
 
 {% include '_overwrite_warning.twig' %}
 
 // @todo: Make all Services implement a ServicesInterface. - MB
-abstract class Base{{ class_name }}Service extends AbstractService
+abstract class Base{{ class_name }}Service
+    extends AbstractService
+    implements ServiceInterface
 {
 
     // Related Objects Table Gateways
@@ -69,12 +73,23 @@ abstract class Base{{ class_name }}Service extends AbstractService
     }
 
     /**
+     * @param int|null $limit
+     * @param int|null $offset
+     * @param array|null $wheres
+     * @param string|null $order
+     * @param string|null $orderDirection
      * @return Models\{{ class_name }}Model[]
      */
-    public function getAll($limit = null, $offset = null)
+    public function getAll(
+        int $limit = null,
+        int $offset = null,
+        array $wheres = null,
+        string $order = null,
+        string $orderDirection = Select::ORDER_ASCENDING
+    )
     {
         ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll($limit, $offset);
+        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll($limit, $offset, $wheres, $order, $orderDirection);
         $return = [];
 
         if ($all{{ class_name }}s instanceof ResultSet) {
@@ -90,7 +105,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
      * @return Models\{{ class_name }}Model
      * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
-    public function getById($id)
+    public function getById(int $id) : Models\{{ class_name }}Model
     {
         ${{ class_name }}Table = $this->getNewTableGatewayInstance();
         return ${{ class_name }}Table->getById($id);
@@ -102,7 +117,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
      * @return Models\{{ class_name }}Model
      * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
-    public function getByField(string $field, $value)
+    public function getByField(string $field, $value) : Models\{{ class_name }}Model
     {
         ${{ class_name }}Table = $this->getNewTableGatewayInstance();
         return ${{ class_name }}Table->getByField($field, $value);
@@ -112,7 +127,7 @@ abstract class Base{{ class_name }}Service extends AbstractService
      * @return Models\{{ class_name }}Model
      * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
-    public function getRandom()
+    public function getRandom() : Models\{{ class_name }}Model
     {
         ${{ class_name }}Table = $this->getNewTableGatewayInstance();
         return ${{ class_name }}Table->fetchRandom();
