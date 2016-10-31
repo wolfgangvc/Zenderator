@@ -1,24 +1,19 @@
     /**
-     * @param $limit integer The maximum number of {{ route.singular }}Model to get
-     * @param $offset integer Get items starting at the nth item.
+     * @param $filter Filter instance
      * @return Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}($limit = null, $offset = null)
+    public function {{ route.function }}(Filter $filter = null)
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
         $method = "{{ route.method }}";
-        $filterArray = [
-            'limit' => $limit,
-            'offset' => $offset,
-        ];
         $response = $this->request(
             $method,
             $endpoint,
             [
                 'headers' => [
-                    'filter' => json_encode($filterArray),
+                    'Filter' => $filter instanceof Filter ? $filter->getHeaderJson() : null ,
                     'Accept' => 'application/json',
                 ]
             ]

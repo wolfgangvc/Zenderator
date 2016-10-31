@@ -186,6 +186,7 @@ class Zenderator
         }
 
         // Scan for remote relations
+        //\Kint::dump(array_keys($models));
         foreach ($models as $oModel) {
             $oModel->scanForRemoteRelations($models);
         }
@@ -291,6 +292,18 @@ class Zenderator
         }
     }
 
+    private function removePHPVCRCassettes($outputPath)
+    {
+        $cassettesDir = new \DirectoryIterator($outputPath . "/tests/fixtures/");
+        foreach($cassettesDir as $cassette){
+            if(!$cassette->isDot()){
+                if(substr($cassette->getFilename(), -9, 9) == '.cassette') {
+                    unlink($cassette->getPathname());
+                }
+            }
+        }
+    }
+
     private function cleanCode()
     {
         if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
@@ -321,6 +334,7 @@ class Zenderator
     {
         $models = $this->makeModelSchemas();
         $this->makeSDKFiles($models, $outputPath);
+        $this->removePHPVCRCassettes($outputPath);
         $this->cleanCode();
     }
 
@@ -397,6 +411,10 @@ class Zenderator
         $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "SDK/Abstracts/abstractaccesslayer.php.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "SDK/Abstracts/abstractclient.php.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "SDK/Abstracts/abstractmodel.php.twig", $renderData);
+        echo " [DONE]\n";
+
+        echo "Generating Filter Objects:";
+        $this->renderToFile(true, $outputPath . "/src/Filters/Filter.php", "SDK/Filters/filter.php.twig", $renderData);
         echo " [DONE]\n";
 
         echo "Generating Client Container:";

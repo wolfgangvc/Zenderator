@@ -17,7 +17,11 @@
      **/
     public function test{{ route.function|capitalize }}LimitOne()
     {
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}(1, 0);
+        $response = $this->{{ pack_name|lower }}->{{ route.function }}(
+                        Filter::Factory()
+                            ->setLimit(1)
+                            ->setOffset(0)
+                    );
         if($response == false){
             $this->markTestSkipped("There was no data returned calling {{ route.function }}() on {{ pack_name|lower }}.");
         }

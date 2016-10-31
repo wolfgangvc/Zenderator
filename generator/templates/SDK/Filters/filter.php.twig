@@ -1,0 +1,102 @@
+<?php
+
+namespace Segura\SDK\{{ app_name }}\Filters;
+
+
+class Filter
+{
+    protected $order;
+    protected $limit;
+    protected $offset;
+    protected $wheres;
+
+    static public function Factory()
+    {
+        return new Filter();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOrder()
+    {
+        return $this->order;
+    }
+
+    /**
+     * @param mixed $order
+     * @return Filter
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLimit()
+    {
+        return $this->limit;
+    }
+
+    /**
+     * @param mixed $limit
+     * @return Filter
+     */
+    public function setLimit($limit)
+    {
+        $this->limit = $limit;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOffset()
+    {
+        return $this->offset;
+    }
+
+    /**
+     * @param mixed $offset
+     * @return Filter
+     */
+    public function setOffset($offset)
+    {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWheres()
+    {
+        return $this->wheres;
+    }
+
+    /**
+     * @param mixed $wheres
+     * @return Filter
+     */
+    public function setWheres($wheres)
+    {
+        $this->wheres = $wheres;
+        return $this;
+    }
+
+    public function getHeaders()
+    {
+        return [
+            'limit' => $this->getLimit(),
+            'offset' => $this->getOffset(),
+        ];
+    }
+
+    public function getHeaderJson()
+    {
+        return json_encode($this->getHeaders());
+    }
+}
