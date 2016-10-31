@@ -63,13 +63,11 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
         return parent::__construct($this->table, $this->databaseAdaptor, null, $resultSetPrototype);
     }
 
+    /**
+     * @return Models\{{ class_name }}Model
+     */
     public function getNewMockModelInstance()
     {
-{% for related_object in related_objects|sort|unique %}
-      ${{ related_object.getRemoteVariable }}ExampleObject = $this->{{ related_object.getRemoteVariable }}TableGateway->getNewMockModelInstance();
-      $this->{{ related_object.getRemoteVariable }}TableGateway->save(${{ related_object.getRemoteVariable }}ExampleObject);
-
-{% endfor %}
 
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
@@ -77,11 +75,11 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% if column.isAutoIncrement %}
         '{{ column.getField }}' => null,
 {% elseif column.hasRelatedObjects %}
-        '{{ column.getField }}' => $this
-                                    ->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway
-                                        ->getNewMockModelInstance()
-                                        ->save()
-                                            ->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+        '{{ column.getField }}' =>
+            $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom() instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
+            ? $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}()
+            : $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+
 {% elseif column.getPhpType == 'int' and 'max_field_length' in column|keys %}
         '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 1) < column.getMaxFieldLength ? 10 ** (column.getMaxLength - 1) : column.getMaxFieldLength}}),
 {% elseif column.getPhpType == 'int' %}
