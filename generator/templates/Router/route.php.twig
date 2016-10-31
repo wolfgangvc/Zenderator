@@ -1,6 +1,15 @@
 <?php
 $DIContainer = \{{ app_container }}::Instance()->getContainer();
-$exampleObjectArray = $DIContainer->get('{{ class_name }}MockModel')->__toArray();
+$tableGateway = $DIContainer->get(\Segura\Api\TableGateways\{{ class_name }}TableGateway::class);
+try{
+    $exampleObject = $tableGateway->fetchRandom();
+}catch(Segura\AppCore\Exceptions\TableGatewayException $tge){
+    $exampleObject = $DIContainer->get('{{ class_name }}MockModel')->save();
+}
+if(!$exampleObject instanceof \Segura\Api\Models\{{ class_name }}Model){
+    $exampleObject = $DIContainer->get('{{ class_name }}MockModel')->save();
+}
+$exampleObjectArray = $exampleObject->__toArray();
 
 $router = \Segura\AppCore\Router\Router::Instance()
     ->addRoute(
