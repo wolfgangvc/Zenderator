@@ -85,11 +85,18 @@ abstract class Base{{ class_name }}Service
         int $offset = null,
         array $wheres = null,
         string $order = null,
-        string $orderDirection = Select::ORDER_ASCENDING
+        string $orderDirection = null
     )
     {
+
         ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll($limit, $offset, $wheres, $order, $orderDirection);
+        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll(
+            $limit,
+            $offset,
+            $wheres,
+            $order,
+            $orderDirection !== null ? $orderDirection : Select::ORDER_ASCENDING
+        );
         $return = [];
 
         if ($all{{ class_name }}s instanceof ResultSet) {

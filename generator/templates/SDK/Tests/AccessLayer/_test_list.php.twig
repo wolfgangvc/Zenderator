@@ -56,3 +56,27 @@
 {% endfor %}
         return $response;
     }
+
+    /**
+    * @vcr unittest_{{ pack_name|lower }}_list.cassette
+    **/
+    public function test{{ route.function|capitalize }}OrderBy()
+    {
+        $responseAsc = $this->{{ pack_name|lower }}->{{ route.function }}(
+            Filter::Factory()->setOrder('Id', 'ASC')
+        );
+        $responseDsc = $this->{{ pack_name|lower }}->{{ route.function }}(
+            Filter::Factory()->setOrder('Id', 'DESC')
+        );
+        $responseAscIds = [];
+        foreach($responseAsc as $item){
+            $responseAscIds[] = $item->getId();
+        }
+        $responseDscIds = [];
+        foreach($responseDsc as $item){
+            $responseDscIds[] = $item->getId();
+        }
+        //\Kint::dump($responseAscIds, $responseDscIds);
+
+        $this->assertEquals(array_reverse($responseAscIds), $responseDscIds);
+    }
