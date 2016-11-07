@@ -84,12 +84,12 @@ class Zenderator
         $this->config = file_get_contents($zenderatorConfigPath);
         $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
 
-        $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
-        $namespaces      = array_keys((array)$this->composer->autoload->{'psr-4'});
+        $this->composer = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
+        $namespaces = array_keys((array)$this->composer->autoload->{'psr-4'});
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
-        $this->twig   = new \Twig_Environment($this->loader);
+        $this->twig = new \Twig_Environment($this->loader);
 
         $this->twig->addExtension(
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
@@ -102,13 +102,13 @@ class Zenderator
             'tbl_migration',
         ];
 
-        $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+        $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
         $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-        $this->transCamel2Studly  = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
-        $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
-        $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
-        $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $this->transSnake2Camel = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+        $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+        $this->transCamel2Snake = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         // Check for old-style config.
         if (isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])) {
@@ -124,7 +124,7 @@ class Zenderator
         }
 
         foreach ($databaseConfigs as $dbName => $databaseConfig) {
-            $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
+            $this->adapters[$dbName] = new DbAdaptor($databaseConfig);
             $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
             $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
         }
@@ -143,8 +143,8 @@ class Zenderator
 
     public static function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
-        $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
-        $query   = $adapter->query($sql);
+        $sql = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
+        $query = $adapter->query($sql);
         $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
@@ -273,7 +273,7 @@ class Zenderator
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
             $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", [
-                'models'        => $allModelData,
+                'models' => $allModelData,
                 'app_container' => APP_CORE_NAME,
             ]);
             echo " [DONE]\n\n";
@@ -340,11 +340,11 @@ class Zenderator
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
-        $packs            = [];
-        $routeCount       = 0;
+        $packs = [];
+        $routeCount = 0;
         $sharedRenderData = [
-            'app_name'         => APP_NAME,
-            'app_container'    => APP_CORE_NAME,
+            'app_name' => APP_NAME,
+            'app_container' => APP_CORE_NAME,
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
         ];
 
@@ -367,7 +367,7 @@ class Zenderator
             echo " > Pack: {$packName}...\n";
             $routeRenderData = [
                 'pack_name' => $packName,
-                'routes'    => $routes,
+                'routes' => $routes,
             ];
             $properties = [];
             foreach ($routes as $route) {
@@ -377,7 +377,7 @@ class Zenderator
                     }
                 }
             }
-            $properties                    = array_unique($properties);
+            $properties = array_unique($properties);
             $routeRenderData['properties'] = $properties;
 
             $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
@@ -402,7 +402,7 @@ class Zenderator
         $renderData = array_merge(
             $sharedRenderData,
             [
-                'packs'  => $packs,
+                'packs' => $packs,
                 'config' => $this->config
             ]
         );
@@ -457,8 +457,8 @@ class Zenderator
     private function getRoutes()
     {
         $response = $this->makeRequest("GET", "/v1");
-        $body     = (string)$response->getBody();
-        $body     = json_decode($body, true);
+        $body = (string)$response->getBody();
+        $body = json_decode($body, true);
         return $body['Routes'];
     }
 
@@ -477,7 +477,7 @@ class Zenderator
          * @var \Segura\AppCore\App $applicationInstance
          */
         $applicationInstance = App::Instance();
-        $calledClass         = get_called_class();
+        $calledClass = get_called_class();
 
         $app = $applicationInstance->getApp();
 
@@ -493,18 +493,18 @@ class Zenderator
 
         $env = Environment::mock(
             [
-                'SCRIPT_NAME'    => '/index.php',
-                'REQUEST_URI'    => $path,
+                'SCRIPT_NAME' => '/index.php',
+                'REQUEST_URI' => $path,
                 'REQUEST_METHOD' => $method,
-                'RAND'           => rand(0, 100000000),
+                'RAND' => rand(0, 100000000),
             ]
         );
-        $uri     = Uri::createFromEnvironment($env);
+        $uri = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies      = [];
+        $cookies = [];
         $serverParams = $env->all();
-        $body         = new RequestBody();
+        $body = new RequestBody();
         if (!is_array($post) && $post != null) {
             $body->write($post);
             $body->rewind();
