@@ -26,7 +26,6 @@ $pathsToPSR2 = [
 $phpCsFixerRules = [
     'no_unused_imports',
     'binary_operator_spaces',
-    'align_equals',
     'ordered_imports',
     'short_array_syntax',
     'phpdoc_order',
