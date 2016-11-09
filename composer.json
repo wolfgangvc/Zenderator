@@ -9,7 +9,6 @@
   "bin": [
     "generator/automize",
     "generator/phpcsfixerfier",
-    "generator/psr2ifier",
     "generator/sdkifier",
     "generator/zenderator"
   ],

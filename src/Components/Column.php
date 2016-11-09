@@ -6,7 +6,6 @@ use Zenderator\Exception\DBTypeNotTranslatedException;
 
 class Column extends Entity
 {
-
     protected $field;
     protected $dbType;
     protected $phpType;

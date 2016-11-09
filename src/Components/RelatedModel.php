@@ -258,7 +258,6 @@ class RelatedModel extends Entity
         string $remoteSchema,
         string $remoteColumn
     ) {
-    
         return $this
             ->setLocalBoundSchema($localSchema)
             ->setLocalBoundColumn($localColumn)

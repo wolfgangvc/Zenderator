@@ -61,6 +61,7 @@ $menu = (new CliMenuBuilder)
         ->end()
     ->addItem('Run Clean', function (CliMenu $menu) use ($zenderator){
         $zenderator->cleanCode();
+        sleep(3);
         $menu->redraw();
     })
 

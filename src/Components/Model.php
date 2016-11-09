@@ -331,7 +331,6 @@ class Model extends Entity
      */
     public function computeAutoIncrementColumns()
     {
-
         $sql = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
         $query = $this->getAdaptor()->query($sql);
         $columns = [];

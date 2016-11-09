@@ -20,12 +20,12 @@ use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
 {
-    static $databaseConfigs;
+    public static $databaseConfigs;
     private $rootOfApp;
     private $config; // @todo rename $composerConfig
     private $composer;
     private $namespace;
-    static private $useClassPrefixes = false;
+    private static $useClassPrefixes = false;
     /** @var \Twig_Loader_Filesystem */
     private $loader;
     /** @var \Twig_Environment */
@@ -49,6 +49,57 @@ class Zenderator
     private $transSnake2Spinal;
     /** @var CaseTransformer */
     private $transCamel2Snake;
+
+    private $pathsToPSR2 = [
+        APP_ROOT . "/src/Models/Base",
+        APP_ROOT . "/src/Models",
+        APP_ROOT . "/src/Controllers/Base",
+        APP_ROOT . "/src/Controllers",
+        APP_ROOT . "/src/Services/Base",
+        APP_ROOT . "/src/Services",
+        APP_ROOT . "/src/*.php",
+        APP_ROOT . "/tests/Api/Generated",
+        APP_ROOT . "/tests/Models/Generated",
+        APP_ROOT . "/public/index.php",
+        APP_ROOT . "/vendor/segura/appcore",
+        APP_ROOT . "/vendor/segura/zenderator",
+        APP_ROOT . "/vendor/segura/libscmapi",
+        APP_ROOT . "/vendor/segura/libschengen",
+        APP_ROOT . "/vendor/segura/libapi",
+        APP_ROOT . "/vendor/segura/libhorizon",
+    ];
+    private $phpCsFixerRules = [
+        'braces',
+        'class_definition',
+        'elseif',
+        'single_blank_line_at_eof',
+        'no_spaces_after_function_name',
+        'function_declaration',
+        'indentation_type',
+        'blank_line_after_namespace',
+        'line_ending',
+        'lowercase_constants',
+        'lowercase_keywords',
+        'method_argument_space',
+        'single_import_per_statement',
+        'no_trailing_whitespace_in_comment',
+        'no_spaces_inside_parenthesis',
+        'no_closing_tag',
+        'single_line_after_imports',
+        'switch_case_semicolon_to_colon',
+        'switch_case_space',
+        'no_trailing_whitespace',
+        'visibility_required',
+        'no_unused_imports',
+        'binary_operator_spaces',
+        'ordered_imports',
+        'short_array_syntax',
+        'phpdoc_order',
+        'phpdoc_align',
+        'phpdoc_scalar',
+        'phpdoc_separation',
+        'phpdoc_summary'
+    ];
 
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
@@ -159,7 +210,7 @@ class Zenderator
         $models = $this->makeModelSchemas();
         $this->removeCoreGeneratedFiles();
         $this->makeCoreFiles($models);
-        if($cleanByDefault) {
+        if ($cleanByDefault) {
             $this->cleanCode();
         }
     }
@@ -224,7 +275,8 @@ class Zenderator
         return $models;
     }
 
-    private function removeCoreGeneratedFiles(){
+    private function removeCoreGeneratedFiles()
+    {
         $generatedPaths = [
             APP_ROOT . "/src/Controllers/Base/",
             APP_ROOT . "/src/Models/Base/",
@@ -235,9 +287,9 @@ class Zenderator
             APP_ROOT . "/tests/Models/Generated/",
             APP_ROOT . "/tests/Services/Generated/",
         ];
-        foreach($generatedPaths as $generatedPath){
-            foreach(new \DirectoryIterator($generatedPath) as $file){
-                if(!$file->isDot() && $file->getExtension() == 'php') {
+        foreach ($generatedPaths as $generatedPath) {
+            foreach (new \DirectoryIterator($generatedPath) as $file) {
+                if (!$file->isDot() && $file->getExtension() == 'php') {
                     unlink($file->getRealPath());
                 }
             }
@@ -318,9 +370,9 @@ class Zenderator
     private function removePHPVCRCassettes($outputPath)
     {
         $cassettesDir = new \DirectoryIterator($outputPath . "/tests/fixtures/");
-        foreach($cassettesDir as $cassette){
-            if(!$cassette->isDot()){
-                if(substr($cassette->getFilename(), -9, 9) == '.cassette') {
+        foreach ($cassettesDir as $cassette) {
+            if (!$cassette->isDot()) {
+                if (substr($cassette->getFilename(), -9, 9) == '.cassette') {
                     unlink($cassette->getPathname());
                 }
             }
@@ -332,20 +384,39 @@ class Zenderator
         if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
             $this->cleanCodePHPCSFixer();
         }
-        if (is_array($this->config['formatting']) && in_array("clean", $this->config['formatting'])) {
-            $this->cleanCodePSR2();
-        }
         $this->cleanCodeComposerAutoloader();
     }
 
-    private function cleanCodePHPCSFixer()
+    private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
     {
-        require(__DIR__ . "/../generator/phpcsfixerfier");
+        ob_start();
+        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --rules=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
+        echo " > {$pathToPSR2} ... ";
+        $begin = microtime(true);
+        system($command, $junk);
+        $time = microtime(true) - $begin;
+        ob_end_clean();
+        echo " [" . ConsoleHelper::COLOR_GREEN . "Complete" . ConsoleHelper::COLOR_RESET . " in " . number_format($time, 2) . "]\n";
+
+        //echo $output;
     }
 
-    private function cleanCodePSR2()
+    public function cleanCodePHPCSFixer()
     {
-        require(__DIR__ . "/../generator/psr2ifier");
+        $begin = microtime(true);
+        echo "php-cs-fixer-fying... \n";
+
+        foreach ($this->pathsToPSR2 as $pathToPSR2) {
+            echo " > {$pathToPSR2} ... ";
+            if (file_exists($pathToPSR2)) {
+                $this->cleanCodePHPCSFixer_FixFile($pathToPSR2, $this->phpCsFixerRules);
+            } else {
+                echo " [" . ConsoleHelper::COLOR_RED . "Skipping" . ConsoleHelper::COLOR_RESET . ", files or directory does not exist.]\n";
+            }
+        }
+
+        $time = microtime(true) - $begin;
+        echo " [Complete in " . number_format($time, 2) . "]\n";
     }
 
     public function cleanCodeComposerAutoloader()
@@ -361,9 +432,9 @@ class Zenderator
     {
         echo "Running phpunit... \n";
 
-        if($withCoverage) {
+        if ($withCoverage) {
             passthru("./vendor/bin/phpunit");
-        }else{
+        } else {
             passthru("./vendor/bin/phpunit --no-coverage");
         }
         sleep(3);
@@ -371,17 +442,17 @@ class Zenderator
 
     public function updateSeguraDependencies()
     {
-        $composerJson = json_decode(file_get_contents(APP_ROOT . "/composer.json"),true);
+        $composerJson = json_decode(file_get_contents(APP_ROOT . "/composer.json"), true);
         $dependencies = array_merge($composerJson['require'], $composerJson['require-dev']);
         $toUpdate = [];
-        foreach($dependencies as $dependency => $version){
-            if(substr($dependency, 0, strlen("segura/")) == "segura/"){
+        foreach ($dependencies as $dependency => $version) {
+            if (substr($dependency, 0, strlen("segura/")) == "segura/") {
                 $toUpdate[] = $dependency;
             }
         }
         $begin = microtime(true);
         echo "Updating Segura Composer Dependencies... \n";
-        foreach($toUpdate as $item){
+        foreach ($toUpdate as $item) {
             echo " > {$item}\n";
         }
         exec("composer update " . implode(" ", $toUpdate));
@@ -394,7 +465,7 @@ class Zenderator
         $models = $this->makeModelSchemas();
         $this->makeSDKFiles($models, $outputPath);
         $this->removePHPVCRCassettes($outputPath);
-        if($cleanByDefault) {
+        if ($cleanByDefault) {
             $this->cleanCode();
         }
     }
@@ -432,7 +503,7 @@ class Zenderator
             ];
             $properties = [];
             foreach ($routes as $route) {
-                if(isset($route['properties'])) {
+                if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
                         $properties[] = $property;
                     }

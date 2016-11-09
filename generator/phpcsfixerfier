@@ -1,65 +1,16 @@
 #!/usr/bin/env php
 <?php
-use Zend\Stdlib\ConsoleHelper;
-if (!defined("APP_ROOT")) {
-    define("APP_ROOT", realpath(__DIR__ . "/../../../../"));
+
+$rootOfApp = __DIR__ . "/../../../../";
+
+require_once($rootOfApp . "/bootstrap.php");
+$mysqlConfigLocation = $rootOfApp . "/config/mysql.php";
+if(!file_exists($mysqlConfigLocation)){
+    die("Cannot find MySQL Config as expected at {$mysqlConfigLocation}\n\n");
 }
-require_once(APP_ROOT . "/bootstrap.php");
-$begin = microtime(true);
-echo "php-cs-fixer-fying... \n";
-$pathsToPSR2 = [
-    APP_ROOT . "/src/Models/Base",
-    APP_ROOT . "/src/Models",
-    APP_ROOT . "/src/Controllers/Base",
-    APP_ROOT . "/src/Controllers",
-    APP_ROOT . "/src/Services/Base",
-    APP_ROOT . "/src/Services",
-    APP_ROOT . "/src/*.php",
-    APP_ROOT . "/tests/Api/Generated",
-    APP_ROOT . "/tests/Models/Generated",
-    APP_ROOT . "/public/index.php",
-    APP_ROOT . "/vendor/segura/appcore",
-    APP_ROOT . "/vendor/segura/zenderator",
-    APP_ROOT . "/vendor/segura/libscmapi",
-    APP_ROOT . "/vendor/segura/libschengen",
-    APP_ROOT . "/vendor/segura/libapi",
-    APP_ROOT . "/vendor/segura/libhorizon",
-];
-$phpCsFixerRules = [
-    'no_unused_imports',
-    'binary_operator_spaces',
-    'ordered_imports',
-    'short_array_syntax',
-    'phpdoc_order',
-    'phpdoc_align',
-    'phpdoc_scalar',
-    'phpdoc_separation',
-    'phpdoc_summary'
-];
-
-function phpcsfixerfy($pathToPSR2, $phpCsFixerRules)
-{
-    ob_start();
-    $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --rules=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
-    echo " > {$pathToPSR2} ... ";
-    $begin = microtime(true);
-    system($command, $junk);
-    $time = microtime(true) - $begin;
-    ob_end_clean();
-    echo " [" . ConsoleHelper::COLOR_GREEN . "Complete" . ConsoleHelper::COLOR_RESET . " in " . number_format($time, 2) . "]\n";
-
-    //echo $output;
-}
-
-foreach ($pathsToPSR2 as $pathToPSR2) {
-    echo " > {$pathToPSR2} ... ";
-    if (file_exists($pathToPSR2)) {
-        phpcsfixerfy($pathToPSR2, $phpCsFixerRules);
-    } else {
-        echo " [" . ConsoleHelper::COLOR_RED . "Skipping" . ConsoleHelper::COLOR_RESET . ", files or directory does not exist.]\n";
-    }
-}
-
-$time = microtime(true) - $begin;
-echo "[ALL DONE]";
-echo " [Complete in " . number_format($time, 2) . "]\n";
+$databaseConfigs = require($mysqlConfigLocation);
+$zenderator = new \Zenderator\Zenderator(
+    $rootOfApp,
+    $databaseConfigs
+);
+$zenderator->cleanCodePHPCSFixer();
