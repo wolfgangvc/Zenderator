@@ -180,6 +180,7 @@ class Zenderator
             $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
             $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
         }
+        return $this;
     }
 
     public static function schemaName2databaseName($schemaName)
@@ -213,6 +214,7 @@ class Zenderator
         if ($cleanByDefault) {
             $this->cleanCode();
         }
+        return $this;
     }
 
     private function makeModelSchemas()
@@ -294,7 +296,9 @@ class Zenderator
                 }
             }
         }
+        return $this;
     }
+
     /**
      * @param Model[] $models
      */
@@ -353,6 +357,7 @@ class Zenderator
             ]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
         }
+        return $this;
     }
 
     private function renderToFile(bool $overwrite, string $path, string $template, array $data)
@@ -365,6 +370,7 @@ class Zenderator
             #echo "  > Writing to {$path}\n";
             file_put_contents($path, $output);
         }
+        return $this;
     }
 
     private function removePHPVCRCassettes($outputPath)
@@ -377,6 +383,7 @@ class Zenderator
                 }
             }
         }
+        return $this;
     }
 
     public function cleanCode()
@@ -385,6 +392,7 @@ class Zenderator
             $this->cleanCodePHPCSFixer();
         }
         $this->cleanCodeComposerAutoloader();
+        return $this;
     }
 
     private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
@@ -398,7 +406,7 @@ class Zenderator
         ob_end_clean();
         echo " [" . ConsoleHelper::COLOR_GREEN . "Complete" . ConsoleHelper::COLOR_RESET . " in " . number_format($time, 2) . "]\n";
 
-        //echo $output;
+        return $this;
     }
 
     public function cleanCodePHPCSFixer()
@@ -417,6 +425,7 @@ class Zenderator
 
         $time = microtime(true) - $begin;
         echo " [Complete in " . number_format($time, 2) . "]\n";
+        return $this;
     }
 
     public function cleanCodeComposerAutoloader()
@@ -426,6 +435,7 @@ class Zenderator
         exec("composer dump-autoload -o");
         $time = microtime(true) - $begin;
         echo "\n[Complete in " . number_format($time, 2) . "]\n";
+        return $this;
     }
 
     public function runTests($withCoverage = false)
@@ -437,7 +447,7 @@ class Zenderator
         } else {
             passthru("./vendor/bin/phpunit --no-coverage");
         }
-        sleep(3);
+        return $this;
     }
 
     public function updateSeguraDependencies()
@@ -458,6 +468,7 @@ class Zenderator
         exec("composer update " . implode(" ", $toUpdate));
         $time = microtime(true) - $begin;
         echo "\n[Complete in " . number_format($time, 2) . "]\n";
+        return $this;
     }
 
     public function makeSDK($outputPath = APP_ROOT, $cleanByDefault = true)
@@ -468,6 +479,7 @@ class Zenderator
         if ($cleanByDefault) {
             $this->cleanCode();
         }
+        return $this;
     }
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
@@ -584,6 +596,7 @@ class Zenderator
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         #\Kint::dump($renderData);
+        return $this;
     }
 
     private function getRoutes()
@@ -656,5 +669,11 @@ class Zenderator
         #echo "Response: " . (string) $response->getBody()."\n";
 
         return $response;
+    }
+
+    public function waitForKeypress($waitMessage = "Press any key to continue.")
+    {
+        echo "\n{$waitMessage}\n";
+        return trim(fgets(fopen('php://stdin', 'r')));
     }
 }
