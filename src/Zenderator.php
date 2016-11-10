@@ -68,6 +68,18 @@ class Zenderator
         APP_ROOT . "/vendor/segura/libapi",
         APP_ROOT . "/vendor/segura/libhorizon",
     ];
+
+    private $generatedPaths = [
+        APP_ROOT . "/src/Controllers/Base/",
+        APP_ROOT . "/src/Models/Base/",
+        APP_ROOT . "/src/Routes/Generated/",
+        APP_ROOT . "/src/Services/Base/",
+        APP_ROOT . "/src/TableGateways/Base/",
+        APP_ROOT . "/tests/Api/Generated/",
+        APP_ROOT . "/tests/Models/Generated/",
+        APP_ROOT . "/tests/Services/Generated/",
+    ];
+
     private $phpCsFixerRules = [
         'braces',
         'class_definition',
@@ -279,20 +291,12 @@ class Zenderator
 
     private function removeCoreGeneratedFiles()
     {
-        $generatedPaths = [
-            APP_ROOT . "/src/Controllers/Base/",
-            APP_ROOT . "/src/Models/Base/",
-            APP_ROOT . "/src/Routes/Generated/",
-            APP_ROOT . "/src/Services/Base/",
-            APP_ROOT . "/src/TableGateways/Base/",
-            APP_ROOT . "/tests/Api/Generated/",
-            APP_ROOT . "/tests/Models/Generated/",
-            APP_ROOT . "/tests/Services/Generated/",
-        ];
-        foreach ($generatedPaths as $generatedPath) {
-            foreach (new \DirectoryIterator($generatedPath) as $file) {
-                if (!$file->isDot() && $file->getExtension() == 'php') {
-                    unlink($file->getRealPath());
+        foreach ($this->generatedPaths as $generatedPath) {
+            if (file_exists($generatedPath)) {
+                foreach (new \DirectoryIterator($generatedPath) as $file) {
+                    if (!$file->isDot() && $file->getExtension() == 'php') {
+                        unlink($file->getRealPath());
+                    }
                 }
             }
         }
