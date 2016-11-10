@@ -50,6 +50,8 @@ class Zenderator
     /** @var CaseTransformer */
     private $transCamel2Snake;
 
+    private $vpnCheckUrl = "http://hub.segurasystems.com/home";
+
     private $pathsToPSR2 = [
         APP_ROOT . "/src/Models/Base",
         APP_ROOT . "/src/Models",
@@ -68,18 +70,6 @@ class Zenderator
         APP_ROOT . "/vendor/segura/libapi",
         APP_ROOT . "/vendor/segura/libhorizon",
     ];
-
-    private $generatedPaths = [
-        APP_ROOT . "/src/Controllers/Base/",
-        APP_ROOT . "/src/Models/Base/",
-        APP_ROOT . "/src/Routes/Generated/",
-        APP_ROOT . "/src/Services/Base/",
-        APP_ROOT . "/src/TableGateways/Base/",
-        APP_ROOT . "/tests/Api/Generated/",
-        APP_ROOT . "/tests/Models/Generated/",
-        APP_ROOT . "/tests/Services/Generated/",
-    ];
-
     private $phpCsFixerRules = [
         'braces',
         'class_definition',
@@ -291,12 +281,20 @@ class Zenderator
 
     private function removeCoreGeneratedFiles()
     {
-        foreach ($this->generatedPaths as $generatedPath) {
-            if (file_exists($generatedPath)) {
-                foreach (new \DirectoryIterator($generatedPath) as $file) {
-                    if (!$file->isDot() && $file->getExtension() == 'php') {
-                        unlink($file->getRealPath());
-                    }
+        $generatedPaths = [
+            APP_ROOT . "/src/Controllers/Base/",
+            APP_ROOT . "/src/Models/Base/",
+            APP_ROOT . "/src/Routes/Generated/",
+            APP_ROOT . "/src/Services/Base/",
+            APP_ROOT . "/src/TableGateways/Base/",
+            APP_ROOT . "/tests/Api/Generated/",
+            APP_ROOT . "/tests/Models/Generated/",
+            APP_ROOT . "/tests/Services/Generated/",
+        ];
+        foreach ($generatedPaths as $generatedPath) {
+            foreach (new \DirectoryIterator($generatedPath) as $file) {
+                if (!$file->isDot() && $file->getExtension() == 'php') {
+                    unlink($file->getRealPath());
                 }
             }
         }
@@ -442,15 +440,16 @@ class Zenderator
         return $this;
     }
 
-    public function runTests($withCoverage = false)
+    public function runTests($withCoverage = false, $haltOnError = false)
     {
         echo "Running phpunit... \n";
-
-        if ($withCoverage) {
-            passthru("./vendor/bin/phpunit");
-        } else {
-            passthru("./vendor/bin/phpunit --no-coverage");
-        }
+        $phpunitCommand = "" .
+            "./vendor/bin/phpunit " .
+            ($withCoverage ? "" : "--no-coverage") . " " .
+            ($haltOnError ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
+        ;
+        echo " > {$phpunitCommand}\n\n";
+        passthru($phpunitCommand);
         return $this;
     }
 
@@ -679,5 +678,20 @@ class Zenderator
     {
         echo "\n{$waitMessage}\n";
         return trim(fgets(fopen('php://stdin', 'r')));
+    }
+
+    public function vpnCheck(){
+        $ch = curl_init($this->vpnCheckUrl);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $data = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if($httpcode>=200 && $httpcode<300){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

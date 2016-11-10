@@ -18,6 +18,11 @@ $zenderator = new \Zenderator\Zenderator(
     $databaseConfigs
 );
 
+if(!$zenderator->vpnCheck()){
+    echo "WARNING! You're not connected to the VPN!\n";
+    $zenderator->waitForKeypress();
+}
+
 $menu = (new CliMenuBuilder)
     ->setTitle('Segura Automizer')
     ->addItem('Run Zenderator', function (CliMenu $menu) use ($zenderator){
@@ -53,6 +58,12 @@ $menu = (new CliMenuBuilder)
         ->addItem('Run Tests with Coverage (slow)', function(CliMenu $menu) use ($zenderator){
             $zenderator
                 ->runTests(true)
+                ->waitForKeypress();
+            $menu->redraw();
+        })
+        ->addItem('Run Tests but Stop on Failure/Error', function(CliMenu $menu) use ($zenderator){
+            $zenderator
+                ->runTests(true, true)
                 ->waitForKeypress();
             $menu->redraw();
         })
