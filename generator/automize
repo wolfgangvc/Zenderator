@@ -26,8 +26,10 @@ if(!$zenderator->vpnCheck()){
     $zenderator->waitForKeypress();
 }
 
+$baseAutomizeName = 'Segura Automizer - ' . APP_NAME;
+
 $menu = (new CliMenuBuilder)
-    ->setTitle('Segura Automizer - ' . APP_NAME)
+    ->setTitle($baseAutomizeName)
     ->addItem('Run Zenderator', function (CliMenu $menu) use ($zenderator){
         $zenderator
             ->makeZenderator(false)
@@ -51,7 +53,7 @@ $menu = (new CliMenuBuilder)
     })
     ->addLineBreak('-')
     ->addSubMenu('Tests')
-        ->setTitle('Segura Automizer > Tests')
+        ->setTitle($baseAutomizeName . ' > Tests')
         ->addItem('Run Tests without Coverage (fast)', function(CliMenu $menu) use ($zenderator){
             $zenderator
                 ->runTests(false)
@@ -73,7 +75,7 @@ $menu = (new CliMenuBuilder)
         ->end()
     ->addLineBreak('-')
     ->addSubMenu('Composer')
-        ->setTitle('Segura Automizer > Composer')
+        ->setTitle($baseAutomizeName . ' > Composer')
         ->addItem('Rebuild Composer Autoloader', function(CliMenu $menu) use ($zenderator){
             $zenderator
                 ->cleanCodeComposerAutoloader()
