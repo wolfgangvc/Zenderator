@@ -13,6 +13,9 @@ if(!file_exists($mysqlConfigLocation)){
     die("Cannot find MySQL Config as expected at {$mysqlConfigLocation}\n\n");
 }
 $databaseConfigs = require($mysqlConfigLocation);
+
+$sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME);
+
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfigs
@@ -31,16 +34,16 @@ $menu = (new CliMenuBuilder)
             ->waitForKeypress();
         $menu->redraw();
     })
-    ->addItem('Run SDKifier', function (CliMenu $menu) use ($zenderator){
+    ->addItem('Run SDKifier', function (CliMenu $menu) use ($zenderator, $sdkOutputPath){
         $zenderator
-            ->makeSDK(null, false)
+            ->makeSDK($sdkOutputPath, false)
             ->waitForKeypress();
         $menu->redraw();
     })
-    ->addItem('Purge System of Sin (Rebuild Everything & Clean)', function (CliMenu $menu) use ($zenderator){
+    ->addItem('Purge System of Sin (Rebuild Everything & Clean)', function (CliMenu $menu) use ($zenderator, $sdkOutputPath){
         $zenderator
             ->makeZenderator(false)
-            ->makeSDK(null, false)
+            ->makeSDK($sdkOutputPath, false)
             ->cleanCode()
             ->runTests(false)
             ->waitForKeypress();
