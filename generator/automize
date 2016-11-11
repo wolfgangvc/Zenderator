@@ -27,7 +27,7 @@ if(!$zenderator->vpnCheck()){
 }
 
 $menu = (new CliMenuBuilder)
-    ->setTitle('Segura Automizer')
+    ->setTitle('Segura Automizer - ' . APP_NAME)
     ->addItem('Run Zenderator', function (CliMenu $menu) use ($zenderator){
         $zenderator
             ->makeZenderator(false)
