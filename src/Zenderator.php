@@ -675,7 +675,7 @@ class Zenderator
         return $response;
     }
 
-    public function waitForKeypress($waitMessage = "Press any key to continue.")
+    public function waitForKeypress($waitMessage = "Press ENTER key to continue.")
     {
         echo "\n{$waitMessage}\n";
         return trim(fgets(fopen('php://stdin', 'r')));
