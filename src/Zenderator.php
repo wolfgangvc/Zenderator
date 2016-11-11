@@ -377,11 +377,13 @@ class Zenderator
 
     private function removePHPVCRCassettes($outputPath)
     {
-        $cassettesDir = new \DirectoryIterator($outputPath . "/tests/fixtures/");
-        foreach ($cassettesDir as $cassette) {
-            if (!$cassette->isDot()) {
-                if (substr($cassette->getFilename(), -9, 9) == '.cassette') {
-                    unlink($cassette->getPathname());
+        if(file_exists($outputPath . "/tests/fixtures")) {
+            $cassettesDir = new \DirectoryIterator($outputPath . "/tests/fixtures/");
+            foreach ($cassettesDir as $cassette) {
+                if (!$cassette->isDot()) {
+                    if (substr($cassette->getFilename(), -9, 9) == '.cassette') {
+                        unlink($cassette->getPathname());
+                    }
                 }
             }
         }
