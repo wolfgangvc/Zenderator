@@ -477,6 +477,7 @@ class Zenderator
     public function makeSDK($outputPath = APP_ROOT, $cleanByDefault = true)
     {
         $models = $this->makeModelSchemas();
+        $this->checkGitSDK($outputPath);
         $this->makeSDKFiles($models, $outputPath);
         $this->removePHPVCRCassettes($outputPath);
         if ($cleanByDefault) {
@@ -680,7 +681,8 @@ class Zenderator
         return trim(fgets(fopen('php://stdin', 'r')));
     }
 
-    public function vpnCheck(){
+    public function vpnCheck()
+    {
         $ch = curl_init($this->vpnCheckUrl);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
@@ -688,10 +690,26 @@ class Zenderator
         $data = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        if($httpcode>=200 && $httpcode<300){
+        if ($httpcode >= 200 && $httpcode < 300) {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public function checkGitSDK($path){
+        if(!file_exists($path . "/.git")){
+            $gitInitScript = [
+                "rm -R $path",
+                "mkdir -p $path",
+                "cd $path",
+                "git init",
+                "git remote add origin git@github.com:segurasystems/Lib" . APP_NAME . ".git",
+                "git fetch --all",
+                "git checkout master",
+                "git pull origin master",
+            ];
+            exec(implode("; ", $gitInitScript));
         }
     }
 }
