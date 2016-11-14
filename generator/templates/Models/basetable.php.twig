@@ -21,7 +21,6 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     /** @var \Faker\Generator */
     protected $faker;
-    static private $fakerSeed = 644194800;
 
     /** @var Db */
     private $databaseConnector;
@@ -53,7 +52,6 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
         $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
 {% endfor %}
         $this->faker = $faker;
-        $this->faker->seed(self::$fakerSeed);
         $this->databaseConnector = $databaseConnector;
 
         /** @var $adaptor AdapterInterface */
@@ -98,9 +96,6 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% endfor %}
       ];
       $new{{ class_name }} = $this->getNewModelInstance($new{{ class_name }}Data);
-
-      self::$fakerSeed++;
-
       return $new{{ class_name }};
     }
 
