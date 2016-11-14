@@ -292,9 +292,11 @@ class Zenderator
             APP_ROOT . "/tests/Services/Generated/",
         ];
         foreach ($generatedPaths as $generatedPath) {
-            foreach (new \DirectoryIterator($generatedPath) as $file) {
-                if (!$file->isDot() && $file->getExtension() == 'php') {
-                    unlink($file->getRealPath());
+            if(file_exists($generatedPath)) {
+                foreach (new \DirectoryIterator($generatedPath) as $file) {
+                    if (!$file->isDot() && $file->getExtension() == 'php') {
+                        unlink($file->getRealPath());
+                    }
                 }
             }
         }
