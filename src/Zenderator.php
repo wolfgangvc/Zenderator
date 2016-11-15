@@ -52,7 +52,7 @@ class Zenderator
 
     private $vpnCheckUrl = "http://hub.segurasystems.com/home";
 
-    private $pathsToPSR2 = array(
+    private $pathsToPSR2 = [
         APP_ROOT . "/src/Models/Base",
         APP_ROOT . "/src/Models",
         APP_ROOT . "/src/Controllers/Base",
@@ -69,39 +69,41 @@ class Zenderator
         APP_ROOT . "/vendor/segura/libschengen",
         APP_ROOT . "/vendor/segura/libapi",
         APP_ROOT . "/vendor/segura/libhorizon",
-    );
-    private $phpCsFixerRules = array(
+    ];
+    private $phpCsFixerRules = [
         'braces',
         'class_definition',
         'elseif',
-        'single_blank_line_at_eof',
-        'no_spaces_after_function_name',
+        'eof_ending',
+        'function_call_space',
         'function_declaration',
-        'indentation_type',
-        'blank_line_after_namespace',
-        'line_ending',
+        'no_tab_indentation',
+        'line_after_namespace',
+        'linefeed',
         'lowercase_constants',
         'lowercase_keywords',
         'method_argument_space',
-        'single_import_per_statement',
+        'multiple_use',
         'no_trailing_whitespace_in_comment',
-        'no_spaces_inside_parenthesis',
-        'no_closing_tag',
+        'parenthesis',
+        'php_closing_tag',
+        'php4_constructor',
         'single_line_after_imports',
         'switch_case_semicolon_to_colon',
         'switch_case_space',
-        'no_trailing_whitespace',
-        'visibility_required',
-        'no_unused_imports',
-        'binary_operator_spaces',
-        'ordered_imports',
-        'array_syntax',
+        'trailing_spaces',
+        'visibility',
+        'unused_use',
+        'unalign_double_arrow',
+        'unalign_equals',
+        'ordered_use',
+        'short_array_syntax',
         'phpdoc_order',
-        'phpdoc_align',
+        'phpdoc_params',
         'phpdoc_scalar',
         'phpdoc_separation',
-        'phpdoc_summary'
-    );
+        'phpdoc_short_description'
+    ];
 
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
@@ -152,9 +154,9 @@ class Zenderator
         $fct = new \Twig_SimpleFunction('var_export', 'var_export');
         $this->twig->addFunction($fct);
 
-        $this->ignoredTables = array(
+        $this->ignoredTables = [
             'tbl_migration',
-        );
+        ];
 
         $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
         $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
@@ -200,7 +202,7 @@ class Zenderator
     {
         $sql = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
         $query = $adapter->query($sql);
-        $columns = array();
+        $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
             $columns[] = $aiColumn['Field'];
@@ -222,7 +224,7 @@ class Zenderator
     private function makeModelSchemas()
     {
         /** @var Model[] $models */
-        $models = array();
+        $models = [];
         foreach ($this->adapters as $dbName => $adapter) {
             echo "Adaptor: {$dbName}\n";
             /**
@@ -251,7 +253,7 @@ class Zenderator
         }
 
         // Check for Conflicts.
-        $conflictCheck = array();
+        $conflictCheck = [];
         foreach ($models as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
@@ -281,7 +283,7 @@ class Zenderator
 
     private function removeCoreGeneratedFiles()
     {
-        $generatedPaths = array(
+        $generatedPaths = [
             APP_ROOT . "/src/Controllers/Base/",
             APP_ROOT . "/src/Models/Base/",
             APP_ROOT . "/src/Routes/Generated/",
@@ -290,7 +292,7 @@ class Zenderator
             APP_ROOT . "/tests/Api/Generated/",
             APP_ROOT . "/tests/Models/Generated/",
             APP_ROOT . "/tests/Services/Generated/",
-        );
+        ];
         foreach ($generatedPaths as $generatedPath) {
             if (file_exists($generatedPath)) {
                 foreach (new \DirectoryIterator($generatedPath) as $file) {
@@ -309,7 +311,7 @@ class Zenderator
     private function makeCoreFiles(array $models)
     {
         echo "Generating Core files for " . count($models) . " models... \n";
-        $allModelData = array();
+        $allModelData = [];
         foreach ($models as $model) {
             $allModelData[$model->getClassName()] = $model->getRenderDataset();
             // "Model" suite
@@ -349,16 +351,16 @@ class Zenderator
         }
 
         echo "Generating App Container:";
-        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "DependencyInjector/appcontainer.php.twig", array('models' => $allModelData, 'config' => $this->config));
+        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "DependencyInjector/appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
 
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
-            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", array(
+            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", [
                 'models' => $allModelData,
                 'app_container' => APP_CORE_NAME,
-            ));
+            ]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
         }
         return $this;
@@ -404,7 +406,7 @@ class Zenderator
     private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
     {
         ob_start();
-        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --rules=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
+        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --fixers=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
         echo " > {$pathToPSR2} ... ";
         $begin = microtime(true);
         system($command, $junk);
@@ -461,7 +463,7 @@ class Zenderator
     {
         $composerJson = json_decode(file_get_contents(APP_ROOT . "/composer.json"), true);
         $dependencies = array_merge($composerJson['require'], $composerJson['require-dev']);
-        $toUpdate = array();
+        $toUpdate = [];
         foreach ($dependencies as $dependency => $version) {
             if (substr($dependency, 0, strlen("segura/")) == "segura/") {
                 $toUpdate[] = $dependency;
@@ -492,13 +494,13 @@ class Zenderator
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
-        $packs = array();
+        $packs = [];
         $routeCount = 0;
-        $sharedRenderData = array(
+        $sharedRenderData = [
             'app_name' => APP_NAME,
             'app_container' => APP_CORE_NAME,
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
-        );
+        ];
 
         $routes = $this->getRoutes();
 
@@ -517,11 +519,11 @@ class Zenderator
         // "SDK" suite
         foreach ($packs as $packName => $routes) {
             echo " > Pack: {$packName}...\n";
-            $routeRenderData = array(
+            $routeRenderData = [
                 'pack_name' => $packName,
                 'routes' => $routes,
-            );
-            $properties = array();
+            ];
+            $properties = [];
             foreach ($routes as $route) {
                 if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
@@ -553,10 +555,10 @@ class Zenderator
 
         $renderData = array_merge(
             $sharedRenderData,
-            array(
+            [
                 'packs' => $packs,
                 'config' => $this->config
-            )
+            ]
         );
 
         echo "Generating Abstract Objects:";
@@ -593,12 +595,12 @@ class Zenderator
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo "Generating Exceptions:";
-        $derivedExceptions = array(
+        $derivedExceptions = [
             'ObjectNotFoundException',
             'FilterConditionNotFoundException',
-        );
+        ];
         foreach ($derivedExceptions as $derivedException) {
-            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, array('ExceptionName' => $derivedException)));
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
         }
         $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "SDK/Exceptions/SDKException.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
@@ -645,17 +647,17 @@ class Zenderator
         Router::Instance()->populateRoutes($app);
 
         $env = Environment::mock(
-            array(
+            [
                 'SCRIPT_NAME' => '/index.php',
                 'REQUEST_URI' => $path,
                 'REQUEST_METHOD' => $method,
                 'RAND' => rand(0, 100000000),
-            )
+            ]
         );
         $uri = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies = array();
+        $cookies = [];
         $serverParams = $env->all();
         $body = new RequestBody();
         if (!is_array($post) && $post != null) {
@@ -704,7 +706,7 @@ class Zenderator
     public function checkGitSDK($path)
     {
         if (!file_exists($path . "/.git")) {
-            $gitInitScript = array(
+            $gitInitScript = [
                 "rm -R $path",
                 "mkdir -p $path",
                 "cd $path",
@@ -713,7 +715,7 @@ class Zenderator
                 "git fetch --all",
                 "git checkout master",
                 "git pull origin master",
-            );
+            ];
             exec(implode("; ", $gitInitScript));
         }
     }
