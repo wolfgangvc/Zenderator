@@ -37,9 +37,7 @@
     "predis/predis": "^1.0",
     "jimmiw/php-time-ago": "^0.4.11",
     "sebastian/diff": "^1.4",
-    "guzzlehttp/guzzle": "^6.2.1"
-  },
-  "require-dev": {
+    "guzzlehttp/guzzle": "^6.2.1",
     "squizlabs/php_codesniffer": "^2.7",
     "friendsofphp/php-cs-fixer": "^1.13",
     "fzaninotto/Faker": "^1.6.0",
