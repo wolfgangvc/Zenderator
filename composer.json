@@ -40,9 +40,9 @@
     "guzzlehttp/guzzle": "^6.2.1"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "dev-master",
+    "squizlabs/php_codesniffer": "^2.7",
     "friendsofphp/php-cs-fixer": "^1.13",
-    "fzaninotto/Faker": "dev-master",
+    "fzaninotto/Faker": "^1.6.0",
     "phpunit/phpunit": "5.*"
   },
   "autoload": {
