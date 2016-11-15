@@ -449,8 +449,8 @@ class Zenderator
         echo "Running phpunit... \n";
         $phpunitCommand = "" .
             "./vendor/bin/phpunit " .
-            ($withCoverage ? "" : "--no-coverage") . " " .
-            ($haltOnError ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
+            ($withCoverage ? "--coverage-php=build/coverage_report.php" : "--no-coverage") . " " .
+            ($haltOnError  ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
         ;
         echo " > {$phpunitCommand}\n\n";
         passthru($phpunitCommand);
