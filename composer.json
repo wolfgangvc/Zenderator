@@ -16,6 +16,27 @@
     {
       "type": "vcs",
       "url": "git@github.com:segurasystems/LibAppCore.git"
+    },
+    {
+      "type": "path",
+      "url": "../Api/vendor/segura/libapi",
+      "options": {
+        "symlink": false
+      }
+    },
+    {
+      "type": "path",
+      "url": "../library/Zenderator",
+      "options": {
+        "symlink": false
+      }
+    },
+    {
+      "type": "path",
+      "url": "../library/AppCore",
+      "options": {
+        "symlink": false
+      }
     }
   ],
   "require": {
@@ -37,7 +58,8 @@
     "predis/predis": "^1.0",
     "jimmiw/php-time-ago": "^0.4.11",
     "sebastian/diff": "^1.4",
-    "guzzlehttp/guzzle": "^6.2.1"
+    "guzzlehttp/guzzle": "^6.2.1",
+    "facebook/webdriver": "^1.2"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "dev-master",
