@@ -11,13 +11,13 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     public static function setUpBeforeClass()
     {
         ${{ variable_name }}TableGateway = App::Container()->get({{ class_name }}TableGateway::class);
+        parent::setUpBeforeClass();
 
         for($i = 0; $i <= 5; $i++){
             ${{ variable_name }}TableGateway
                 ->getNewMockModelInstance()
                 ->save();
         }
-        parent::setUpBeforeClass();
     }
 
     /**

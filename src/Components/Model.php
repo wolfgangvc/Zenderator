@@ -17,10 +17,10 @@ class Model extends Entity
     /** @var string */
     protected $table;
     /** @var Column[] */
-    protected $columns = [];
-    protected $constraints = [];
+    protected $columns        = [];
+    protected $constraints    = [];
     protected $relatedObjects = [];
-    protected $primaryKeys = [];
+    protected $primaryKeys    = [];
     protected $autoIncrements;
 
     /**
@@ -331,8 +331,8 @@ class Model extends Entity
      */
     public function computeAutoIncrementColumns()
     {
-        $sql = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
-        $query = $this->getAdaptor()->query($sql);
+        $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
+        $query   = $this->getAdaptor()->query($sql);
         $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
@@ -361,7 +361,7 @@ class Model extends Entity
 
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
-            $oColumn = Column::Factory()
+            $oColumn       = Column::Factory()
                 ->setField($column->getName())
                 ->setDbType(reset($typeFragments))
                 ->setPermittedValues($column->getErrata('permitted_values'))
@@ -410,24 +410,24 @@ class Model extends Entity
     public function getRenderDataset()
     {
         return [
-            'namespace' => $this->getNamespace(),
-            'database' => $this->getDatabase(),
-            'table' => $this->getTable(),
-            'app_name' => APP_NAME,
-            'app_container' => APP_CORE_NAME,
-            'class_name' => $this->getClassName(),
-            'variable_name' => $this->transStudly2Camel->transform($this->getClassName()),
-            'name' => $this->getClassName(),
-            'object_name_plural' => Inflect::pluralize($this->getClassName()),
-            'object_name_singular' => $this->getClassName(),
-            'controller_route' => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
-            'namespace_model' => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
-            'columns' => $this->columns,
-            'related_objects' => $this->getRelatedObjects(),
+            'namespace'              => $this->getNamespace(),
+            'database'               => $this->getDatabase(),
+            'table'                  => $this->getTable(),
+            'app_name'               => APP_NAME,
+            'app_container'          => APP_CORE_NAME,
+            'class_name'             => $this->getClassName(),
+            'variable_name'          => $this->transStudly2Camel->transform($this->getClassName()),
+            'name'                   => $this->getClassName(),
+            'object_name_plural'     => Inflect::pluralize($this->getClassName()),
+            'object_name_singular'   => $this->getClassName(),
+            'controller_route'       => $this->transCamel2Snake->transform(Inflect::pluralize($this->getClassName())),
+            'namespace_model'        => "{$this->getNamespace()}\\Models\\{$this->getClassName()}Model",
+            'columns'                => $this->columns,
+            'related_objects'        => $this->getRelatedObjects(),
             'related_objects_shared' => $this->getRelatedObjectsSharedAssets(),
-            'remote_objects' => $this->getRemoteObjects(),
+            'remote_objects'         => $this->getRemoteObjects(),
 
-            'primary_keys' => $this->getPrimaryKeys(),
+            'primary_keys'       => $this->getPrimaryKeys(),
             'primary_parameters' => $this->getPrimaryParameters(),
             'autoincrement_keys' => $this->getAutoIncrements(),
             // @todo: work out why there are two.

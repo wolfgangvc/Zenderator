@@ -74,33 +74,35 @@ class Zenderator
         'braces',
         'class_definition',
         'elseif',
-        'single_blank_line_at_eof',
-        'no_spaces_after_function_name',
+        'eof_ending',
+        'function_call_space',
         'function_declaration',
-        'indentation_type',
-        'blank_line_after_namespace',
-        'line_ending',
+        'no_tab_indentation',
+        'line_after_namespace',
+        'linefeed',
         'lowercase_constants',
         'lowercase_keywords',
         'method_argument_space',
-        'single_import_per_statement',
+        'multiple_use',
         'no_trailing_whitespace_in_comment',
-        'no_spaces_inside_parenthesis',
-        'no_closing_tag',
+        'parenthesis',
+        'php_closing_tag',
+        'php4_constructor',
         'single_line_after_imports',
         'switch_case_semicolon_to_colon',
         'switch_case_space',
-        'no_trailing_whitespace',
-        'visibility_required',
-        'no_unused_imports',
-        'binary_operator_spaces',
-        'ordered_imports',
+        'trailing_spaces',
+        'visibility',
+        'unused_use',
+        'align_double_arrow',
+        'align_equals',
+        'ordered_use',
         'short_array_syntax',
         'phpdoc_order',
-        'phpdoc_align',
+        'phpdoc_params',
         'phpdoc_scalar',
         'phpdoc_separation',
-        'phpdoc_summary'
+        'phpdoc_short_description'
     ];
 
     public function __construct(string $rootOfApp, array $databaseConfigs)
@@ -138,12 +140,12 @@ class Zenderator
         $this->config = file_get_contents($zenderatorConfigPath);
         $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
 
-        $this->composer = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
-        $namespaces = array_keys((array)$this->composer->autoload->{'psr-4'});
+        $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
+        $namespaces      = array_keys((array)$this->composer->autoload->{'psr-4'});
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
-        $this->twig = new \Twig_Environment($this->loader);
+        $this->twig   = new \Twig_Environment($this->loader);
 
         $this->twig->addExtension(
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
@@ -156,13 +158,13 @@ class Zenderator
             'tbl_migration',
         ];
 
-        $this->transSnake2Studly = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
-        $this->transStudly2Camel = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
+        $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
+        $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
         $this->transStudly2Studly = new CaseTransformer(new Format\StudlyCaps(), new Format\StudlyCaps());
-        $this->transCamel2Studly = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
-        $this->transSnake2Camel = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
-        $this->transSnake2Spinal = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
-        $this->transCamel2Snake = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
+        $this->transCamel2Studly  = new CaseTransformer(new Format\CamelCase(), new Format\StudlyCaps());
+        $this->transSnake2Camel   = new CaseTransformer(new Format\SnakeCase(), new Format\CamelCase());
+        $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
+        $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         // Check for old-style config.
         if (isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])) {
@@ -178,7 +180,7 @@ class Zenderator
         }
 
         foreach ($databaseConfigs as $dbName => $databaseConfig) {
-            $this->adapters[$dbName] = new DbAdaptor($databaseConfig);
+            $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
             $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
             $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
         }
@@ -198,8 +200,8 @@ class Zenderator
 
     public static function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
-        $sql = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
-        $query = $adapter->query($sql);
+        $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
+        $query   = $adapter->query($sql);
         $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
@@ -292,7 +294,7 @@ class Zenderator
             APP_ROOT . "/tests/Services/Generated/",
         ];
         foreach ($generatedPaths as $generatedPath) {
-            if(file_exists($generatedPath)) {
+            if (file_exists($generatedPath)) {
                 foreach (new \DirectoryIterator($generatedPath) as $file) {
                     if (!$file->isDot() && $file->getExtension() == 'php') {
                         unlink($file->getRealPath());
@@ -356,7 +358,7 @@ class Zenderator
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
             $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", [
-                'models' => $allModelData,
+                'models'        => $allModelData,
                 'app_container' => APP_CORE_NAME,
             ]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
@@ -379,7 +381,7 @@ class Zenderator
 
     private function removePHPVCRCassettes($outputPath)
     {
-        if(file_exists($outputPath . "/tests/fixtures")) {
+        if (file_exists($outputPath . "/tests/fixtures")) {
             $cassettesDir = new \DirectoryIterator($outputPath . "/tests/fixtures/");
             foreach ($cassettesDir as $cassette) {
                 if (!$cassette->isDot()) {
@@ -404,7 +406,7 @@ class Zenderator
     private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
     {
         ob_start();
-        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --rules=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
+        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --fixers=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
         echo " > {$pathToPSR2} ... ";
         $begin = microtime(true);
         system($command, $junk);
@@ -449,8 +451,8 @@ class Zenderator
         echo "Running phpunit... \n";
         $phpunitCommand = "" .
             "./vendor/bin/phpunit " .
-            ($withCoverage ? "" : "--no-coverage") . " " .
-            ($haltOnError ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
+            ($withCoverage ? "--coverage-php=build/coverage_report.php" : "--no-coverage") . " " .
+            ($haltOnError  ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
         ;
         echo " > {$phpunitCommand}\n\n";
         passthru($phpunitCommand);
@@ -461,7 +463,7 @@ class Zenderator
     {
         $composerJson = json_decode(file_get_contents(APP_ROOT . "/composer.json"), true);
         $dependencies = array_merge($composerJson['require'], $composerJson['require-dev']);
-        $toUpdate = [];
+        $toUpdate     = [];
         foreach ($dependencies as $dependency => $version) {
             if (substr($dependency, 0, strlen("segura/")) == "segura/") {
                 $toUpdate[] = $dependency;
@@ -492,11 +494,11 @@ class Zenderator
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
-        $packs = [];
-        $routeCount = 0;
+        $packs            = [];
+        $routeCount       = 0;
         $sharedRenderData = [
-            'app_name' => APP_NAME,
-            'app_container' => APP_CORE_NAME,
+            'app_name'         => APP_NAME,
+            'app_container'    => APP_CORE_NAME,
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
         ];
 
@@ -519,7 +521,7 @@ class Zenderator
             echo " > Pack: {$packName}...\n";
             $routeRenderData = [
                 'pack_name' => $packName,
-                'routes' => $routes,
+                'routes'    => $routes,
             ];
             $properties = [];
             foreach ($routes as $route) {
@@ -529,7 +531,7 @@ class Zenderator
                     }
                 }
             }
-            $properties = array_unique($properties);
+            $properties                    = array_unique($properties);
             $routeRenderData['properties'] = $properties;
 
             $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
@@ -554,7 +556,7 @@ class Zenderator
         $renderData = array_merge(
             $sharedRenderData,
             [
-                'packs' => $packs,
+                'packs'  => $packs,
                 'config' => $this->config
             ]
         );
@@ -610,8 +612,8 @@ class Zenderator
     private function getRoutes()
     {
         $response = $this->makeRequest("GET", "/v1");
-        $body = (string)$response->getBody();
-        $body = json_decode($body, true);
+        $body     = (string)$response->getBody();
+        $body     = json_decode($body, true);
         return $body['Routes'];
     }
 
@@ -630,7 +632,7 @@ class Zenderator
          * @var \Segura\AppCore\App $applicationInstance
          */
         $applicationInstance = App::Instance();
-        $calledClass = get_called_class();
+        $calledClass         = get_called_class();
 
         $app = $applicationInstance->getApp();
 
@@ -646,18 +648,18 @@ class Zenderator
 
         $env = Environment::mock(
             [
-                'SCRIPT_NAME' => '/index.php',
-                'REQUEST_URI' => $path,
+                'SCRIPT_NAME'    => '/index.php',
+                'REQUEST_URI'    => $path,
                 'REQUEST_METHOD' => $method,
-                'RAND' => rand(0, 100000000),
+                'RAND'           => rand(0, 100000000),
             ]
         );
-        $uri = Uri::createFromEnvironment($env);
+        $uri     = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies = [];
+        $cookies      = [];
         $serverParams = $env->all();
-        $body = new RequestBody();
+        $body         = new RequestBody();
         if (!is_array($post) && $post != null) {
             $body->write($post);
             $body->rewind();
@@ -691,7 +693,7 @@ class Zenderator
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $data = curl_exec($ch);
+        $data     = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($httpcode >= 200 && $httpcode < 300) {
@@ -701,8 +703,9 @@ class Zenderator
         }
     }
 
-    public function checkGitSDK($path){
-        if(!file_exists($path . "/.git")){
+    public function checkGitSDK($path)
+    {
+        if (!file_exists($path . "/.git")) {
             $gitInitScript = [
                 "rm -R $path",
                 "mkdir -p $path",

@@ -9,14 +9,24 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {
     protected $testInstance;
 
-    public function __setUp()
+    public function setUp()
     {
-        parent::__setUp();
+        parent::setUp();
     }
 
-    public function __tearDown()
+    public function tearDown()
     {
-        parent::__tearDown();
+        parent::tearDown();
+    }
+
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+    }
+
+    public static function tearDownAfterClass()
+    {
+        parent::tearDownAfterClass();
     }
 
     public function testExchangeArray()

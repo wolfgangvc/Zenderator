@@ -89,8 +89,8 @@ abstract class Base{{ class_name }}Service
     )
     {
 
-        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        list($all{{ class_name }}s, $count) = ${{ class_name }}Table->fetchAll(
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        list($all{{ class_name }}s, $count) = ${{ variable_name }}Table->fetchAll(
             $limit,
             $offset,
             $wheres,
@@ -100,8 +100,8 @@ abstract class Base{{ class_name }}Service
         $return = [];
 
         if ($all{{ class_name }}s instanceof ResultSet) {
-            foreach ($all{{ class_name }}s as ${{ class_name }}) {
-                $return[] = ${{ class_name }};
+            foreach ($all{{ class_name }}s as ${{ variable_name }}) {
+                $return[] = ${{ variable_name }};
             }
         }
         return $return;
@@ -114,8 +114,9 @@ abstract class Base{{ class_name }}Service
      */
     public function getById(int $id) : Models\{{ class_name }}Model
     {
-        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ class_name }}Table->getById($id);
+        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->getById($id);
     }
 
     /**
@@ -126,8 +127,22 @@ abstract class Base{{ class_name }}Service
      */
     public function getByField(string $field, $value) : Models\{{ class_name }}Model
     {
-        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ class_name }}Table->getByField($field, $value);
+        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->getByField($field, $value);
+    }
+
+    /**
+     * @param string $field
+     * @param $value
+     * @return Models\{{ class_name }}Model[]
+     * @throws \Segura\AppCore\Exceptions\TableGatewayException
+     */
+    public function getManyByField(string $field, $value) : array
+    {
+        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->getManyByField($field, $value);
     }
 
     /**
@@ -136,8 +151,9 @@ abstract class Base{{ class_name }}Service
      */
     public function getRandom() : Models\{{ class_name }}Model
     {
-        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ class_name }}Table->fetchRandom();
+        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->fetchRandom();
     }
 
     /**
@@ -146,9 +162,10 @@ abstract class Base{{ class_name }}Service
      */
     public function createFromArray($dataExchange)
     {
-        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        ${{ class_name }} = $this->getNewModelInstance($dataExchange);
-        return ${{ class_name }}Table->save(${{ class_name }});
+        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        ${{ variable_name }} = $this->getNewModelInstance($dataExchange);
+        return ${{ variable_name }}Table->save(${{ variable_name }});
     }
 
     /**
@@ -157,8 +174,9 @@ abstract class Base{{ class_name }}Service
      */
     public function deleteByID($id) : int
     {
-        ${{ class_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ class_name }}Table->delete(['id' => $id]);
+        /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->delete(['id' => $id]);
     }
 
     public function getTermPlural() : string
