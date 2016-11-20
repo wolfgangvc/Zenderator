@@ -122,27 +122,31 @@ abstract class Base{{ class_name }}Service
     /**
      * @param string $field
      * @param $value
+     * @param $orderBy string Field to sort by
+     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model
      * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
-    public function getByField(string $field, $value) : Models\{{ class_name }}Model
+    public function getByField(string $field, $value, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : Models\{{ class_name }}Model
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getByField($field, $value);
+        return ${{ variable_name }}Table->getByField($field, $value, $orderBy, $orderDirection);
     }
 
     /**
      * @param string $field
      * @param $value
+     * @param $orderBy string Field to sort by
+     * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model[]
      * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
-    public function getManyByField(string $field, $value) : array
+    public function getManyByField(string $field, $value, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : array
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        return ${{ variable_name }}Table->getManyByField($field, $value);
+        return ${{ variable_name }}Table->getManyByField($field, $value, $orderBy, $orderDirection);
     }
 
     /**

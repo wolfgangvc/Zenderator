@@ -16,6 +16,11 @@ abstract class Base{{ class_name }}Model
     implements ModelInterface
 {
 
+    // Declare what fields are available on this object
+{% for column in columns %}
+    const FIELD_{{ column.getField|upper }} = '{{ column.getField }}';
+{% endfor %}
+
 {% if primary_keys %}
     protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
 {% endif %}
@@ -88,26 +93,34 @@ abstract class Base{{ class_name }}Model
     /**
      * @returns Models\{{ remote_object.getLocalClass }}Model
      */
-    public function fetch{{ remote_object.getLocalFunctionName }}Object() : Models\{{ remote_object.getLocalClass }}Model {
+    public function fetch{{ remote_object.getLocalFunctionName }}Object(
+{% if remote_object.local_model_key != 'id' %}
+        $orderBy = null,
+        $orderDirection='ASC'
+{% endif %}
+    ) : Models\{{ remote_object.getLocalClass }}Model {
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
         ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
 {% if remote_object.local_model_key == 'id' %}
         return ${{ remote_object.getLocalVariable }}Service->getById($this->{{ column.getLocalBoundColumnGetter }}());
 {% else %}
-        return ${{ remote_object.getLocalVariable }}Service->getByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
+        return ${{ remote_object.getLocalVariable }}Service->getByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $orderBy, $orderDirection);
 {% endif %}
     }
 
     /**
      * @returns Models\{{ remote_object.getLocalClass }}Model[]
      */
-    public function fetch{{ remote_object.getLocalFunctionName }}Objects() : array {
+    public function fetch{{ remote_object.getLocalFunctionName }}Objects(
+        $orderBy = null,
+        $orderDirection='ASC'
+    ) : array {
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
         ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
 {% if remote_object.local_model_key == 'id' %}
-        return ${{ remote_object.getLocalVariable }}Service->getManyById($this->{{ column.getLocalBoundColumnGetter }}());
+        return ${{ remote_object.getLocalVariable }}Service->getManyById($this->{{ column.getLocalBoundColumnGetter }}(),$orderBy, $orderDirection);
 {% else %}
-        return ${{ remote_object.getLocalVariable }}Service->getManyByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
+        return ${{ remote_object.getLocalVariable }}Service->getManyByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $orderBy, $orderDirection);
 {% endif %}
     }
 
