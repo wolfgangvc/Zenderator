@@ -515,6 +515,8 @@ class Zenderator
                     }
                 }
             }
+        }else{
+            echo "\n\n" . ConsoleHelper::COLOR_RED . "UHOH. cannot find any routes! Something has gone very wrong!" . ConsoleHelper::COLOR_RESET . "\n\n";
         }
 
         echo "Generating SDK for {$routeCount} routes...\n";
