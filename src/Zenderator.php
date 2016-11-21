@@ -504,13 +504,15 @@ class Zenderator
 
         $routes = $this->getRoutes();
 
-        foreach ($routes as $route) {
-            if ($route['name']) {
-                if (isset($route['class'])) {
-                    $packs[$route['class']][$route['function']] = $route;
-                    $routeCount++;
-                } else {
-                    echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
+        if(count($routes) > 0) {
+            foreach ($routes as $route) {
+                if ($route['name']) {
+                    if (isset($route['class'])) {
+                        $packs[$route['class']][$route['function']] = $route;
+                        $routeCount++;
+                    } else {
+                        echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
+                    }
                 }
             }
         }
