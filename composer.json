@@ -41,6 +41,9 @@
     "facebook/webdriver": "^1.2",
     "squizlabs/php_codesniffer": "^2.7",
     "friendsofphp/php-cs-fixer": "^1.12",
+    "johnkary/phpunit-speedtrap": "~1.0@dev",
+    "lstrojny/phpunit-clever-and-smart": "0.*",
+    "brianium/paratest": "^0.14.0",
     "fzaninotto/Faker": "^1.6.0",
     "phpunit/phpunit": "5.*"
   },
