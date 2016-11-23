@@ -16,6 +16,7 @@ use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zend\Db\Metadata\Metadata;
 use Zend\Stdlib\ConsoleHelper;
 use Zenderator\Components\Model;
+use Zenderator\Exception\Exception;
 use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
@@ -108,7 +109,18 @@ class Zenderator
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
+        set_exception_handler(array($this, 'exception_handler'));
         $this->setUp($databaseConfigs);
+    }
+
+    public function exception_handler(\Exception $exception)
+    {
+        echo "\n\n" . ConsoleHelper::COLOR_RED . "UHOH: Exception." . ConsoleHelper::COLOR_RESET . "\n\n";
+        echo $exception->getMessage();
+        echo "\n\n";
+        echo "In {$exception->getFile()}:{$exception->getLine()}";
+        echo "\n\n";
+        exit;
     }
 
     public static function classPrefixesOn()
@@ -504,7 +516,7 @@ class Zenderator
 
         $routes = $this->getRoutes();
 
-        if(count($routes) > 0) {
+        if (count($routes) > 0) {
             foreach ($routes as $route) {
                 if ($route['name']) {
                     if (isset($route['class'])) {
@@ -515,8 +527,8 @@ class Zenderator
                     }
                 }
             }
-        }else{
-            echo "\n\n" . ConsoleHelper::COLOR_RED . "UHOH. cannot find any routes! Something has gone very wrong!" . ConsoleHelper::COLOR_RESET . "\n\n";
+        } else {
+            throw new Exception("Cannot find any routes while building SDK. Something has gone very wrong.");
         }
 
         echo "Generating SDK for {$routeCount} routes...\n";
