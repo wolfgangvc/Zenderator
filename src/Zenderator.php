@@ -106,16 +106,31 @@ class Zenderator
         'phpdoc_short_description'
     ];
 
+    private $defaultEnvironment = [];
+    private $defaultHeaders     = [];
+
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
-        set_exception_handler(array($this, 'exception_handler'));
+        set_exception_handler([$this, 'exception_handler']);
         $this->setUp($databaseConfigs);
+
+        $this->defaultEnvironment = [
+            'SCRIPT_NAME' => '/index.php',
+            'RAND'        => rand(0, 100000000),
+        ];
+        $this->defaultHeaders = [];
     }
 
-    public function exception_handler(\Exception $exception)
+    public function exception_handler($exception)
     {
-        echo "\n\n" . ConsoleHelper::COLOR_RED . "UHOH: Exception." . ConsoleHelper::COLOR_RESET . "\n\n";
+        /** @var \Exception $exception */
+        echo "\n" . ConsoleHelper::COLOR_RED;
+        echo " ____ ____ ____ ____ \n";
+        echo "||U |||H |||O |||H ||\n";
+        echo "||__|||__|||__|||__||\n";
+        echo "|/__\\|/__\\|/__\\|/__\\|\n";
+        echo ConsoleHelper::COLOR_RESET . "\n\n";
         echo $exception->getMessage();
         echo "\n\n";
         echo "In {$exception->getFile()}:{$exception->getLine()}";
@@ -319,6 +334,8 @@ class Zenderator
 
     /**
      * @param Model[] $models
+     *
+     * @return Zenderator
      */
     private function makeCoreFiles(array $models)
     {
@@ -654,22 +671,27 @@ class Zenderator
 
         if (defined("$calledClass")) {
             $modelName = $calledClass::MODEL_NAME;
-            require(APP_ROOT . "/src/Routes/{$modelName}Route.php");
+            if (file_exists(APP_ROOT . "/src/Routes/{$modelName}Route.php")) {
+                require(APP_ROOT . "/src/Routes/{$modelName}Route.php");
+            }
         } else {
-            require(APP_ROOT . "/src/Routes.php");
+            if (file_exists(APP_ROOT . "/src/Routes.php")) {
+                require(APP_ROOT . "/src/Routes.php");
+            }
         }
-        require(APP_ROOT . "/src/RoutesExtra.php");
-
+        if (file_exists(APP_ROOT . "/src/RoutesExtra.php")) {
+            require(APP_ROOT . "/src/RoutesExtra.php");
+        }
         Router::Instance()->populateRoutes($app);
 
-        $env = Environment::mock(
-            [
-                'SCRIPT_NAME'    => '/index.php',
-                'REQUEST_URI'    => $path,
-                'REQUEST_METHOD' => $method,
-                'RAND'           => rand(0, 100000000),
-            ]
-        );
+
+        $envArray = array_merge($this->defaultEnvironment, $this->defaultHeaders);
+        $envArray = array_merge($envArray, [
+            'REQUEST_URI'    => $path,
+            'REQUEST_METHOD' => $method,
+        ]);
+
+        $env     = Environment::mock($envArray);
         $uri     = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
@@ -683,14 +705,14 @@ class Zenderator
             $body->write(json_encode($post));
             $body->rewind();
         }
+
         $request = new Request($method, $uri, $headers, $cookies, $serverParams, $body);
         if ($isJsonRequest) {
             $request = $request->withHeader("Content-type", "application/json");
-            $request = $request->withHeader("Accept", "application/json");
         }
         $response = new Response();
         // Invoke app
-        $app($request, $response);
+        $response = $applicationInstance->getApp()->process($request, $response);
         #echo "\nRequesting {$method}: {$path} : ".json_encode($post) . "\n";
         #echo "Response: " . (string) $response->getBody()."\n";
 
