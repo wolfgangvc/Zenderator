@@ -512,7 +512,6 @@ class Zenderator
     public function makeSDK($outputPath = APP_ROOT, $cleanByDefault = true)
     {
         $models = $this->makeModelSchemas();
-        $this->checkGitSDK($outputPath);
         $this->makeSDKFiles($models, $outputPath);
         $this->removePHPVCRCassettes($outputPath);
         if ($cleanByDefault) {
@@ -520,6 +519,8 @@ class Zenderator
         }
         return $this;
     }
+
+
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
@@ -741,20 +742,58 @@ class Zenderator
         }
     }
 
+    private function runScript($path = null, $script)
+    {
+        $output = null;
+        if($path) {
+            $execLine = "cd {$path} && " . $script;
+        }else{
+            $execLine = $script;
+        }
+        echo "Running: \n";
+        echo " > {$execLine}\n";
+        exec($execLine, $output);
+        $output = implode("\n", $output);
+        echo $output;
+        return $output;
+    }
+
+    public function purgeSDK($path)
+    {
+        echo "Purging SDK:\n";
+        $this->runScript(null, "rm -R $path; mkdir -p $path");
+        return $this;
+    }
+
+    public function runSDKTests($path)
+    {
+        $this->runScript($path, "composer install");
+        $this->runScript($path, "rm -f {$path}/tests/fixtures/*.cassette");
+        $testResults = $this->runScript($path, "./vendor/bin/phpunit --no-coverage --stop-on-error --stop-on-failure");
+        if(stripos($testResults, "ERRORS!") !== false){
+            throw new \Exception("PHPUnit says Errors happened. Something is busted!");
+        }
+        return $this;
+    }
+
     public function checkGitSDK($path)
     {
-        if (!file_exists($path . "/.git")) {
-            $gitInitScript = [
-                "rm -R $path",
-                "mkdir -p $path",
-                "cd $path",
-                "git init",
-                "git remote add origin git@github.com:segurasystems/Lib" . APP_NAME . ".git",
-                "git fetch --all",
-                "git checkout master",
-                "git pull origin master",
-            ];
-            exec(implode("; ", $gitInitScript));
-        }
+        echo "Preparing SDK Git:\n";
+        $this->runScript(null, "ssh-keyscan -H github.com >> /root/.ssh/known_hosts");
+        $this->runScript($path, "git init");
+        $this->runScript($path, "git remote add origin git@github.com:segurasystems/Lib" . APP_NAME . ".git");
+        $this->runScript($path, "git fetch --all");
+        $this->runScript($path, "git checkout master");
+        $this->runScript($path, "git pull origin master");
+        return $this;
+    }
+
+    public function sendSDKToGit($path)
+    {
+        echo "Sending SDK to Git:\n";
+        $this->runScript($path, "git config --global user.email \"sdkifier@segura.co.uk\"");
+        $this->runScript($path, "git config --global user.name \"Segura SDKifier\"");
+        $this->runScript($path, "git commit -m \"Updated PHPVCR Cassettes\" tests/fixtures");
+        return $this;
     }
 }

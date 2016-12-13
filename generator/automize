@@ -38,7 +38,11 @@ $menu = (new CliMenuBuilder)
     })
     ->addItem('Run SDKifier', function (CliMenu $menu) use ($zenderator, $sdkOutputPath){
         $zenderator
+            ->purgeSDK($sdkOutputPath)
+            ->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, false)
+            ->runSDKTests($sdkOutputPath)
+            ->sendSDKToGit($sdkOutputPath)
             ->waitForKeypress();
         $menu->redraw();
     })
