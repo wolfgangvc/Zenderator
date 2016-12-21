@@ -9,6 +9,10 @@ $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfigs
 );
-$exportPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+$sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
 
-$zenderator->makeSDK($exportPath);
+$zenderator->purgeSDK($sdkOutputPath)
+    ->checkGitSDK($sdkOutputPath)
+    ->makeSDK($sdkOutputPath, false)
+    ->runSDKTests($sdkOutputPath)
+    ->sendSDKToGit($sdkOutputPath);

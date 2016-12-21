@@ -109,6 +109,8 @@ class Zenderator
     private $defaultEnvironment = [];
     private $defaultHeaders     = [];
 
+    private $coverageReport;
+
     public function __construct(string $rootOfApp, array $databaseConfigs)
     {
         $this->rootOfApp = $rootOfApp;
@@ -745,9 +747,9 @@ class Zenderator
     private function runScript($path = null, $script)
     {
         $output = null;
-        if($path) {
+        if ($path) {
             $execLine = "cd {$path} && " . $script;
-        }else{
+        } else {
             $execLine = $script;
         }
         echo "Running: \n";
@@ -767,12 +769,24 @@ class Zenderator
 
     public function runSDKTests($path)
     {
+        echo "Installing composer dependencies\n";
         $this->runScript($path, "composer install");
+
+        echo "Removing stale test cache data\n";
         $this->runScript($path, "rm -f {$path}/tests/fixtures/*.cassette");
-        $testResults = $this->runScript($path, "./vendor/bin/phpunit --no-coverage --stop-on-error --stop-on-failure");
-        if(stripos($testResults, "ERRORS!") !== false){
+
+        echo "Running tests...\n";
+        $testResults = $this->runScript($path, "API_HOST=api ./vendor/bin/phpunit --coverage-xml build/phpunit_coverage");
+        if (stripos($testResults, "ERRORS!") !== false || stripos($testResults, "FAILURES!") !== false) {
             throw new \Exception("PHPUnit says Errors happened. Something is busted!");
         }
+
+        if(file_exists("{$path}/build/phpunit_coverage/index.xml")){
+            $this->coverageReport = simplexml_load_file("{$path}/build/phpunit_coverage/index.xml");
+        }
+
+        echo "Tests run complete\n\n\n";
+
         return $this;
     }
 
@@ -791,9 +805,21 @@ class Zenderator
     public function sendSDKToGit($path)
     {
         echo "Sending SDK to Git:\n";
+
+        if($this->coverageReport) {
+            $coverageStatement = sprintf(
+                "%s coverage",
+                $this->coverageReport->project[0]->directory[0]->totals->lines->attributes()->percent
+            );
+        }else{
+            $coverageStatement = "No coverage available.";
+        }
         $this->runScript($path, "git config --global user.email \"sdkifier@segura.co.uk\"");
         $this->runScript($path, "git config --global user.name \"Segura SDKifier\"");
-        $this->runScript($path, "git commit -m \"Updated PHPVCR Cassettes\" tests/fixtures");
+        $this->runScript($path, "git commit -m \"Updated PHPVCR Cassettes.\" tests/fixtures");
+        $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
+        $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
+        $this->runScript($path, "git push origin master");
         return $this;
     }
 }

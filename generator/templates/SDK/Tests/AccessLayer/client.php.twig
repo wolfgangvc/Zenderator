@@ -17,6 +17,9 @@ class {{ pack_name }}Test extends \PHPUnit_Framework_TestCase{
     {
         parent::setUp();
         $this->client = new SDKClient();
+        if(isset($_ENV['API_HOST'])){
+            $this->client->setBaseUrl($_ENV['API_HOST']);
+        }
         $this->{{ pack_name|lower }} = $this->client->get{{ pack_name }}();
     }
 
