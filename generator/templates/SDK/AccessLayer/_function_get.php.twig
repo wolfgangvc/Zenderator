@@ -40,3 +40,18 @@
         }
     }
 
+    /**
+     * @param Filter|null $filter
+     *
+     * @return Models\{{ route.singular }}Model|false
+     */
+    public function getFiltered(Filter $filter = null)
+    {
+        $list = $this->list(
+                    $filter
+                      ->setLimit(1)
+        );
+
+        return count($list) > 0 ? reset($list) : false;
+    }
+
