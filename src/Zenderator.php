@@ -817,7 +817,9 @@ class Zenderator
         $this->runScript($path, "git config --global user.email \"sdkifier@segura.co.uk\"");
         $this->runScript($path, "git config --global user.name \"Segura SDKifier\"");
         $this->runScript($path, "git commit -m \"Updated PHPVCR Cassettes.\" tests/fixtures");
+        $this->runScript($path, "git add tests/");
         $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
+        $this->runScript($path, "git add src/");
         $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
         $this->runScript($path, "git push origin master");
         return $this;
