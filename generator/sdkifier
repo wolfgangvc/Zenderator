@@ -14,5 +14,6 @@ $sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . 
 $zenderator->purgeSDK($sdkOutputPath)
     ->checkGitSDK($sdkOutputPath)
     ->makeSDK($sdkOutputPath, false)
+    ->cleanCodePHPCSFixer([$sdkOutputPath])
     ->runSDKTests($sdkOutputPath)
     ->sendSDKToGit($sdkOutputPath);

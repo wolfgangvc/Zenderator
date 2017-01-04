@@ -448,12 +448,15 @@ class Zenderator
         return $this;
     }
 
-    public function cleanCodePHPCSFixer()
+    public function cleanCodePHPCSFixer(array $pathsToPSR2 = [])
     {
         $begin = microtime(true);
         echo "php-cs-fixer-fying... \n";
 
-        foreach ($this->pathsToPSR2 as $pathToPSR2) {
+        if(empty($pathsToPSR2)){
+            $pathsToPSR2 = $this->pathsToPSR2;
+        }
+        foreach ($pathsToPSR2 as $pathToPSR2) {
             echo " > {$pathToPSR2} ... ";
             if (file_exists($pathToPSR2)) {
                 $this->cleanCodePHPCSFixer_FixFile($pathToPSR2, $this->phpCsFixerRules);
@@ -762,8 +765,20 @@ class Zenderator
 
     public function purgeSDK($path)
     {
+        $preserveVendor = false;
+        if(file_exists("{$path}/vendor")){
+            $preserveVendor = true;
+            echo "Preserving vendor directory...\n";
+            $this->runScript(null, "mv {$path}/vendor /tmp/vendorbak_" . date("Y-m-d_H-i-s", APP_START));
+        }
+
         echo "Purging SDK:\n";
         $this->runScript(null, "rm -R $path; mkdir -p $path");
+
+        if($preserveVendor){
+            echo "Restoring vendor directory...\n";
+            $this->runScript(null, "mv /tmp/vendorbak_" . date("Y-m-d_H-i-s", APP_START) . " {$path}/vendor");
+        }
         return $this;
     }
 
