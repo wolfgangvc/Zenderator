@@ -26,6 +26,13 @@
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
         $method = "{{ route.method }}";
+
+{% if route.callbackProperties %}
+{% for callbackProperty in route.callbackProperties %}
+        $endpoint = str_replace('{' . '{{ callbackProperty.name }}' . '}', ${{ callbackProperty.name }}, $endpoint);
+{% endfor %}
+{% endif %}
+
         $response = $this->request(
             $method,
             $endpoint,
