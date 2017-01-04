@@ -781,7 +781,7 @@ class Zenderator
             throw new \Exception("PHPUnit says Errors happened. Something is busted!");
         }
 
-        if(file_exists("{$path}/build/phpunit_coverage/index.xml")){
+        if (file_exists("{$path}/build/phpunit_coverage/index.xml")) {
             $this->coverageReport = simplexml_load_file("{$path}/build/phpunit_coverage/index.xml");
         }
 
@@ -806,12 +806,12 @@ class Zenderator
     {
         echo "Sending SDK to Git:\n";
 
-        if($this->coverageReport) {
+        if ($this->coverageReport) {
             $coverageStatement = sprintf(
                 "%s coverage",
                 $this->coverageReport->project[0]->directory[0]->totals->lines->attributes()->percent
             );
-        }else{
+        } else {
             $coverageStatement = "No coverage available.";
         }
         $this->runScript($path, "git config --global user.email \"sdkifier@segura.co.uk\"");
