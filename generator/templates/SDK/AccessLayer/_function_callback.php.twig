@@ -49,6 +49,6 @@
         if(json_decode($body) === null){
             throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
         }
-        $body = json_decode($body);
+        $body = json_decode($body, true);
         return $body;
     }
