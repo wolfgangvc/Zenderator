@@ -8,11 +8,7 @@ $rootOfApp = __DIR__ . "/../../../../";
 
 require_once($rootOfApp . "/bootstrap.php");
 
-$mysqlConfigLocation = $rootOfApp . "/config/mysql.php";
-if(!file_exists($mysqlConfigLocation)){
-    die("Cannot find MySQL Config as expected at {$mysqlConfigLocation}\n\n");
-}
-$databaseConfigs = require($mysqlConfigLocation);
+$databaseConfigs = \Segura\AppCore\App::Container()->get("DatabaseConfig");
 
 $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME);
 
