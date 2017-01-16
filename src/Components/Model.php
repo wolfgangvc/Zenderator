@@ -357,7 +357,6 @@ class Model extends Entity
     public function computeColumns(array $columns)
     {
         $autoIncrementColumns = Zenderator::getAutoincrementColumns($this->dbAdaptor, $this->getTable());
-        //\Kint::dump($autoIncrementColumns);exit;
 
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());

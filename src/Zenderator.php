@@ -137,6 +137,8 @@ class Zenderator
         echo "\n\n";
         echo "In {$exception->getFile()}:{$exception->getLine()}";
         echo "\n\n";
+        echo $exception->getTraceAsString();
+        echo "\n\n";
         exit;
     }
 

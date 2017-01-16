@@ -4,7 +4,11 @@
 $rootOfApp = __DIR__ . "/../../../../";
 
 require_once($rootOfApp . "/bootstrap.php");
-$databaseConfigs = require($rootOfApp . "/config/mysql.php");
+
+$scope = APP_CORE_NAME;
+
+$databaseConfigs = $scope::Container()->get("DatabaseConfig");
+
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfigs

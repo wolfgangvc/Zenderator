@@ -8,7 +8,9 @@ $rootOfApp = __DIR__ . "/../../../../";
 
 require_once($rootOfApp . "/bootstrap.php");
 
-$databaseConfigs = \Segura\AppCore\App::Container()->get("DatabaseConfig");
+$scope = APP_CORE_NAME;
+
+$databaseConfigs = $scope::Container()->get("DatabaseConfig");
 
 $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME);
 
