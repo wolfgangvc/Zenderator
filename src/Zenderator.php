@@ -126,6 +126,7 @@ class Zenderator
 
     public function exception_handler($exception)
     {
+        // UHOH exception handler
         /** @var \Exception $exception */
         echo "\n" . ConsoleHelper::COLOR_RED;
         echo " ____ ____ ____ ____ \n";
@@ -139,7 +140,7 @@ class Zenderator
         echo "\n\n";
         echo $exception->getTraceAsString();
         echo "\n\n";
-        exit;
+        exit(1);
     }
 
     public static function classPrefixesOn()
