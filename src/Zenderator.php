@@ -840,7 +840,6 @@ class Zenderator
         $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
         $this->runScript($path, "git add src/");
         $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
-        $this->runScript($path, "git push origin master");
         return $this;
     }
 }
