@@ -7,7 +7,11 @@ require_once($rootOfApp . "/bootstrap.php");
 
 $scope = APP_CORE_NAME;
 
-$databaseConfigs = $scope::Container()->get("DatabaseConfig");
+try {
+    $databaseConfigs = $scope::Container()->get("DatabaseConfig");
+}catch(\Segura\AppCore\Exceptions\DbConfigException $dbConfigException){
+    $databaseConfigs = null;
+}
 
 $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
