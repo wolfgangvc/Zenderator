@@ -112,7 +112,7 @@ class Zenderator
 
     private $coverageReport;
 
-    public function __construct(string $rootOfApp, array $databaseConfigs)
+    public function __construct(string $rootOfApp, array $databaseConfigs = null)
     {
         $this->rootOfApp = $rootOfApp;
         set_exception_handler([$this, 'exception_handler']);
@@ -199,11 +199,6 @@ class Zenderator
         $this->transSnake2Spinal  = new CaseTransformer(new Format\SnakeCase(), new Format\SpinalCase());
         $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
-        // Check for old-style config.
-        if (isset($databaseConfigs['driver']) || isset($databaseConfigs['hostname'])) {
-            die("Database configs have changed in Zenderator!\nYou need to update your mysql.php config!\n\n");
-        }
-
         // Decide if we're gonna use class prefixes. You don't want to do this if you have a single DB,
         // or you'll get classes called DefaultThing instead of just Thing.
         if (isset($databaseConfigs['Default']) && count($databaseConfigs) == 1) {
@@ -212,10 +207,12 @@ class Zenderator
             self::classPrefixesOn();
         }
 
-        foreach ($databaseConfigs as $dbName => $databaseConfig) {
-            $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
-            $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
-            $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
+        if ($databaseConfigs) {
+            foreach ($databaseConfigs as $dbName => $databaseConfig) {
+                $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
+                $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
+                $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
+            }
         }
         return $this;
     }
