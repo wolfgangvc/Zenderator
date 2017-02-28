@@ -199,6 +199,7 @@ class Column extends Entity
             case 'int':
             case 'bigint':
             case 'tinyint':
+            case 'smallint':
                 $this->setPhpType('int');
                 break;
             case 'varchar':
