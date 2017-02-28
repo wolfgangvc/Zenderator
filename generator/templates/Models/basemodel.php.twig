@@ -79,7 +79,7 @@ abstract class Base{{ class_name }}Model
 {% if related_object.getRemoteBoundColumn == 'id' %}
         return ${{ related_object.getRemoteClass }}Service->getById($this->{{ related_object.getLocalBoundColumnGetter }}());
 {% else %}
-        return ${{ related_object.getRemoteClass }}Service->getByField('{{ related_object.getRemoteBoundColumn }}', $this->{{ column.getLocalBoundColumnGetter }}());
+        return ${{ related_object.getRemoteClass }}Service->getByField('{{ related_object.getRemoteBoundColumn }}', $this->{{ related_object.getLocalBoundColumnGetter }}());
 {% endif %}
     }
 
