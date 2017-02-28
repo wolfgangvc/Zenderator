@@ -4,6 +4,7 @@
 $rootOfApp = __DIR__ . "/../../../../";
 
 require_once($rootOfApp . "/bootstrap.php");
+ini_set("memory_limit", "256M");
 
 $scope = APP_CORE_NAME;
 
