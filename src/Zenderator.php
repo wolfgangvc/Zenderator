@@ -187,9 +187,10 @@ class Zenderator
         $fct = new \Twig_SimpleFunction('var_export', 'var_export');
         $this->twig->addFunction($fct);
 
-        $this->ignoredTables = [
-            'tbl_migration',
-        ];
+        // Skip tables specified in configuration.
+        if(isset($this->config['database']) && isset($this->config['database']['skip_tables'])) {
+            $this->ignoredTables = $this->config['database']['skip_tables'];
+        }
 
         $this->transSnake2Studly  = new CaseTransformer(new Format\SnakeCase(), new Format\StudlyCaps());
         $this->transStudly2Camel  = new CaseTransformer(new Format\StudlyCaps(), new Format\CamelCase());
@@ -265,6 +266,9 @@ class Zenderator
             echo "Collecting " . count($tables) . " entities data.\n";
 
             foreach ($tables as $table) {
+                if(in_array($table->getName(), $this->ignoredTables)){
+                    continue;
+                }
                 $oModel = Components\Model::Factory()
                     ->setNamespace($this->namespace)
                     ->setAdaptor($adapter)
