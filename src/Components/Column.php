@@ -3,6 +3,7 @@
 namespace Zenderator\Components;
 
 use Zenderator\Exception\DBTypeNotTranslatedException;
+use Zenderator\Zenderator;
 
 class Column extends Entity
 {
@@ -23,10 +24,9 @@ class Column extends Entity
     /**
      * @return self
      */
-    public static function Factory()
+    public static function Factory(Zenderator $zenderator)
     {
-        $class = get_called_class();
-        return new $class;
+        return parent::Factory($zenderator);
     }
 
     /**

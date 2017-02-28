@@ -19,10 +19,9 @@ class RelatedModel extends Entity
     /**
      * @return self
      */
-    public static function Factory()
+    public static function Factory(Zenderator $zenderator)
     {
-        $class = get_called_class();
-        return new $class;
+        return parent::Factory($zenderator);
     }
 
     public function markClassConflict(bool $conflict)
@@ -54,6 +53,11 @@ class RelatedModel extends Entity
     {
         $this->remoteTable = $remoteTable;
         return $this;
+    }
+
+    public function getRemoteTableSanitised()
+    {
+        return $this->getZenderator()->sanitiseTableName($this->getRemoteTable());
     }
 
     /**
@@ -116,40 +120,40 @@ class RelatedModel extends Entity
     public function getRemoteClass()
     {
         if (Zenderator::isUsingClassPrefixes()) {
-            return  $this->transCamel2Studly->transform($this->remoteBoundSchema) .
-                    $this->transCamel2Studly->transform($this->remoteTable);
+            return  $this->transCamel2Studly->transform($this->getRemoteBoundSchema()) .
+                    $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
         } else {
-            return  $this->transCamel2Studly->transform($this->remoteTable);
+            return  $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
         }
     }
 
     public function getRemoteVariable()
     {
         if (Zenderator::isUsingClassPrefixes()) {
-            return  $this->transCamel2Camel->transform($this->remoteBoundSchema) .
-                    $this->transCamel2Studly->transform($this->remoteTable);
+            return  $this->transCamel2Camel->transform($this->getRemoteBoundSchema()) .
+                    $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
         } else {
-            return  $this->transCamel2Camel->transform($this->remoteTable);
+            return  $this->transCamel2Camel->transform($this->getRemoteTableSanitised());
         }
     }
 
     public function getLocalClass()
     {
         if (Zenderator::isUsingClassPrefixes()) {
-            return  $this->transCamel2Studly->transform($this->localBoundSchema) .
-                    $this->transCamel2Studly->transform($this->localTable);
+            return  $this->transCamel2Studly->transform($this->getLocalBoundSchema()) .
+                    $this->transCamel2Studly->transform($this->getLocalTableSanitised());
         } else {
-            return  $this->transCamel2Studly->transform($this->localTable);
+            return  $this->transCamel2Studly->transform($this->getLocalTableSanitised());
         }
     }
 
     public function getLocalVariable()
     {
         if (Zenderator::isUsingClassPrefixes()) {
-            return  $this->transCamel2Camel->transform($this->localBoundSchema) .
-                    $this->transCamel2Studly->transform($this->localTable);
+            return  $this->transCamel2Camel->transform($this->getLocalBoundSchema()) .
+                    $this->transCamel2Studly->transform($this->getLocalTableSanitised());
         } else {
-            return  $this->transCamel2Camel->transform($this->localTable);
+            return  $this->transCamel2Camel->transform($this->getLocalTableSanitised());
         }
     }
 
@@ -159,7 +163,7 @@ class RelatedModel extends Entity
             return
                 Inflect::singularize($this->getLocalClass()) .
                 "By" .
-                $this->transCamel2Studly->transform($this->localBoundColumn);
+                $this->transCamel2Studly->transform($this->getLocalBoundColumn());
         } else {
             return Inflect::singularize($this->getLocalClass());
         }
@@ -171,7 +175,7 @@ class RelatedModel extends Entity
             return
                 Inflect::singularize($this->getRemoteClass()) .
                 "By" .
-                $this->transCamel2Studly->transform($this->localBoundColumn);
+                $this->transCamel2Studly->transform($this->getLocalBoundColumn());
         } else {
             return Inflect::singularize($this->getRemoteClass());
         }
@@ -242,6 +246,11 @@ class RelatedModel extends Entity
     {
         $this->localTable = $localTable;
         return $this;
+    }
+
+    public function getLocalTableSanitised()
+    {
+        return $this->getZenderator()->sanitiseTableName($this->getLocalTable());
     }
 
     /**

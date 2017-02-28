@@ -229,6 +229,14 @@ class Zenderator
         throw new SchemaToAdaptorException("Could not translate {$schemaName} to an appropriate dbName");
     }
 
+    public function sanitiseTableName($tableName)
+    {
+        if(isset($this->config['database']) && isset($this->config['database']['remove_prefix'])) {
+            return str_replace($this->config['database']['remove_prefix'], "", $tableName);
+        }
+        return $tableName;
+    }
+
     public static function getAutoincrementColumns(DbAdaptor $adapter, $table)
     {
         $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
@@ -269,7 +277,7 @@ class Zenderator
                 if(in_array($table->getName(), $this->ignoredTables)){
                     continue;
                 }
-                $oModel = Components\Model::Factory()
+                $oModel = Components\Model::Factory($this)
                     ->setNamespace($this->namespace)
                     ->setAdaptor($adapter)
                     ->setDatabase($dbName)

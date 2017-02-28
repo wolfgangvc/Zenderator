@@ -8,6 +8,7 @@ use Zenderator\Zenderator;
 
 class Model extends Entity
 {
+
     /** @var DbAdaptor */
     protected $dbAdaptor;
 
@@ -26,10 +27,9 @@ class Model extends Entity
     /**
      * @return self
      */
-    public static function Factory()
+    public static function Factory(Zenderator $zenderator)
     {
-        $class = get_called_class();
-        return new $class;
+        return parent::Factory($zenderator);
     }
 
     /**
@@ -177,7 +177,7 @@ class Model extends Entity
         #echo "Computing the constraints of {$this->getClassName()}\n";
         foreach ($zendConstraints as $zendConstraint) {
             if ($zendConstraint->getType() == "FOREIGN KEY") {
-                $newRelatedObject = RelatedModel::Factory()
+                $newRelatedObject = RelatedModel::Factory($this->getZenderator())
                     ->setSchema($zendConstraint->getReferencedTableSchema())
                     ->setLocalTable($zendConstraint->getTableName())
                     ->setRemoteTable($zendConstraint->getReferencedTableName())
@@ -221,10 +221,10 @@ class Model extends Entity
         if (Zenderator::isUsingClassPrefixes()) {
             return
                 $this->transSnake2Studly->transform($this->getDatabase()) .
-                $this->transStudly2Studly->transform($this->getTable());
+                $this->transStudly2Studly->transform($this->getTableSanitised());
         } else {
             return
-                $this->transStudly2Studly->transform($this->getTable());
+                $this->transStudly2Studly->transform($this->getTableSanitised());
         }
     }
 
@@ -264,6 +264,15 @@ class Model extends Entity
     {
         $this->table = $table;
         return $this;
+    }
+
+    /**
+     * Get the table name, sanitised by removing any prefixes as per zenderator.yml
+     * @return string
+     */
+    public function getTableSanitised()
+    {
+        return $this->getZenderator()->sanitiseTableName($this->getTable());
     }
 
     /**
@@ -360,7 +369,7 @@ class Model extends Entity
 
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
-            $oColumn       = Column::Factory()
+            $oColumn       = Column::Factory($this->getZenderator())
                 ->setField($column->getName())
                 ->setDbType(reset($typeFragments))
                 ->setPermittedValues($column->getErrata('permitted_values'))
