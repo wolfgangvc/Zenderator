@@ -35,7 +35,7 @@ class Zenderator
     private $adapters;
     /** @var Metadata[] */
     private $metadatas;
-    private $ignoredTables;
+    private $ignoredTables = [];
     /** @var CaseTransformer */
     private $transSnake2Studly;
     /** @var CaseTransformer */
