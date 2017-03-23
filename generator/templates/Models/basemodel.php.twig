@@ -40,9 +40,9 @@ abstract class Base{{ class_name }}Model
     /**
      * @returns {{ class_name }}Model
      */
-    static public function factory()
+    static public function factory(array $data = null)
     {
-        return parent::factory();
+        return parent::factory($data);
     }
 
 {% for column in columns %}
