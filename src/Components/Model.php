@@ -267,7 +267,8 @@ class Model extends Entity
     }
 
     /**
-     * Get the table name, sanitised by removing any prefixes as per zenderator.yml
+     * Get the table name, sanitised by removing any prefixes as per zenderator.yml.
+     *
      * @return string
      */
     public function getTableSanitised()
