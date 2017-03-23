@@ -188,7 +188,7 @@ class Zenderator
         $this->twig->addFunction($fct);
 
         // Skip tables specified in configuration.
-        if(isset($this->config['database']) && isset($this->config['database']['skip_tables'])) {
+        if (isset($this->config['database']) && isset($this->config['database']['skip_tables'])) {
             $this->ignoredTables = $this->config['database']['skip_tables'];
         }
 
@@ -218,6 +218,17 @@ class Zenderator
         return $this;
     }
 
+    /**
+     * @return \Slim\App
+     */
+    public function getApp()
+    {
+        $instanceClass = APP_CORE_NAME;
+        return $instanceClass::Instance()
+            ->loadAllRoutes()
+            ->getApp();
+    }
+
     public static function schemaName2databaseName($schemaName)
     {
         foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
@@ -231,7 +242,7 @@ class Zenderator
 
     public function sanitiseTableName($tableName)
     {
-        if(isset($this->config['database']) && isset($this->config['database']['remove_prefix'])) {
+        if (isset($this->config['database']) && isset($this->config['database']['remove_prefix'])) {
             return str_replace($this->config['database']['remove_prefix'], "", $tableName);
         }
         return $tableName;
@@ -274,7 +285,7 @@ class Zenderator
             echo "Collecting " . count($tables) . " entities data.\n";
 
             foreach ($tables as $table) {
-                if(in_array($table->getName(), $this->ignoredTables)){
+                if (in_array($table->getName(), $this->ignoredTables)) {
                     continue;
                 }
                 $oModel = Components\Model::Factory($this)
