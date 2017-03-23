@@ -6,7 +6,7 @@ use Camel\Format\SnakeCase;
 use Camel\Format\StudlyCaps;
 use Zenderator\Zenderator;
 
-class AutomizerCommand
+class AutomizeCommand
 {
     private $zenderator;
 

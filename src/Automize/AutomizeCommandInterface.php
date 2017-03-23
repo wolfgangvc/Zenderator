@@ -1,7 +1,7 @@
 <?php
 namespace Zenderator\Automize;
 
-interface AutomizerCommandInterface
+interface AutomizeCommandInterface
 {
     public function getCommandName() : string;
 
