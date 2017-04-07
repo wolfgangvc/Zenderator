@@ -24,7 +24,7 @@
     "segura/sessions": "*",
     "slim/slim": "^3.2",
     "php-school/cli-menu": "^2.0.0",
-    "raveren/kint": "^1.0",
+    "kint-php/kint": "^1.0",
     "zendframework/zend-db": "^2.7",
     "zeuxisoo/slim-whoops": "^0.5.0",
     "symfony/var-dumper": "^3.0",
