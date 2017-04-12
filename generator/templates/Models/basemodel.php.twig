@@ -38,9 +38,10 @@ abstract class Base{{ class_name }}Model
 {% endfor %}
 
     /**
+     * @param array $data An array of a {{ class_name }}Model's properties.
      * @returns {{ class_name }}Model
      */
-    static public function factory(array $data = null)
+    static public function factory(array $data = [])
     {
         return parent::factory($data);
     }
@@ -55,6 +56,7 @@ abstract class Base{{ class_name }}Model
     }
 
     /**
+     * @param {{ column.phptype }} ${{ column.getField }}
      * @returns {{ class_name }}Model
      */
     public function set{{ column.getPropertyFunction }}({{ column.phptype }} ${{ column.getField }} = null)
