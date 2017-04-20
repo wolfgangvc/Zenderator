@@ -136,7 +136,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 
     /**
      * @depends testDeleteById
-     * @expectedException Segura\AppCore\Exceptions\TableGatewayException
+     * @expectedException \Segura\AppCore\Exceptions\TableGatewayException
      * @expectedExceptionMessageRegExp /Cannot find record by ID '\d+'/
      */
     public function testDeleteByIdVerify({{ class_name }}Model $deleted)

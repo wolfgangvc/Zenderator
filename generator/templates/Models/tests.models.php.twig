@@ -68,7 +68,10 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
         $newMockModel = $table->getNewMockModelInstance();
 
-        $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class($newMockModel));
+        $this->assertInstanceOf(
+            Models\{{ class_name }}Model::class,
+            $newMockModel
+            );
 
         return $newMockModel;
     }
@@ -77,7 +80,10 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     {
         $instance = {{ class_name }}Model::factory();
 
-        $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class($instance));
+        $this->assertInstanceOf(
+            Models\{{ class_name }}Model::class,
+            $instance
+        );
     }
 
     public function testSave()
@@ -151,7 +157,10 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $this->assertTrue(method_exists(${{ class_name|lower }}, "fetch{{ column.field }}Object"));
 
         ${{ column.field }}Object = ${{ class_name|lower }}->fetch{{ column.field }}Object();
-        $this->assertEquals(Models\{{ column.constraints.remote_model_class }}Model::class, get_class(${{ column.field }}Object));
+        $this->assertInstanceOf(
+            Models\{{ column.constraints.remote_model_class }}Model::class,
+            ${{ column.field }}Object
+        );
     }
 {% endif %}
 {% endfor %}
@@ -177,5 +186,84 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {% endfor %}
     }
 {% endif %}
+
+    public function testDestroy()
+    {
+        /** @var {{ class_name }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+        /** @var Models\{{ class_name }}Model $destroyableModel */
+        $destroyableModel = $table->getNewMockModelInstance();
+        $this->assertTrue(true, $destroyableModel->destroy());
+    }
+
+    public function testDestroyThoroughly()
+    {
+        /** @var {{ class_name }}TableGateway $table */
+        $table = $this->getDIContainer()->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+        /** @var Models\{{ class_name }}Model $destroyableModel */
+        $destroyableModel = $table->getNewMockModelInstance();
+        $this->assertGreaterThan(0, $destroyableModel->destroyThoroughly());
+    }
+
+{% if related_object %}
+
+{% for related_object in related_objects %}
+    /**
+     * @depends testNewMockModelInstance
+     */
+    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName }}Object({{ class_name }}Model ${{ class_name }})
+    {
+        // Verify the function exists
+        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ related_object.getRemoteFunctionName }}Object"));
+
+        // Call the function on it
+        ${{ class_name }}Model = ${{ class_name }}->fetch{{ related_object.getRemoteFunctionName }}Object();
+
+        $this->assertInstanceOf(Models\{{ class_name }}Model::class, ${{ class_name }}Model);
+    }
+
+{% endfor %}
+{% endif %}
+
+{% if remote_objects %}
+{% for remote_object in remote_objects %}
+    /**
+     * @depends testNewMockModelInstance
+     */
+    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Object({{ class_name }}Model ${{ class_name }})
+    {
+        // Verify the function exists
+        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
+
+        // TODO: I've not worked out how I want this to work yet.
+        $this->markTestIncomplete();
+
+        // Call the function on it
+        ${{ class_name }}Model = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Object();
+
+        $this->assertInstanceOf(Models\{{ class_name }}Model::class, ${{ class_name }}Model);
+    }
+
+    /**
+     * @depends testNewMockModelInstance
+     */
+    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name }})
+    {
+
+        // Verify the function exists
+        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
+
+        // TODO: I've not worked out how I want this to work yet.
+        $this->markTestIncomplete();
+
+        // Call the function on it
+        ${{ class_name }}Models = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
+
+        $this->assertContainsOnly(Models\{{ class_name }}Model::class, ${{ class_name }}Models);
+    }
+
+{% endfor %}
+{% endif %}
+
 
 }
