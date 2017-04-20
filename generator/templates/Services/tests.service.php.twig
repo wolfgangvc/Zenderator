@@ -20,6 +20,15 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         }
     }
 
+    public function testGetNewModelInstance()
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            ${{ variable_name }}Service->getNewModelInstance()
+        );
+    }
+
     /**
      * @large
      */
@@ -27,7 +36,10 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     {
         ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
         $all = ${{ variable_name }}Service->getAll();
-        $this->assertEquals('{{ namespace }}\Models\{{ class_name }}Model', get_class(reset($all)));
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            reset($all)
+        );
     }
 
     public function testGetRandom()
@@ -35,20 +47,46 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
 
         $random = ${{ variable_name }}Service->getRandom();
-        $this->assertEquals(
-            '{{ namespace }}\Models\{{ class_name }}Model',
-            get_class($random)
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            $random
         );
 
         return $random;
     }
 
+    /**
+     * @depends testGetRandom
+     */
+    public function testGetById({{ class_name }}Model $random)
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $found = ${{ variable_name }}Service->getById($random->getId());
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            $found
+        );
+        $this->assertEquals($random, $found);
+    }
+
+    /**
+     * @depends testGetRandom
+     */
+    public function testCreateFromArray({{ class_name }}Model $random)
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            ${{ variable_name }}Service->createFromArray($random->__ToArray())
+        );
+    }
+
     public function testGetMockObject()
     {
         ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
-        $this->assertEquals(
-            '{{ namespace }}\Models\{{ class_name }}Model',
-            get_class(${{ variable_name }}Service->getMockObject())
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            ${{ variable_name }}Service->getMockObject()
         );
     }
 
@@ -60,11 +98,51 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
 {% for column in columns %}
         $found = ${{ variable_name }}Service->getByField('{{ column.field }}', $random->get{{ column.field }}());
-        $this->assertEquals(
-            '{{ namespace }}\Models\{{ class_name }}Model',
-            get_class($found)
+        $this->assertInstanceOf(
+            {{ class_name }}Model::class,
+            $found
         );
 {% endfor %}
+    }
+
+    /**
+     * @depends testGetRandom
+     */
+    public function testGetManyByField({{ class_name }}Model $random)
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+{% for column in columns %}
+        $found = ${{ variable_name }}Service->getManyByField('{{ column.field }}', $random->get{{ column.field }}());
+        $this->assertContainsOnlyInstancesOf(
+            {{ class_name }}Model::class,
+            $found
+        );
+{% endfor %}
+    }
+
+    public function testDeleteById()
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        ${{ variable_name }}TableGateway = App::Container()->get({{ class_name }}TableGateway::class);
+
+        $deletable = ${{ variable_name }}TableGateway
+            ->getNewMockModelInstance()
+            ->save();
+
+        $this->assertEquals(1, ${{ variable_name }}Service->deleteById($deletable->getId()));
+
+        return $deletable;
+    }
+
+    /**
+     * @depends testDeleteById
+     * @expectedException Segura\AppCore\Exceptions\TableGatewayException
+     * @expectedExceptionMessageRegExp /Cannot find record by ID '\d+'/
+     */
+    public function testDeleteByIdVerify({{ class_name }}Model $deleted)
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+        ${{ variable_name }}Service->getById($deleted->getId());
     }
 
     public function testGetTermPlural()
