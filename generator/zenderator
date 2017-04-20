@@ -19,3 +19,14 @@ $zenderator = new \Zenderator\Zenderator(
     $databaseConfigs
 );
 $zenderator->makeZenderator();
+foreach(array_slice($argv,1) as $option){
+    switch($option){
+        case '--clean':
+            $zenderator->cleanCode();
+            break;
+        default:
+            die("Unknown option \"{$option}\".\n");
+
+    }
+}
+
