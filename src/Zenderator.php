@@ -66,11 +66,6 @@ class Zenderator
         APP_ROOT . "/public/index.php",
         APP_ROOT . "/vendor/segura/appcore",
         APP_ROOT . "/vendor/segura/zenderator",
-        APP_ROOT . "/vendor/segura/libgondalez",
-        APP_ROOT . "/vendor/segura/liblumberjack",
-        APP_ROOT . "/vendor/segura/libschengen",
-        APP_ROOT . "/vendor/segura/libapi",
-        APP_ROOT . "/vendor/segura/libhorizon",
     ];
     private $phpCsFixerRules = [
         'braces',
@@ -172,6 +167,15 @@ class Zenderator
 
         $this->config = file_get_contents($zenderatorConfigPath);
         $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
+
+        $customPathsToPSR2 = [];
+        if (isset($this->config['clean']) && isset($this->config['clean']['paths'])) {
+            foreach ($this->config['clean']['paths'] as $path) {
+                $customPathsToPSR2[] = "/app/{$path}";
+            }
+        }
+
+        $this->pathsToPSR2 = array_merge($this->pathsToPSR2, $customPathsToPSR2);
 
         $this->composer  = json_decode(file_get_contents($this->rootOfApp . "/composer.json"));
         $namespaces      = array_keys((array)$this->composer->autoload->{'psr-4'});
