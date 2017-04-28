@@ -8,6 +8,7 @@
   ],
   "bin": [
     "generator/automize",
+    "generator/clean",
     "generator/phpcsfixerfier",
     "generator/sdkifier",
     "generator/zenderator"
