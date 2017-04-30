@@ -103,6 +103,9 @@ abstract class Base{{ class_name }}Model
      *****************************************************/
 {% for remote_object in remote_objects %}
     /**
+     * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
+     * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
+     *
      * @returns Models\{{ remote_object.getLocalClass }}Model
      */
     public function fetch{{ remote_object.getLocalFunctionName }}Object(
@@ -121,6 +124,10 @@ abstract class Base{{ class_name }}Model
     }
 
     /**
+     * @param $limit int Number to fetch maximum
+     * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
+     * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
+     *
      * @returns Models\{{ remote_object.getLocalClass }}Model[]
      */
     public function fetch{{ remote_object.getLocalFunctionName }}Objects(
