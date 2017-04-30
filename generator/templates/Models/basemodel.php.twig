@@ -124,15 +124,16 @@ abstract class Base{{ class_name }}Model
      * @returns Models\{{ remote_object.getLocalClass }}Model[]
      */
     public function fetch{{ remote_object.getLocalFunctionName }}Objects(
-        $orderBy = null,
-        $orderDirection='ASC'
+        int $limit = null,
+        string $orderBy = null,
+        string $orderDirection='ASC'
     ) : array {
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
         ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
 {% if remote_object.local_model_key == 'id' %}
         return ${{ remote_object.getLocalVariable }}Service->getManyById($this->{{ column.getLocalBoundColumnGetter }}(),$orderBy, $orderDirection);
 {% else %}
-        return ${{ remote_object.getLocalVariable }}Service->getManyByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $orderBy, $orderDirection);
+        return ${{ remote_object.getLocalVariable }}Service->getManyByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $limit, $orderBy, $orderDirection);
 {% endif %}
     }
 
