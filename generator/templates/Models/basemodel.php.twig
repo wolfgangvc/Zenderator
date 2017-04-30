@@ -22,6 +22,15 @@ abstract class Base{{ class_name }}Model
     const FIELD_{{ column.getField|upper }} = '{{ column.getField }}';
 {% endfor %}
 
+    // Constants defined by ENUMs
+{% for column in columns %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+{% for permittedValue in column.getPermittedValues %}
+    const {{ column.getField|upper }}_{{ permittedValue|upper }} = '{{ permittedValue }}';
+{% endfor %}
+{% endif %}
+{% endfor %}
+
 {% if primary_keys %}
     protected $_primary_keys = ['{{ primary_keys|join('\', \'')|raw }}'];
 {% endif %}
