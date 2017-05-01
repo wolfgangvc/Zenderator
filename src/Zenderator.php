@@ -479,7 +479,7 @@ class Zenderator
     public function cleanCodePHPCSFixer(array $pathsToPSR2 = [])
     {
         $begin = microtime(true);
-        echo "php-cs-fixer-fying... \n";
+        echo "Cleaning... \n";
 
         if (empty($pathsToPSR2)) {
             $pathsToPSR2 = $this->pathsToPSR2;
