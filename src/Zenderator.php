@@ -214,7 +214,7 @@ class Zenderator
 
         if ($databaseConfigs) {
             foreach ($databaseConfigs as $dbName => $databaseConfig) {
-                $this->adapters[$dbName]  = new DbAdaptor($databaseConfig);
+                $this->adapters[$dbName]  = new \Segura\AppCore\Adapter($databaseConfig);
                 $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
                 $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
             }
