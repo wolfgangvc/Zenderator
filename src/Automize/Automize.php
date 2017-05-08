@@ -208,6 +208,9 @@ class Automize
                 case 'clean':
                     $this->zenderator->cleanCodePHPCSFixer();
                     break;
+                case 'composer-optimise':
+                    $this->zenderator->cleanCodeComposerAutoloader();
+                    break;
                 case 'sdk':
                     $this->zenderator->runSdkifier();
                     break;
@@ -215,7 +218,11 @@ class Automize
                     $this->zenderator->runTests($values->offsetExists('tests-coverage'), $values->offsetExists('tests-stop-on-error'));
                     break;
                 case 'matt-mode':
-                    $this->zenderator->makeZenderator()->cleanCodePHPCSFixer()->runTests(false, false);
+                    $this->zenderator
+                        ->makeZenderator()
+                        ->cleanCodePHPCSFixer()
+                        ->cleanCodeComposerAutoloader()
+                        ->runTests(false, true);
                     break;
                 default:
                     foreach ($this->getApplicationSpecificCommands() as $command) {
@@ -236,9 +243,10 @@ class Automize
     {
         $arguments = "
             Usage: {self} [options]
-            -c --clean Run Cleaner
             -z --zenderator Run Zenderator
             -s --sdk Run SDKifier
+            -c --clean Run Cleaner
+            -o --composer-optimise Optimise composer autoloader
             -t --tests Run tests
             -v --tests-coverage Run tests with coverage
             -x --tests-stop-on-error Stop tests on Errors or Failures
@@ -247,7 +255,7 @@ class Automize
         foreach ($this->getApplicationSpecificCommands() as $command) {
             $arguments.="--" . str_replace(" ", "-", strtolower($command->getCommandName())) . " Run {$command->getCommandName()}\n";
         }
-        $arguments.="-M --matt-mode Shortcode for -zct\n";
+        $arguments.="-M --matt-mode Shortcode for -zcotx\n";
         $arguments.="-h --help Show this help\n";
         $values = CLIOpts::run($arguments);
 
