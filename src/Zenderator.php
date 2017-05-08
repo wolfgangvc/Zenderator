@@ -757,7 +757,7 @@ class Zenderator
 
     public function waitForKeypress($waitMessage = "Press ENTER key to continue.")
     {
-        if($this->waitForKeypressEnabled) {
+        if ($this->waitForKeypressEnabled) {
             echo "\n{$waitMessage}\n";
             return trim(fgets(fopen('php://stdin', 'r')));
         }
@@ -872,8 +872,9 @@ class Zenderator
         return $this;
     }
 
-    public function runSdkifier($sdkOutputPath = false){
-        if(!$sdkOutputPath){
+    public function runSdkifier($sdkOutputPath = false)
+    {
+        if (!$sdkOutputPath) {
             $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
         }
         $this->purgeSDK($sdkOutputPath)
