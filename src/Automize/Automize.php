@@ -40,7 +40,7 @@ class Automize
     private function getApplicationSpecificMenuItems()
     {
         $commands = $this->getApplicationSpecificCommands();
-        foreach($commands as $command){
+        foreach ($commands as $command) {
             $item                                 = new SelectableItem($command->getCommandName(), [$command, "action"]);
             $this->applicationSpecificMenuItems[] = $item;
         }
@@ -51,7 +51,7 @@ class Automize
      */
     private function getApplicationSpecificCommands() : array
     {
-        $commands = [];
+        $commands         = [];
         $appNamespaceBits = explode("\\", APP_CORE_NAME);
         unset($appNamespaceBits[count($appNamespaceBits) - 1]);
         $appNamespace                        = implode("\\", $appNamespaceBits);
@@ -182,9 +182,9 @@ class Automize
         $this->getApplicationSpecificMenuItems();
         #$this->vpnCheck();
         $values = $this->checkForArguments();
-        if($values->count()){
+        if ($values->count()) {
             $this->runNonInteractive();
-        }else {
+        } else {
             $this->runInteractive();
         }
     }
@@ -200,50 +200,57 @@ class Automize
         $this->zenderator->disableWaitForKeypress();
         $values = $this->checkForArguments();
         // non-interactive mode
-        if($values->offsetExists('zenderator')){
-            $this->zenderator->makeZenderator();
-        }
-        if($values->offsetExists('clean')){
-            $this->zenderator->cleanCodePHPCSFixer();
-        }
-        if($values->offsetExists('sdk')){
-            $this->zenderator->runSdkifier();
-        }
-        if($values->offsetExists('tests')){
-            $this->zenderator->runTests(true, $values->offsetExists('stop-on-error'));
-        }
-        if($values->offsetExists('tests-no-cover')){
-            $this->zenderator->runTests(false, $values->offsetExists('stop-on-error'));
-        }
-        foreach($this->getApplicationSpecificCommands() as $command){
-            $flag = str_replace(" ", "-", strtolower($command->getCommandName()));
-            if($values->offsetExists($flag)){
-                $command->action();
-                exit;
+        foreach ($values as $name => $value) {
+            switch ($name) {
+                case 'zenderator':
+                    $this->zenderator->makeZenderator();
+                    break;
+                case 'clean':
+                    $this->zenderator->cleanCodePHPCSFixer();
+                    break;
+                case 'sdk':
+                    $this->zenderator->runSdkifier();
+                    break;
+                case 'tests':
+                    $this->zenderator->runTests($values->offsetExists('tests-coverage'), $values->offsetExists('tests-stop-on-error'));
+                    break;
+                case 'matt-mode':
+                    $this->zenderator->makeZenderator()->cleanCodePHPCSFixer()->runTests(false, false);
+                    break;
+                default:
+                    foreach ($this->getApplicationSpecificCommands() as $command) {
+                        $flag = str_replace(" ", "-", strtolower($command->getCommandName()));
+                        if ($flag == $name) {
+                            echo "Running {$command->getCommandName()}...\n";
+                            if ($values->offsetExists($flag)) {
+                                $command->action();
+                            }
+                            echo "Completed running {$command->getCommandName()}\n\n";
+                        }
+                    }
             }
-
         }
     }
 
-    private function checkForArguments(){
+    private function checkForArguments()
+    {
         $arguments = "
             Usage: {self} [options]
             -c --clean Run Cleaner
             -z --zenderator Run Zenderator
             -s --sdk Run SDKifier
-            -t --tests-no-cover Run tests without coverage
-            -T --tests Run tests with coverage
-            --stop-on-error Stop tests on Errors
+            -t --tests Run tests
+            -v --tests-coverage Run tests with coverage
+            -x --tests-stop-on-error Stop tests on Errors or Failures
             -r --run <command> Run a specified Command
             ";
-        foreach($this->getApplicationSpecificCommands() as $command){
-            $arguments.="--" . str_replace(" ", "-", strtolower($command->getCommandName())) . " Run {$command->getCommandName()}";
+        foreach ($this->getApplicationSpecificCommands() as $command) {
+            $arguments.="--" . str_replace(" ", "-", strtolower($command->getCommandName())) . " Run {$command->getCommandName()}\n";
         }
-        $arguments.="-h --help           Show this help";
+        $arguments.="-M --matt-mode Shortcode for -zct\n";
+        $arguments.="-h --help Show this help\n";
         $values = CLIOpts::run($arguments);
 
         return $values;
     }
-
-
 }
