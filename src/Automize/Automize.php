@@ -255,7 +255,6 @@ class Automize
             -t --tests Run tests
             -T --tests-coverage Run tests with coverage
             -x --tests-stop-on-error Stop tests on Errors or Failures
-            -r --run <command> Run a specified Command
             ";
         foreach ($this->getApplicationSpecificCommands() as $command) {
             $arguments.="--" . str_replace(" ", "-", strtolower($command->getCommandName())) . " Run {$command->getCommandName()}\n";
