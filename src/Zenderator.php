@@ -513,6 +513,13 @@ class Zenderator
     public function runTests($withCoverage = false, $haltOnError = false)
     {
         echo "Running phpunit... \n";
+
+        if ($withCoverage && file_exists(APP_ROOT . "/build/clover.xml")) {
+            $coverageReport   = simplexml_load_file(APP_ROOT . "/build/clover.xml");
+            $metrics          = $coverageReport->project->metrics;
+            $previousCoverage = (100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc;
+        }
+
         $phpunitCommand = "" .
             "./vendor/bin/phpunit " .
             ($withCoverage ? "--coverage-php=build/coverage_report.php" : "--no-coverage") . " " .
@@ -520,6 +527,29 @@ class Zenderator
         ;
         echo " > {$phpunitCommand}\n\n";
         passthru($phpunitCommand);
+
+        if ($withCoverage) {
+            $coverageReport = simplexml_load_file(APP_ROOT . "/build/clover.xml");
+            $metrics        = $coverageReport->project->metrics;
+            $coverage       = (100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc;
+            echo "\nCoverage: ";
+            printf(
+                "There is %s%% coverage. ",
+                number_format($coverage, 2)
+            );
+            if (isset($previousCoverage)) {
+                if ($coverage != $previousCoverage) {
+                    printf(
+                        "This is a %s%% %s in coverage.",
+                        number_format($previousCoverage - $coverage, 2),
+                        $coverage > $previousCoverage ? 'increase' : 'decrease'
+                    );
+                } else {
+                    echo "There is no change in coverage. ";
+                }
+            }
+            echo "\n\n";
+        }
         return $this;
     }
 

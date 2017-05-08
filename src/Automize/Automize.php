@@ -215,6 +215,7 @@ class Automize
                     $this->zenderator->runSdkifier();
                     break;
                 case 'tests':
+                case 'tests-coverage':
                     $this->zenderator->runTests($values->offsetExists('tests-coverage'), $values->offsetExists('tests-stop-on-error'));
                     break;
                 case 'matt-mode':
@@ -248,7 +249,7 @@ class Automize
             -c --clean Run Cleaner
             -o --composer-optimise Optimise composer autoloader
             -t --tests Run tests
-            -v --tests-coverage Run tests with coverage
+            -T --tests-coverage Run tests with coverage
             -x --tests-stop-on-error Stop tests on Errors or Failures
             -r --run <command> Run a specified Command
             ";
