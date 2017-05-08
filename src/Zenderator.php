@@ -517,7 +517,7 @@ class Zenderator
         if ($withCoverage && file_exists(APP_ROOT . "/build/clover.xml")) {
             $coverageReport   = simplexml_load_file(APP_ROOT . "/build/clover.xml");
             $metrics          = $coverageReport->project->metrics;
-            $previousCoverage = (100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc;
+            $previousCoverage = floatval((100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc);
         }
 
         $phpunitCommand = "" .
@@ -531,7 +531,7 @@ class Zenderator
         if ($withCoverage) {
             $coverageReport = simplexml_load_file(APP_ROOT . "/build/clover.xml");
             $metrics        = $coverageReport->project->metrics;
-            $coverage       = (100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc;
+            $coverage       = floatval((100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc);
             echo "\nCoverage: ";
             printf(
                 "There is %s%% coverage. ",
