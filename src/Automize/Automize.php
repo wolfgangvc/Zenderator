@@ -211,6 +211,9 @@ class Automize
                 case 'composer-optimise':
                     $this->zenderator->cleanCodeComposerAutoloader();
                     break;
+                case 'composer-update-segura':
+                    $this->zenderator->updateSeguraDependencies();
+                    break;
                 case 'sdk':
                     $this->zenderator->runSdkifier();
                     break;
@@ -248,6 +251,7 @@ class Automize
             -s --sdk Run SDKifier
             -c --clean Run Cleaner
             -o --composer-optimise Optimise composer autoloader
+            -u --composer-update-segura Update Segura dependencies
             -t --tests Run tests
             -T --tests-coverage Run tests with coverage
             -x --tests-stop-on-error Stop tests on Errors or Failures
