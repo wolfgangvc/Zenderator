@@ -53,6 +53,8 @@ class Zenderator
 
     private $vpnCheckUrl = "http://hub.segurasystems.com/home";
 
+    private $waitForKeypressEnabled = true;
+
     private $pathsToPSR2 = [
         APP_ROOT . "/src/Models/Base",
         APP_ROOT . "/src/Models",
@@ -755,8 +757,11 @@ class Zenderator
 
     public function waitForKeypress($waitMessage = "Press ENTER key to continue.")
     {
-        echo "\n{$waitMessage}\n";
-        return trim(fgets(fopen('php://stdin', 'r')));
+        if($this->waitForKeypressEnabled) {
+            echo "\n{$waitMessage}\n";
+            return trim(fgets(fopen('php://stdin', 'r')));
+        }
+        return false;
     }
 
     public function vpnCheck()
@@ -864,6 +869,30 @@ class Zenderator
         $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
         $this->runScript($path, "git add src/");
         $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
+        return $this;
+    }
+
+    public function runSdkifier($sdkOutputPath = false){
+        if(!$sdkOutputPath){
+            $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+        }
+        $this->purgeSDK($sdkOutputPath)
+            ->checkGitSDK($sdkOutputPath)
+            ->makeSDK($sdkOutputPath, false)
+            ->cleanCodePHPCSFixer([$sdkOutputPath])
+            ->runSDKTests($sdkOutputPath)
+            ->sendSDKToGit($sdkOutputPath);
+    }
+
+    public function disableWaitForKeypress()
+    {
+        $this->waitForKeypressEnabled = false;
+        return $this;
+    }
+
+    public function enableWaitForKeypress()
+    {
+        $this->waitForKeypressEnabled = true;
         return $this;
     }
 }

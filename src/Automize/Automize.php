@@ -1,6 +1,7 @@
 <?php
 namespace Zenderator\Automize;
 
+use CLIOpts\CLIOpts;
 use PhpSchool\CliMenu\CliMenu;
 use PhpSchool\CliMenu\CliMenuBuilder;
 use PhpSchool\CliMenu\MenuItem\AsciiArtItem;
@@ -38,10 +39,24 @@ class Automize
 
     private function getApplicationSpecificMenuItems()
     {
+        $commands = $this->getApplicationSpecificCommands();
+        foreach($commands as $command){
+            $item                                 = new SelectableItem($command->getCommandName(), [$command, "action"]);
+            $this->applicationSpecificMenuItems[] = $item;
+        }
+    }
+
+    /**
+     * @return AutomizeCommandInterface[]
+     */
+    private function getApplicationSpecificCommands() : array
+    {
+        $commands = [];
         $appNamespaceBits = explode("\\", APP_CORE_NAME);
         unset($appNamespaceBits[count($appNamespaceBits) - 1]);
         $appNamespace                        = implode("\\", $appNamespaceBits);
         $applicationSpecificCommandsLocation = APP_ROOT . "/src/Commands";
+
         if (file_exists($applicationSpecificCommandsLocation)) {
             foreach (new \DirectoryIterator($applicationSpecificCommandsLocation) as $file) {
                 $commandSuffix = "Command.php";
@@ -51,11 +66,12 @@ class Automize
                     /** @var AutomizerCommand $command */
                     $command = new $class($this->zenderator);
                     //\Kint::dump($command, $class, $file);exit;
-                    $item                                 = new SelectableItem($command->getCommandName(), [$command, "action"]);
-                    $this->applicationSpecificMenuItems[] = $item;
+                    $commands[] = $command;
                 }
             }
         }
+
+        return $commands;
     }
 
     private function buildMenu()
@@ -165,7 +181,69 @@ class Automize
     {
         $this->getApplicationSpecificMenuItems();
         #$this->vpnCheck();
+        $values = $this->checkForArguments();
+        if($values->count()){
+            $this->runNonInteractive();
+        }else {
+            $this->runInteractive();
+        }
+    }
+
+    private function runInteractive()
+    {
         $this->buildMenu();
         $this->menu->open();
     }
+
+    private function runNonInteractive()
+    {
+        $this->zenderator->disableWaitForKeypress();
+        $values = $this->checkForArguments();
+        // non-interactive mode
+        if($values->offsetExists('zenderator')){
+            $this->zenderator->makeZenderator();
+        }
+        if($values->offsetExists('clean')){
+            $this->zenderator->cleanCodePHPCSFixer();
+        }
+        if($values->offsetExists('sdk')){
+            $this->zenderator->runSdkifier();
+        }
+        if($values->offsetExists('tests')){
+            $this->zenderator->runTests(true, $values->offsetExists('stop-on-error'));
+        }
+        if($values->offsetExists('tests-no-cover')){
+            $this->zenderator->runTests(false, $values->offsetExists('stop-on-error'));
+        }
+        foreach($this->getApplicationSpecificCommands() as $command){
+            $flag = str_replace(" ", "-", strtolower($command->getCommandName()));
+            if($values->offsetExists($flag)){
+                $command->action();
+                exit;
+            }
+
+        }
+    }
+
+    private function checkForArguments(){
+        $arguments = "
+            Usage: {self} [options]
+            -c --clean Run Cleaner
+            -z --zenderator Run Zenderator
+            -s --sdk Run SDKifier
+            -t --tests-no-cover Run tests without coverage
+            -T --tests Run tests with coverage
+            --stop-on-error Stop tests on Errors
+            -r --run <command> Run a specified Command
+            ";
+        foreach($this->getApplicationSpecificCommands() as $command){
+            $arguments.="--" . str_replace(" ", "-", strtolower($command->getCommandName())) . " Run {$command->getCommandName()}";
+        }
+        $arguments.="-h --help           Show this help";
+        $values = CLIOpts::run($arguments);
+
+        return $values;
+    }
+
+
 }

@@ -111,6 +111,50 @@ The API can be tested without first starting a server and running curl requests 
 Instead, we can create [PSR7 Messages](http://www.php-fig.org/psr/psr-7/) and send those into the Slim Router, and have it respond in a manner similar to how it would for a connection into Apache.
 This can be seen in `Segura\AppCore\Test\RoutesTestCase` as the `request()` function.
 
+## Usage
+
+To aid in using this, there is a tool called `Automize` included.
+
+### Zenderator
+To run zenderator, you can call Zenderator as shown:
+    
+    `./vendor/bin/zenderator`
+    
+or through Automize
+
+    `./vendor/bin/automize -z
+    or
+    ./vendor/bin/automize --zenderator`
+    
+### Codebase Cleaner
+
+There is an included tool to clean source code to match PSR2 standards, as well as do tasks like prune unneeded USE statements.
+To run zenderator, you can call Zenderator as shown:
+    
+    `./vendor/bin/clean`
+    
+or through Automize
+
+    `./vendor/bin/automize -c
+    or
+    ./vendor/bin/automize --clean`
+
+### Automize Advanced
+
+#### Run Zenderator, Clean code, run tests:
+
+    `./vendor/bin/automize -zct --stop-on-error`
+
+This instruction will run Zenderator, then run Clean, then run PHPUnit and will halt at the first fault.
+
+This is equivalent to:
+
+    `./vendor/bin/automize --zenderator --clean --tests-no-cover --stop-on-error`
+    
+## Project Commands
+
+@TODO I need to write this bit.
+    
 ## Additional Reading & Links
 
 * [Faker](https://github.com/fzaninotto/Faker) - We use faker to generate test or dummy data, say when creating mock objects for tests.
