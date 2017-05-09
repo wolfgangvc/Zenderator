@@ -209,6 +209,7 @@ class Column extends Entity
             case 'smalltext':
             case 'text':
             case 'longtext':
+            case 'json':
                 $this->setPhpType('string');
                 break;
             case 'enum':
