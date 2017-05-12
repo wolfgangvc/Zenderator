@@ -17,7 +17,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
     protected $database = '{{ database }}';
 
-    protected $model = '{{ namespace_model }}';
+    protected $model = Models\{{ class_name }}Model::class;
 
     /** @var \Faker\Generator */
     protected $faker;
