@@ -54,19 +54,26 @@ class Automize
         $commands         = [];
         $appNamespaceBits = explode("\\", APP_CORE_NAME);
         unset($appNamespaceBits[count($appNamespaceBits) - 1]);
-        $appNamespace                        = implode("\\", $appNamespaceBits);
-        $applicationSpecificCommandsLocation = APP_ROOT . "/src/Commands";
+        $appScopeBits = explode('\\', APP_CORE_NAME);
+        $appScope = implode('\\', array_slice($appScopeBits,0,-1));
+        $applicationSpecificCommandsLocations =
+        [
+            $appScope => APP_ROOT . "/src/Commands",
+            'Segura\AppCore' => APPCORE_ROOT . "/src/Commands",
+        ];
 
-        if (file_exists($applicationSpecificCommandsLocation)) {
-            foreach (new \DirectoryIterator($applicationSpecificCommandsLocation) as $file) {
-                $commandSuffix = "Command.php";
-                $offset        = strlen($commandSuffix);
-                if (!$file->isDot() && $file->getExtension() == "php" && substr($file->getFilename(), strlen($file->getFilename()) - $offset, $offset) == $commandSuffix) {
-                    $class = $appNamespace . "\\Commands\\" . str_replace($commandSuffix, "", $file->getFilename()) . "Command";
-                    /** @var AutomizerCommand $command */
-                    $command = new $class($this->zenderator);
-                    //\Kint::dump($command, $class, $file);exit;
-                    $commands[] = $command;
+        foreach($applicationSpecificCommandsLocations as $appNamespace => $applicationSpecificCommandsLocation) {
+            if (file_exists($applicationSpecificCommandsLocation)) {
+                foreach (new \DirectoryIterator($applicationSpecificCommandsLocation) as $file) {
+                    $commandSuffix = "Command.php";
+                    $offset = strlen($commandSuffix);
+                    if (!$file->isDot() && $file->getExtension() == "php" && substr($file->getFilename(), strlen($file->getFilename()) - $offset, $offset) == $commandSuffix) {
+                        $class = $appNamespace . "\\Commands\\" . str_replace($commandSuffix, "", $file->getFilename()) . "Command";
+                        /** @var AutomizeCommand $command */
+                        $command = new $class($this->zenderator);
+                        //\Kint::dump($command, $class, $file);exit;
+                        $commands[] = $command;
+                    }
                 }
             }
         }
