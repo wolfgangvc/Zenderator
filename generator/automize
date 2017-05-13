@@ -17,6 +17,7 @@ try {
     $databaseConfigs = null;
 }
 
+$scope::waitForMySQLToBeReady();
 $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME);
 
 $zenderator = new \Zenderator\Zenderator(

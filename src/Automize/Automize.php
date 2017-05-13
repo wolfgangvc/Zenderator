@@ -28,8 +28,6 @@ class Automize
         $this->sdkOutputPath = $sdkOutputPath;
 
         $this->automizeInstanceName = 'Segura Automizer - ' . APP_NAME;
-
-        App::Instance()->waitForMySQLToBeReady();
     }
 
     private function vpnCheck()
