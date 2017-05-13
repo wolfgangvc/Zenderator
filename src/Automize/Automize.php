@@ -54,19 +54,19 @@ class Automize
         $commands         = [];
         $appNamespaceBits = explode("\\", APP_CORE_NAME);
         unset($appNamespaceBits[count($appNamespaceBits) - 1]);
-        $appScopeBits = explode('\\', APP_CORE_NAME);
-        $appScope = implode('\\', array_slice($appScopeBits,0,-1));
+        $appScopeBits                         = explode('\\', APP_CORE_NAME);
+        $appScope                             = implode('\\', array_slice($appScopeBits, 0, -1));
         $applicationSpecificCommandsLocations =
         [
-            $appScope => APP_ROOT . "/src/Commands",
+            $appScope        => APP_ROOT . "/src/Commands",
             'Segura\AppCore' => APPCORE_ROOT . "/src/Commands",
         ];
 
-        foreach($applicationSpecificCommandsLocations as $appNamespace => $applicationSpecificCommandsLocation) {
+        foreach ($applicationSpecificCommandsLocations as $appNamespace => $applicationSpecificCommandsLocation) {
             if (file_exists($applicationSpecificCommandsLocation)) {
                 foreach (new \DirectoryIterator($applicationSpecificCommandsLocation) as $file) {
                     $commandSuffix = "Command.php";
-                    $offset = strlen($commandSuffix);
+                    $offset        = strlen($commandSuffix);
                     if (!$file->isDot() && $file->getExtension() == "php" && substr($file->getFilename(), strlen($file->getFilename()) - $offset, $offset) == $commandSuffix) {
                         $class = $appNamespace . "\\Commands\\" . str_replace($commandSuffix, "", $file->getFilename()) . "Command";
                         /** @var AutomizeCommand $command */
