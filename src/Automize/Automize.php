@@ -6,6 +6,7 @@ use PhpSchool\CliMenu\CliMenu;
 use PhpSchool\CliMenu\CliMenuBuilder;
 use PhpSchool\CliMenu\MenuItem\AsciiArtItem;
 use PhpSchool\CliMenu\MenuItem\SelectableItem;
+use Segura\AppCore\App;
 use Zenderator\Zenderator;
 
 class Automize
@@ -27,6 +28,8 @@ class Automize
         $this->sdkOutputPath = $sdkOutputPath;
 
         $this->automizeInstanceName = 'Segura Automizer - ' . APP_NAME;
+
+        App::Instance()->waitForMySQLToBeReady();
     }
 
     private function vpnCheck()
