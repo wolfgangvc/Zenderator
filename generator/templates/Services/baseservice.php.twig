@@ -78,6 +78,7 @@ abstract class Base{{ class_name }}Service
      * @param array|\Closure[]|null $wheres
      * @param string|null $order
      * @param string|null $orderDirection
+     *
      * @return Models\{{ class_name }}Model[]
      */
     public function getAll(
@@ -88,23 +89,13 @@ abstract class Base{{ class_name }}Service
         string $orderDirection = null
     )
     {
-
-        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
-        list($all{{ class_name }}s, $count) = ${{ variable_name }}Table->fetchAll(
+        return parent::getAll(
             $limit,
             $offset,
             $wheres,
             $order,
-            $orderDirection !== null ? $orderDirection : Select::ORDER_ASCENDING
+            $orderDirection
         );
-        $return = [];
-
-        if ($all{{ class_name }}s instanceof ResultSet) {
-            foreach ($all{{ class_name }}s as ${{ variable_name }}) {
-                $return[] = ${{ variable_name }};
-            }
-        }
-        return $return;
     }
 
     /**
