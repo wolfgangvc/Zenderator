@@ -2,7 +2,7 @@
 
 namespace Zenderator\Components;
 
-use Thru\Inflection\Inflect;
+use Gone\Inflection\Inflect;
 use Zenderator\Zenderator;
 
 class RelatedModel extends Entity

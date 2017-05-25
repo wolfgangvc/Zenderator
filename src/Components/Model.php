@@ -2,7 +2,7 @@
 
 namespace Zenderator\Components;
 
-use Thru\Inflection\Inflect;
+use Gone\Inflection\Inflect;
 use Zend\Db\Adapter\Adapter as DbAdaptor;
 use Zenderator\Zenderator;
 
