@@ -22,6 +22,10 @@ abstract class Base{{ class_name }}Model
     const FIELD_{{ column.getField|upper }} = '{{ column.getField }}';
 {% endfor %}
 
+{% for column in columns %}
+    const TYPE_{{ column.getField|upper }} = '{{ column.getDbType }}';
+{% endfor %}
+
     // Constants defined by ENUMs
 {% for column in columns %}
 {% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
@@ -54,6 +58,30 @@ abstract class Base{{ class_name }}Model
     static public function factory(array $data = [])
     {
         return parent::factory($data);
+    }
+
+    /**
+     * @returns array
+     */
+    public function getPropertyTypes()
+    {
+        return [
+{% for column in columns %}
+            self::FIELD_{{ column.getField|upper }} => [
+                    'type' => self::TYPE_{{ column.getField|upper }},
+{% if column.getMaxLength > 0 %}
+                    'length' => {{ column.getMaxLength }},
+{% endif %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                    'options' => [
+{% for permittedValue in column.getPermittedValues %}
+                        '{{ permittedValue }}',
+{% endfor %}
+                    ],
+{% endif %}
+                ],
+{% endfor %}
+        ];
     }
 
 {% for column in columns %}
