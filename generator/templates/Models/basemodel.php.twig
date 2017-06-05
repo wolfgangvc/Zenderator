@@ -78,6 +78,9 @@ abstract class Base{{ class_name }}Model
                         '{{ permittedValue }}',
 {% endfor %}
                     ],
+{% if column.getDefaultvalue %}
+                    'default' => '{{ column.getDefaultValue() }}',
+{% endif %}
 {% endif %}
                 ],
 {% endfor %}
