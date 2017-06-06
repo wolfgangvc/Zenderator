@@ -63,9 +63,15 @@ abstract class Base{{ class_name }}Model
     /**
      * @returns array
      */
-    public function getPropertyTypes()
+    public function getPropertyMeta()
     {
-        return [
+{% for column in columns %}
+{% if column.hasRelatedObjects %}
+        ${{ column.getField|replace({"Id":"s"})|capitalize }}Service = App::Container()->get(Services\{{ column.getField|replace({"Id":"s"})|capitalize }}Service::class);
+{% endif %}
+{% endfor %}
+
+        $properties = [
 {% for column in columns %}
             self::FIELD_{{ column.getField|upper }} => [
                     'type' => self::TYPE_{{ column.getField|upper }},
@@ -82,9 +88,13 @@ abstract class Base{{ class_name }}Model
                     'default' => '{{ column.getDefaultValue() }}',
 {% endif %}
 {% endif %}
+{% if column.hasRelatedObjects %}
+                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"})|capitalize }}Service->getAll(),
+{% endif %}
                 ],
 {% endfor %}
         ];
+        return $properties;
     }
 
 {% for column in columns %}
