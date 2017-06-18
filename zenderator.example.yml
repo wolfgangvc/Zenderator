@@ -6,3 +6,6 @@ templates:
   - Routes
 formatting:
   - clean
+clean:
+  paths:
+    - "/vendor/segura/appcore",
