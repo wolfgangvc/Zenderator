@@ -67,7 +67,7 @@ abstract class Base{{ class_name }}Model
     {
 {% for column in columns %}
 {% if column.hasRelatedObjects %}
-        ${{ column.getField|replace({"Id":"s"})|capitalize }}Service = App::Container()->get(Services\{{ column.getField|replace({"Id":"s"})|capitalize }}Service::class);
+        ${{ column.getField|replace({"Id":"s"}) }}Service = App::Container()->get(Services\{{ column.getField|replace({"Id":"s"})|transform_camel_to_studly }}Service::class);
 {% endif %}
 {% endfor %}
 
@@ -89,7 +89,7 @@ abstract class Base{{ class_name }}Model
 {% endif %}
 {% endif %}
 {% if column.hasRelatedObjects %}
-                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"})|capitalize }}Service->getAll(),
+                    'remoteOptionsLoader' => ${{ column.getField|replace({"Id":"s"}) }}Service->getAll(),
 {% endif %}
                 ],
 {% endfor %}

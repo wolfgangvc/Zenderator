@@ -3,6 +3,7 @@ namespace Zenderator;
 
 use Camel\CaseTransformer;
 use Camel\Format;
+use Gone\Twig\TransformExtension;
 use Segura\AppCore\App;
 use Segura\AppCore\Router\Router;
 use Slim\Http\Environment;
@@ -184,7 +185,9 @@ class Zenderator
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
-        $this->twig   = new \Twig_Environment($this->loader);
+        $this->twig   = new \Twig_Environment($this->loader, ['debug' => true]);
+        $this->twig->addExtension(new \Twig_Extension_Debug());
+        $this->twig->addExtension(new TransformExtension());
 
         $this->twig->addExtension(
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()
