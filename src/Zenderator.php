@@ -601,7 +601,6 @@ class Zenderator
         ];
 
         $routes = $this->getRoutes();
-
         if (count($routes) > 0) {
             foreach ($routes as $route) {
                 if ($route['name']) {
@@ -614,7 +613,7 @@ class Zenderator
                 }
             }
         } else {
-            throw new Exception("Cannot find any routes while building SDK. Something has gone very wrong.");
+            die("Cannot find any routes while building SDK. Something has gone very wrong.\n\n");
         }
 
         echo "Generating SDK for {$routeCount} routes...\n";
@@ -736,8 +735,6 @@ class Zenderator
         $applicationInstance = App::Instance();
         $calledClass         = get_called_class();
 
-        $app = $applicationInstance->getApp();
-
         if (defined("$calledClass")) {
             $modelName = $calledClass::MODEL_NAME;
             if (file_exists(APP_ROOT . "/src/Routes/{$modelName}Route.php")) {
@@ -751,8 +748,16 @@ class Zenderator
         if (file_exists(APP_ROOT . "/src/RoutesExtra.php")) {
             require(APP_ROOT . "/src/RoutesExtra.php");
         }
-        Router::Instance()->populateRoutes($app);
+        if (file_exists(APP_ROOT . "/src/Routes") && is_dir(APP_ROOT . "/src/Routes")){
+            $count = $applicationInstance->addRoutePathsRecursively(APP_ROOT . "/src/Routes");
+            #echo "Added {$count} route files\n";
+        }
 
+        $applicationInstance->loadAllRoutes();
+        $app = $applicationInstance->getApp();
+
+
+        #$app = Router::Instance()->populateRoutes($app);
 
         $envArray = array_merge($this->defaultEnvironment, $this->defaultHeaders);
         $envArray = array_merge($envArray, [
@@ -781,9 +786,11 @@ class Zenderator
         }
         $response = new Response();
         // Invoke app
-        $response = $applicationInstance->getApp()->process($request, $response);
+
+        $response = $app->process($request, $response);
         #echo "\nRequesting {$method}: {$path} : ".json_encode($post) . "\n";
         #echo "Response: " . (string) $response->getBody()."\n";
+        #exit;
 
         return $response;
     }
@@ -873,35 +880,47 @@ class Zenderator
 
     public function checkGitSDK($path)
     {
-        echo "Preparing SDK Git:\n";
-        $this->runScript(null, "ssh-keyscan -H github.com >> /root/.ssh/known_hosts");
-        $this->runScript($path, "git init");
-        $this->runScript($path, "git remote add origin git@github.com:segurasystems/Lib" . APP_NAME . ".git");
-        $this->runScript($path, "git fetch --all");
-        $this->runScript($path, "git checkout master");
-        $this->runScript($path, "git pull origin master");
+        if(isset($this->config['sdk']['output']['git']['repo'])) {
+            echo "Preparing SDK Git:\n";
+            $this->runScript(null, "ssh-keyscan -H github.com >> /root/.ssh/known_hosts");
+            $this->runScript($path, "git init");
+            $this->runScript($path, "git remote add origin " . $this->config['sdk']['output']['git']['repo']);
+            $this->runScript($path, "git fetch --all");
+            $this->runScript($path, "git checkout master");
+            $this->runScript($path, "git pull origin master");
+        }else{
+            echo "Skipping GIT step, not configured in zenderator.yml: (sdk->output->git->repo)\n";
+        }
         return $this;
+
     }
 
     public function sendSDKToGit($path)
     {
-        echo "Sending SDK to Git:\n";
+        if(isset($this->config['sdk']['output']['git']['repo'])) {
+            echo "Sending SDK to Git:\n";
 
-        if ($this->coverageReport) {
-            $coverageStatement = sprintf(
-                "%s coverage",
-                $this->coverageReport->project[0]->directory[0]->totals->lines->attributes()->percent
-            );
-        } else {
-            $coverageStatement = "No coverage available.";
+            if ($this->coverageReport) {
+                $coverageStatement = sprintf(
+                    "%s coverage",
+                    $this->coverageReport->project[0]->directory[0]->totals->lines->attributes()->percent
+                );
+            } else {
+                $coverageStatement = "No coverage available.";
+            }
+            if(isset($this->config['sdk']['output']['git']['author']['name']) && isset($this->config['sdk']['output']['git']['author']['email'])) {
+                $this->runScript($path, "git config --global user.email \"{$this->config['sdk']['output']['git']['author']['email']}\"");
+                $this->runScript($path, "git config --global user.name \"{$this->config['sdk']['output']['git']['author']['name']}\"");
+            }
+            $this->runScript($path, "git commit -m \"Updated PHPVCR Cassettes.\" tests/fixtures");
+            $this->runScript($path, "git add tests/");
+            $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
+            $this->runScript($path, "git add src/");
+            $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
+            $this->runScript($path, "git push origin master");
+        }else{
+            echo "Skipping GIT step, not configured in zenderator.yml: (sdk->output->git->repo)\n";
         }
-        $this->runScript($path, "git config --global user.email \"sdkifier@segura.co.uk\"");
-        $this->runScript($path, "git config --global user.name \"Segura SDKifier\"");
-        $this->runScript($path, "git commit -m \"Updated PHPVCR Cassettes.\" tests/fixtures");
-        $this->runScript($path, "git add tests/");
-        $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
-        $this->runScript($path, "git add src/");
-        $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
         return $this;
     }
 
@@ -909,13 +928,19 @@ class Zenderator
     {
         if (!$sdkOutputPath) {
             $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+            if (isset($this->config['sdk']) && isset($this->config['sdk']['output']) && isset($this->config['sdk']['output']['path'])) {
+                $sdkOutputPath = APP_ROOT . "/" . $this->config['sdk']['output']['path'];
+            }
         }
-        $this->purgeSDK($sdkOutputPath)
+
+        $this
+            ->purgeSDK($sdkOutputPath)
             ->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, false)
             ->cleanCodePHPCSFixer([$sdkOutputPath])
-            ->runSDKTests($sdkOutputPath)
-            ->sendSDKToGit($sdkOutputPath);
+            //->runSDKTests($sdkOutputPath)
+            ->sendSDKToGit($sdkOutputPath)
+        ;
     }
 
     public function disableWaitForKeypress()
