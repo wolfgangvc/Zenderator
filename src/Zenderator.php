@@ -916,8 +916,11 @@ class Zenderator
             $this->runScript($path, "git add tests/");
             $this->runScript($path, "git commit -m \"Updated Tests. {$coverageStatement}\" tests");
             $this->runScript($path, "git add src/");
-            $this->runScript($path, "git commit -am \"Updated Library. {$coverageStatement}\"");
+            $this->runScript($path, "git add .gitignore");
+            $this->runScript($path, "git add bootstrap.php composer.* Dockerfile phpunit.xml.dist Readme.md run-tests.sh test-compose.yml");
+            $this->runScript($path, "git commit -m \"Updated Library. {$coverageStatement}\"");
             $this->runScript($path, "git push origin master");
+
         }else{
             echo "Skipping GIT step, not configured in zenderator.yml: (sdk->output->git->repo)\n";
         }
