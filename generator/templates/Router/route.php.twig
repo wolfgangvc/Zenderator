@@ -1,12 +1,12 @@
 <?php
 $DIContainer = \{{ app_container }}::Instance()->getContainer();
-$tableGateway = $DIContainer->get(\Segura\Api\TableGateways\{{ class_name }}TableGateway::class);
+$tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 try{
     $exampleExistingObject = $tableGateway->fetchRandom();
 }catch(Segura\AppCore\Exceptions\TableGatewayException $tge){
     $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
 }
-if(!$exampleExistingObject instanceof \Segura\Api\Models\{{ class_name }}Model){
+if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
     $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
 }
 $exampleObjectToCreate = $DIContainer->get('{{ class_name }}MockModel');
