@@ -7,6 +7,7 @@ use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\Models;
 use \Zend\Db\Adapter\AdapterInterface;
 use \Zend\Db\ResultSet\ResultSet;
+use \Segura\AppCore\Exceptions;
 
 {% include '_overwrite_warning.twig' %}
 
@@ -66,6 +67,15 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
      */
     public function getNewMockModelInstance()
     {
+{% for column in columns|sort %}
+{% if column.hasRelatedObjects %}
+    try{
+        $random{{ column.getRelatedObjects()[0].getRemoteClass }} = $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom();
+    }catch(Exceptions\TableGatewayException $tge){
+        $random{{ column.getRelatedObjects()[0].getRemoteClass }} = false;
+    }
+{% endif %}
+{% endfor %}
 
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
@@ -74,7 +84,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
         '{{ column.getField }}' => null,
 {% elseif column.hasRelatedObjects %}
         '{{ column.getField }}' =>
-            $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom() instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
+            $random{{ column.getRelatedObjects()[0].getRemoteClass }} instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
             ? $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}()
             : $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
 
