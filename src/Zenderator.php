@@ -748,7 +748,7 @@ class Zenderator
         if (file_exists(APP_ROOT . "/src/RoutesExtra.php")) {
             require(APP_ROOT . "/src/RoutesExtra.php");
         }
-        if (file_exists(APP_ROOT . "/src/Routes") && is_dir(APP_ROOT . "/src/Routes")){
+        if (file_exists(APP_ROOT . "/src/Routes") && is_dir(APP_ROOT . "/src/Routes")) {
             $count = $applicationInstance->addRoutePathsRecursively(APP_ROOT . "/src/Routes");
             #echo "Added {$count} route files\n";
         }
@@ -880,7 +880,7 @@ class Zenderator
 
     public function checkGitSDK($path)
     {
-        if(isset($this->config['sdk']['output']['git']['repo'])) {
+        if (isset($this->config['sdk']['output']['git']['repo'])) {
             echo "Preparing SDK Git:\n";
             $this->runScript(null, "ssh-keyscan -H github.com >> /root/.ssh/known_hosts");
             $this->runScript($path, "git init");
@@ -888,16 +888,15 @@ class Zenderator
             $this->runScript($path, "git fetch --all");
             $this->runScript($path, "git checkout master");
             $this->runScript($path, "git pull origin master");
-        }else{
+        } else {
             echo "Skipping GIT step, not configured in zenderator.yml: (sdk->output->git->repo)\n";
         }
         return $this;
-
     }
 
     public function sendSDKToGit($path)
     {
-        if(isset($this->config['sdk']['output']['git']['repo'])) {
+        if (isset($this->config['sdk']['output']['git']['repo'])) {
             echo "Sending SDK to Git:\n";
 
             if ($this->coverageReport) {
@@ -908,7 +907,7 @@ class Zenderator
             } else {
                 $coverageStatement = "No coverage available.";
             }
-            if(isset($this->config['sdk']['output']['git']['author']['name']) && isset($this->config['sdk']['output']['git']['author']['email'])) {
+            if (isset($this->config['sdk']['output']['git']['author']['name']) && isset($this->config['sdk']['output']['git']['author']['email'])) {
                 $this->runScript($path, "git config --global user.email \"{$this->config['sdk']['output']['git']['author']['email']}\"");
                 $this->runScript($path, "git config --global user.name \"{$this->config['sdk']['output']['git']['author']['name']}\"");
             }
@@ -920,8 +919,7 @@ class Zenderator
             $this->runScript($path, "git add bootstrap.php composer.* Dockerfile phpunit.xml.dist Readme.md run-tests.sh test-compose.yml");
             $this->runScript($path, "git commit -m \"Updated Library. {$coverageStatement}\"");
             $this->runScript($path, "git push origin master");
-
-        }else{
+        } else {
             echo "Skipping GIT step, not configured in zenderator.yml: (sdk->output->git->repo)\n";
         }
         return $this;
