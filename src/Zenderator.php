@@ -157,19 +157,24 @@ class Zenderator
         return self::$useClassPrefixes;
     }
 
-    private function setUp($databaseConfigs)
+    public static function getConfig($rootOfApp)
     {
-        self::$databaseConfigs = $databaseConfigs;
-        if (file_exists($this->rootOfApp . "/zenderator.yml")) {
-            $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml";
-        } elseif (file_exists($this->rootOfApp . "/zenderator.yml.dist")) {
-            $zenderatorConfigPath = $this->rootOfApp . "/zenderator.yml.dist";
+        if (file_exists($rootOfApp . "/zenderator.yml")) {
+            $zenderatorConfigPath = $rootOfApp . "/zenderator.yml";
+        } elseif (file_exists($rootOfApp . "/zenderator.yml.dist")) {
+            $zenderatorConfigPath = $rootOfApp . "/zenderator.yml.dist";
         } else {
             die("Missing Zenderator config /zenderator.yml or /zenderator.yml.dist\nThere is an example in /vendor/bin/segura/zenderator/zenderator.example.yml\n\n");
         }
 
-        $this->config = file_get_contents($zenderatorConfigPath);
-        $this->config = \Symfony\Component\Yaml\Yaml::parse($this->config);
+        $config = file_get_contents($zenderatorConfigPath);
+        $config = \Symfony\Component\Yaml\Yaml::parse($config);
+        return $config;
+    }
+
+    private function setUp($databaseConfigs)
+    {
+        self::$databaseConfigs = $databaseConfigs;
 
         $customPathsToPSR2 = [];
         if (isset($this->config['clean']) && isset($this->config['clean']['paths'])) {
@@ -177,6 +182,8 @@ class Zenderator
                 $customPathsToPSR2[] = "/app/{$path}";
             }
         }
+
+        $this->config = self::getConfig($this->rootOfApp);
 
         $this->pathsToPSR2 = array_merge($this->pathsToPSR2, $customPathsToPSR2);
 
