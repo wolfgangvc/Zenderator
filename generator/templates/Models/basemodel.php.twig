@@ -179,9 +179,22 @@ abstract class Base{{ class_name }}Model
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
         ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
 {% if remote_object.local_model_key == 'id' %}
-        return ${{ remote_object.getLocalVariable }}Service->getManyById($this->{{ column.getLocalBoundColumnGetter }}(),$orderBy, $orderDirection);
+        return ${{ remote_object.getLocalVariable }}Service->getManyById($this->{{ column.getLocalBoundColumnGetter }}(), $orderBy, $orderDirection);
 {% else %}
         return ${{ remote_object.getLocalVariable }}Service->getManyByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}(), $limit, $orderBy, $orderDirection);
+{% endif %}
+    }
+
+    /**
+     * @returns int Number of objects found.
+     */
+    public function count{{ remote_object.getLocalFunctionName }}Objects() : int {
+        /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
+        ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
+{% if remote_object.local_model_key == 'id' %}
+        return ${{ remote_object.getLocalVariable }}Service->countById($this->{{ column.getLocalBoundColumnGetter }}());
+{% else %}
+        return ${{ remote_object.getLocalVariable }}Service->countByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
 {% endif %}
     }
 

@@ -145,6 +145,17 @@ abstract class Base{{ class_name }}Service
     }
 
     /**
+     * @param string $field
+     * @param $value
+     * @return int
+     */
+    public function countByField(string $field, $value) : int
+    {
+        ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
+        return ${{ variable_name }}Table->countByField($field, $value);
+    }
+
+    /**
      * @return Models\{{ class_name }}Model
      * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
