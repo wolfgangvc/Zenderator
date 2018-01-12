@@ -1,6 +1,7 @@
 <?php
 namespace {{ namespace }}\Test\Models\Generated;
 
+use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
 use \{{ namespace }}\Models\{{ class_name }}Model;
 use \{{ namespace }}\Models;
@@ -107,6 +108,14 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
                 }
             }
         }
+
+{% for column in columns|sort %}
+{% if column.getDbType == 'json' %}
+        // Reserialize JSON fields
+        $mockModelArray['{{ column.getPropertyFunction }}']  = json_encode(json_decode($mockModelArray['{{ column.getPropertyFunction }}'],true), JSON_PRETTY_PRINT);
+        $savedModelArray['{{ column.getPropertyFunction }}'] = json_encode(json_decode($savedModelArray['{{ column.getPropertyFunction }}'],true), JSON_PRETTY_PRINT);
+{% endif %}
+{% endfor %}
 
         $this->assertEquals($mockModelArray, $savedModelArray);
     }
@@ -235,13 +244,20 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         // Verify the function exists
         $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
 
-        // TODO: I've not worked out how I want this to work yet.
-        $this->markTestIncomplete();
+        /** @var TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway $tableGateway */
+        $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway::class);
+
+        ${{ class_name }} = ${{ class_name }}->save();
+
+        /** @var Models\{{ remote_object.getLocalFunctionName }}sModel $newMockModel */
+        $newMockModel = $tableGateway->getNewMockModelInstance();
+        $newMockModel->set{{ remote_object.getRemoteFunctionName }}Id(${{ class_name }}->getId());
+        $newMockModel->save();
 
         // Call the function on it
-        ${{ class_name }}Model = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Object();
+        ${{ remote_object.getLocalFunctionName }}Model = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Object();
 
-        $this->assertInstanceOf(Models\{{ class_name }}Model::class, ${{ class_name }}Model);
+        $this->assertInstanceOf(Models\{{ remote_object.getLocalFunctionName }}sModel::class, ${{ remote_object.getLocalFunctionName }}Model);
     }
 
     /**
@@ -249,17 +265,23 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
      */
     public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name }})
     {
-
         // Verify the function exists
         $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
 
-        // TODO: I've not worked out how I want this to work yet.
-        $this->markTestIncomplete();
+        /** @var TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway $tableGateway */
+        $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway::class);
+
+        ${{ class_name }} = ${{ class_name }}->save();
+
+        /** @var Models\{{ remote_object.getLocalFunctionName }}sModel $newMockModel */
+        $newMockModel = $tableGateway->getNewMockModelInstance();
+        $newMockModel->set{{ remote_object.getRemoteFunctionName }}Id(${{ class_name }}->getId());
+        $newMockModel->save();
 
         // Call the function on it
-        ${{ class_name }}Models = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
+        ${{ remote_object.getLocalFunctionName }}Models = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
 
-        $this->assertContainsOnly(Models\{{ class_name }}Model::class, ${{ class_name }}Models);
+        $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalFunctionName }}sModel::class, ${{ remote_object.getLocalFunctionName }}Models);
     }
 
 {% endfor %}

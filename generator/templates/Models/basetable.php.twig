@@ -69,11 +69,21 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
     {
 {% for column in columns|sort %}
 {% if column.hasRelatedObjects %}
-    try{
-        $random{{ column.getRelatedObjects()[0].getRemoteClass }} = $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom();
-    }catch(Exceptions\TableGatewayException $tge){
-        $random{{ column.getRelatedObjects()[0].getRemoteClass }} = false;
-    }
+        // Generate a Random {{ column.getRelatedObjects()[0].getRemoteClass }}.
+        try{
+            $random{{ column.getRelatedObjects()[0].getRemoteClass }} = $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom();
+        }catch(Exceptions\TableGatewayException $tge){
+            $random{{ column.getRelatedObjects()[0].getRemoteClass }} = false;
+        }
+
+{% endif %}
+{% if column.getDbType == 'json' %}
+        // Generate an array of lastnames to make a filler json array.
+        ${{ column.getField }}Array = [];
+        for($i = 0; $i < $this->faker->numberBetween(1,10); $i++) {
+            ${{ column.getField }}Array[] = $this->faker->lastName;
+        }
+
 {% endif %}
 {% endfor %}
 
@@ -100,8 +110,10 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
         '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, -5, 5),
 {% elseif column.getMaxLength %}
         '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} >= 5 ? {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} : 5), 0, {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }}),
+{% elseif column.getDbType == 'json' %}
+        '{{ column.getField }}' => json_encode(${{ column.getField }}Array, JSON_PRETTY_PRINT),
 {% else %}
-        '{{ column.getField }}' => $this->faker->word,
+        'column.getField' => $this->faker->word,
 {% endif %}
 {% endfor %}
       ];

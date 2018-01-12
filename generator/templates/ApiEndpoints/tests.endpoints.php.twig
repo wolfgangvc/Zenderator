@@ -18,14 +18,41 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
             $this->waypoint("Initialise Mock Model");
             $new{{ class_name }}Array = $new{{ class_name }}->__toArray();
 
+            $method = "PUT";
+            $uri    = "/v1/{{ controller_route}}";
+
             $response = $this->request(
-                "PUT",
-                "/v1/{{ controller_route}}",
+                $method,
+                $uri,
                 $new{{ class_name }}Array
             );
             $this->waypoint("API PUT REST REQUEST");
             $body = (string) $response->getBody();
-            $this->assertTrue(in_array($response->getStatusCode(), [200,400]), "Response was not expected 200 or 400. Response body is: \n\n" . $body . "\n\n");            $this->waypoint("Get & Parse Response");
+
+            ob_start();
+            \Kint::dump(
+                $new{{ class_name }}Array,
+                json_encode($new{{ class_name }}Array, JSON_PRETTY_PRINT)
+            );
+            $request{{ class_name }}Params = ob_get_contents();
+            ob_end_clean();
+
+            $this->assertTrue(
+                in_array(
+                    $response->getStatusCode(),
+                    [
+                        200,
+                        400,
+                    ]
+                ),
+                "Response was not expected 200 or 400.\n" .
+                "Request: {$method} => {$uri}" .
+                "{$request{{ class_name }}Params}\n" .
+                "Response body is: \n" .
+                " ******************************\n{$body}\n ******************************\n"
+            );
+
+            $this->waypoint("Get & Parse Response");
             $this->assertNotNull(
                 json_decode((string) $body),
                 "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}->__toArray()) . "\""
@@ -36,10 +63,12 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
             $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to PUT /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
             $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
             $this->waypoint("Some assertions");
-#\Kint::dump(
-#    $new{{ class_name }}Array,
-#    $responseJson
-#);
+
+            #\Kint::dump(
+            #    $new{{ class_name }}Array,
+            #    $responseJson
+            #);
+
             $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
             $this->waypoint("Validate Object Response");
             //TODO: Make this respect primary key field instead of assuming ID.
@@ -55,7 +84,6 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
 
     public function test{{ class_name }}CreateFails()
     {
-        $this->markTestSkipped("This test makes phpunit sad because closures cannot be serialised");
         $this->waypoint("Begin");
 
         $new{{ class_name }} = [
