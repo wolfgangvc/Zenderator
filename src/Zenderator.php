@@ -520,7 +520,7 @@ class Zenderator
         return $this;
     }
 
-    public function runTests($withCoverage = false, $haltOnError = false)
+    public function runTests($withCoverage = false, $haltOnError = false) : int
     {
         echo "Running phpunit... \n";
 
@@ -536,7 +536,7 @@ class Zenderator
             ($haltOnError  ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
         ;
         echo " > {$phpunitCommand}\n\n";
-        passthru($phpunitCommand);
+        passthru($phpunitCommand, $returnCode);
 
         if ($withCoverage) {
             $coverageReport = simplexml_load_file(APP_ROOT . "/build/clover.xml");
@@ -560,7 +560,7 @@ class Zenderator
             }
             echo "\n\n";
         }
-        return $this;
+        return $returnCode;
     }
 
     public function updateSeguraDependencies()
