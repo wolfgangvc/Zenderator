@@ -170,6 +170,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $responseJson = json_decode((string)$body, true);
         $this->assertArrayHasKey('Status', $responseJson);
         $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to DELETE /v1/{{ controller_route }}/{$id} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertEquals("DELETE", $responseJson['Action']);
         $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
         $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
         return $id;

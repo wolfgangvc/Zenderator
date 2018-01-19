@@ -69,12 +69,8 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
     {
 {% for column in columns|sort %}
 {% if column.hasRelatedObjects %}
-        // Generate a Random {{ column.getRelatedObjects()[0].getRemoteClass }}.
-        try{
-            $random{{ column.getRelatedObjects()[0].getRemoteClass }} = $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom();
-        }catch(Exceptions\TableGatewayException $tge){
-            $random{{ column.getRelatedObjects()[0].getRemoteClass }} = false;
-        }
+      // Generate a Random {{ column.getRelatedObjects()[0].getRemoteClass }}.
+      $random{{ column.getRelatedObjects()[0].getRemoteClass }} = $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom();
 
 {% endif %}
 {% if column.getDbType == 'json' %}
@@ -86,7 +82,6 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 
 {% endif %}
 {% endfor %}
-
       $new{{ class_name }}Data = [
 {% for column in columns|sort %}
         // {{ column.getField }}. Type = {{ column.getDbType }}. PHPType = {{ column.getPhpType }}. {% if(column.hasRelatedObjects) %}Has{% else %}Has no{% endif %} related objects.

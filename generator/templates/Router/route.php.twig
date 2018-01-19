@@ -1,15 +1,26 @@
 <?php
 $DIContainer = \{{ app_container }}::Instance()->getContainer();
 $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
-try{
+
+// @todo This badly needs refactoring to be less insane/db heavy
+/** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleExistingObject */
+try {
     $exampleExistingObject = $tableGateway->fetchRandom();
-}catch(Segura\AppCore\Exceptions\TableGatewayException $tge){
+}catch(\Segura\AppCore\Exceptions\TableGatewayException $exception){
+    $exampleExistingObject = false;
+}
+if(!$exampleExistingObject){
     $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
+#    $exampleExistingObject->destroy();
 }
 if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
     $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
+#    $exampleExistingObject->destroy();
 }
+/** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleObjectToCreate */
 $exampleObjectToCreate = $DIContainer->get('{{ class_name }}MockModel');
+
+// Router proper begins
 
 $router = \Segura\AppCore\Router\Router::Instance()
     ->addRoute(
