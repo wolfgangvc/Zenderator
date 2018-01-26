@@ -532,7 +532,7 @@ class Zenderator
 
         $phpunitCommand = "" .
             "./vendor/bin/phpunit " .
-            ($withCoverage ? "--coverage-php=build/coverage_report.php" : "--no-coverage") . " " .
+            ($withCoverage ? "--coverage-php=build/coverage_report.php --coverage-text" : "--no-coverage") . " " .
             ($haltOnError  ? "--stop-on-failure --stop-on-error --stop-on-warning" : "")
         ;
         echo " > {$phpunitCommand}\n\n";
