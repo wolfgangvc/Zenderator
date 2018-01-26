@@ -4,6 +4,7 @@ namespace {{ namespace }}\Test\Api\Generated;
 
 use {{ namespace }}\TableGateways;
 use \Segura\AppCore\Exceptions\TableGatewayException;
+use Segura\Reporting\Models\{{ class_name }}Model;
 
 class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
 {
@@ -14,6 +15,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
     {
         try{
             $this->waypoint("Begin");
+            /** @var {{ class_name }}Model $new{{ class_name }} **/
             $new{{ class_name }} = $this->getDIContainer()->get('{{ class_name }}MockModel');
             $this->waypoint("Initialise Mock Model");
             $new{{ class_name }}Array = $new{{ class_name }}->__toArray();
