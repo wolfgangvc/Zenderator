@@ -3,7 +3,6 @@
 namespace {{ namespace }}\Test\Api\Generated;
 
 use {{ namespace }}\TableGateways;
-use \Segura\AppCore\Exceptions\TableGatewayException;
 use Segura\Reporting\Models\{{ class_name }}Model;
 
 class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
@@ -13,74 +12,71 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
 
     public function test{{ class_name }}Create()
     {
-        try{
-            $this->waypoint("Begin");
-            /** @var {{ class_name }}Model $new{{ class_name }} **/
-            $new{{ class_name }} = $this->getDIContainer()->get('{{ class_name }}MockModel');
-            $this->waypoint("Initialise Mock Model");
-            $new{{ class_name }}Array = $new{{ class_name }}->__toArray();
+        $this->waypoint("Begin");
+        /** @var {{ class_name }}Model $new{{ class_name }} **/
+        $new{{ class_name }} = $this->getDIContainer()->get('{{ class_name }}MockModel');
+        $this->waypoint("Initialise Mock Model");
+        $new{{ class_name }}Array = $new{{ class_name }}->__toArray();
 
-            $method = "PUT";
-            $uri    = "/v1/{{ controller_route}}";
+        $method = "PUT";
+        $uri    = "/v1/{{ controller_route}}";
 
-            $response = $this->request(
-                $method,
-                $uri,
-                $new{{ class_name }}Array
-            );
-            $this->waypoint("API PUT REST REQUEST");
-            $body = (string) $response->getBody();
+        $response = $this->request(
+            $method,
+            $uri,
+            $new{{ class_name }}Array
+        );
+        $this->waypoint("API PUT REST REQUEST");
+        $body = (string) $response->getBody();
 
-            ob_start();
-            \Kint::dump(
-                $new{{ class_name }}Array,
-                json_encode($new{{ class_name }}Array, JSON_PRETTY_PRINT)
-            );
-            $request{{ class_name }}Params = ob_get_contents();
-            ob_end_clean();
+        ob_start();
+        \Kint::dump(
+            $new{{ class_name }}Array,
+            json_encode($new{{ class_name }}Array, JSON_PRETTY_PRINT)
+        );
+        $request{{ class_name }}Params = ob_get_contents();
+        ob_end_clean();
 
-            $this->assertTrue(
-                in_array(
-                    $response->getStatusCode(),
-                    [
-                        200,
-                        400,
-                    ]
-                ),
-                "Response was not expected 200 or 400.\n" .
-                "Request: {$method} => {$uri}" .
-                "{$request{{ class_name }}Params}\n" .
-                "Response body is: \n" .
-                " ******************************\n{$body}\n ******************************\n"
-            );
+        $this->assertTrue(
+            in_array(
+                $response->getStatusCode(),
+                [
+                    200,
+                    400,
+                ]
+            ),
+            "Response was not expected 200 or 400.\n" .
+            "Request: {$method} => {$uri}" .
+            "{$request{{ class_name }}Params}\n" .
+            "Response body is: \n" .
+            " ******************************\n{$body}\n ******************************\n"
+        );
 
-            $this->waypoint("Get & Parse Response");
-            $this->assertNotNull(
-                json_decode((string) $body),
-                "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}->__toArray()) . "\""
-            );
-            $responseJson = json_decode($body, true);
-            $this->waypoint("JSON DECODE");
-            $this->assertArrayHasKey('Status', $responseJson);
-            $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to PUT /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
-            $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
-            $this->waypoint("Some assertions");
+        $this->waypoint("Get & Parse Response");
+        $this->assertNotNull(
+            json_decode((string) $body),
+            "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\" Request JSON blob: \"" . json_encode($new{{ class_name }}->__toArray()) . "\""
+        );
+        $responseJson = json_decode($body, true);
+        $this->waypoint("JSON DECODE");
+        $this->assertArrayHasKey('Status', $responseJson);
+        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to PUT /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
+        $this->waypoint("Some assertions");
 
-            #\Kint::dump(
-            #    $new{{ class_name }}Array,
-            #    $responseJson
-            #);
+        #\Kint::dump(
+        #    $new{{ class_name }}Array,
+        #    $responseJson
+        #);
 
-            $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
-            $this->waypoint("Validate Object Response");
-            //TODO: Make this respect primary key field instead of assuming ID.
-            if(!isset($responseJson['{{ class_name }}']['Id'])){
-                $this->markTestIncomplete("Skipped test... {{ class_name }} response object doesn't have an ID field.");
-            }
-            return $responseJson['{{ class_name }}']['Id'];
-        } catch ( TableGatewayException $tge ) {
-            $this->fail("Skipped test due to: {$tge->getMessage()}");
+        $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
+        $this->waypoint("Validate Object Response");
+        //TODO: Make this respect primary key field instead of assuming ID.
+        if(!isset($responseJson['{{ class_name }}']['Id'])){
+            $this->markTestIncomplete("Skipped test... {{ class_name }} response object doesn't have an ID field.");
         }
+
+        return $responseJson['{{ class_name }}']['Id'];
     }
 
 

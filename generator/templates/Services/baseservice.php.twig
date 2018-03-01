@@ -101,7 +101,6 @@ abstract class Base{{ class_name }}Service
     /**
      * @param int $id
      * @return Models\{{ class_name }}Model|null
-     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getById(int $id) : ?Models\{{ class_name }}Model
     {
@@ -115,10 +114,10 @@ abstract class Base{{ class_name }}Service
      * @param $value
      * @param $orderBy string Field to sort by
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
-     * @return Models\{{ class_name }}Model
-     * @throws \Segura\AppCore\Exceptions\TableGatewayException
+     *
+     * @return Models\{{ class_name }}Model|null
      */
-    public function getByField(string $field, $value, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : Models\{{ class_name }}Model
+    public function getByField(string $field, $value, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?Models\{{ class_name }}Model
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
@@ -132,7 +131,6 @@ abstract class Base{{ class_name }}Service
      * @param $orderBy string Field to sort by
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model[]|null
-     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getManyByField(string $field, $value, int $limit = null, $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?array
     {
@@ -154,7 +152,6 @@ abstract class Base{{ class_name }}Service
 
     /**
      * @return Models\{{ class_name }}Model
-     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getRandom() : Models\{{ class_name }}Model
     {
@@ -169,7 +166,6 @@ abstract class Base{{ class_name }}Service
      * @param $orderBy string Field to sort by
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model
-     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : Models\{{ class_name }}Model
     {
@@ -183,7 +179,6 @@ abstract class Base{{ class_name }}Service
      * @param $orderBy string Field to sort by
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model[]
-     * @throws \Segura\AppCore\Exceptions\TableGatewayException
      */
     public function getManyMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : array
     {

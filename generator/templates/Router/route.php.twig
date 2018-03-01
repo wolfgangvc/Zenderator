@@ -4,11 +4,8 @@ $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }
 
 // @todo This badly needs refactoring to be less insane/db heavy
 /** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleExistingObject */
-try {
-    $exampleExistingObject = $tableGateway->fetchRandom();
-}catch(\Segura\AppCore\Exceptions\TableGatewayException $exception){
-    $exampleExistingObject = false;
-}
+$exampleExistingObject = $tableGateway->fetchRandom();
+
 if(!$exampleExistingObject){
     $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
 #    $exampleExistingObject->destroy();
