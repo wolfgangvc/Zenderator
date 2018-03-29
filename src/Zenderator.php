@@ -941,7 +941,7 @@ class Zenderator
         }
 
         $this
-            ->purgeSDK($sdkOutputPath)
+            //->purgeSDK($sdkOutputPath)
             //->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, false)
             ->cleanCodePHPCSFixer([$sdkOutputPath])
