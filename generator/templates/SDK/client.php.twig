@@ -5,6 +5,14 @@ use \GuzzleHttp\Client as GuzzleClient;
 
 class Client extends Abstracts\AbstractClient
 {
+    /**
+     * @returns GuzzleClient
+     */
+    public function getGuzzleClient() : GuzzleClient
+    {
+        return new GuzzleClient();
+    }
+
 {% for pack in packs|keys %}
     /**
      * @returns AccessLayer\{{ pack }}AccessLayer
@@ -12,7 +20,7 @@ class Client extends Abstracts\AbstractClient
     public function get{{ pack }}()
     {
         return new AccessLayer\{{ pack }}AccessLayer(
-            new GuzzleClient(),
+            $this->getGuzzleClient(),
             $this
         );
     }
