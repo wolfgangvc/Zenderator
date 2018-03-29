@@ -608,14 +608,13 @@ class Zenderator
         ];
 
         $routes = $this->getRoutes();
+        echo "Found " . count($routes) . " routes.\n";
         if (count($routes) > 0) {
             foreach ($routes as $route) {
-                if ($route['name']) {
+                if (isset($route['name'])) {
                     if (isset($route['class'])) {
-                        $packs[$route['class']][$route['function']] = $route;
+                        $packs[(string) $route['class']][(string) $route['function']] = $route;
                         $routeCount++;
-                    } else {
-                        echo " > Skipping {$route['name']} because there is no defined Class attached to it...\n";
                     }
                 }
             }
@@ -657,7 +656,7 @@ class Zenderator
             $this->renderToFile(true, $outputPath . "/tests/AccessLayer/{$packName}Test.php", "SDK/Tests/AccessLayer/client.php.twig", $routeRenderData);
 
             if (!file_exists($outputPath . "/tests/fixtures")) {
-                mkdir($outputPath . "/tests/fixtures", null, true);
+                mkdir($outputPath . "/tests/fixtures", 0777, true);
             }
         }
 
@@ -943,11 +942,11 @@ class Zenderator
 
         $this
             ->purgeSDK($sdkOutputPath)
-            ->checkGitSDK($sdkOutputPath)
+            //->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, false)
             ->cleanCodePHPCSFixer([$sdkOutputPath])
             //->runSDKTests($sdkOutputPath)
-            ->sendSDKToGit($sdkOutputPath)
+            //->sendSDKToGit($sdkOutputPath)
         ;
     }
 
