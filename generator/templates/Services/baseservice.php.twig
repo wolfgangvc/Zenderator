@@ -153,7 +153,7 @@ abstract class Base{{ class_name }}Service
     /**
      * @return Models\{{ class_name }}Model
      */
-    public function getRandom() : Models\{{ class_name }}Model
+    public function getRandom() : ?Models\{{ class_name }}Model
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
@@ -167,7 +167,7 @@ abstract class Base{{ class_name }}Service
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model
      */
-    public function getMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : Models\{{ class_name }}Model
+    public function getMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?Models\{{ class_name }}Model
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
@@ -180,7 +180,7 @@ abstract class Base{{ class_name }}Service
      * @param $orderDirection string Direction to sort (Select::ORDER_ASCENDING || Select::ORDER_DESCENDING)
      * @return Models\{{ class_name }}Model[]
      */
-    public function getManyMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : array
+    public function getManyMatching($keyValue = [], $orderBy = null, $orderDirection = Select::ORDER_ASCENDING) : ?array
     {
         /** @var TableGateways\{{ class_name }}TableGateway ${{ variable_name }}Table */
         ${{ variable_name }}Table = $this->getNewTableGatewayInstance();
