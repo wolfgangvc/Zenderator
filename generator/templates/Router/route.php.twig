@@ -6,16 +6,16 @@ $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }
 /** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleExistingObject */
 $exampleExistingObject = $tableGateway->fetchRandom();
 
-if(!$exampleExistingObject){
-    $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
-#    $exampleExistingObject->destroy();
-}
+/** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
+$exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+
 if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
-    $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
-#    $exampleExistingObject->destroy();
+    $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance()->save();
+    #$exampleExistingObject->destroy();
 }
+
 /** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleObjectToCreate */
-$exampleObjectToCreate = $DIContainer->get('{{ class_name }}MockModel');
+$exampleObjectToCreate = $exampleExistingObjectTableGateway->getNewMockModelInstance();
 
 // Router proper begins
 

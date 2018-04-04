@@ -5,6 +5,7 @@ use Camel\CaseTransformer;
 use Camel\Format;
 use Gone\Twig\TransformExtension;
 use Segura\AppCore\App;
+use Segura\AppCore\DbConfig;
 use Segura\AppCore\Router\Router;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
@@ -22,6 +23,7 @@ use Zenderator\Exception\SchemaToAdaptorException;
 
 class Zenderator
 {
+    /** @var DbConfig */
     public static $databaseConfigs;
     private $rootOfApp;
     private $config; // @todo rename $composerConfig
@@ -110,7 +112,7 @@ class Zenderator
 
     private $coverageReport;
 
-    public function __construct(string $rootOfApp, array $databaseConfigs = null)
+    public function __construct(string $rootOfApp, DbConfig $databaseConfigs = null)
     {
         $this->rootOfApp = $rootOfApp;
         set_exception_handler([$this, 'exception_handler']);
@@ -172,7 +174,7 @@ class Zenderator
         return $config;
     }
 
-    private function setUp($databaseConfigs)
+    private function setUp(DbConfig $databaseConfigs)
     {
         self::$databaseConfigs = $databaseConfigs;
 
@@ -224,8 +226,8 @@ class Zenderator
             self::classPrefixesOn();
         }
 
-        if ($databaseConfigs) {
-            foreach ($databaseConfigs as $dbName => $databaseConfig) {
+        if ($databaseConfigs instanceof DbConfig) {
+            foreach ($databaseConfigs->__toArray() as $dbName => $databaseConfig) {
                 $this->adapters[$dbName]  = new \Segura\AppCore\Adapter($databaseConfig);
                 $this->metadatas[$dbName] = new Metadata($this->adapters[$dbName]);
                 $this->adapters[$dbName]->query('set global innodb_stats_on_metadata=0;');
@@ -247,7 +249,7 @@ class Zenderator
 
     public static function schemaName2databaseName($schemaName)
     {
-        foreach (self::$databaseConfigs as $dbName => $databaseConfig) {
+        foreach (self::$databaseConfigs->__toArray() as $dbName => $databaseConfig) {
             $adapter = new DbAdaptor($databaseConfig);
             if ($schemaName == $adapter->getCurrentSchema()) {
                 return $dbName;
@@ -421,9 +423,9 @@ class Zenderator
             }
         }
 
-        echo "Generating App Container:";
-        $this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "DependencyInjector/appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
+        //echo "Generating App Container:";
+        //$this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "DependencyInjector/appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
+        //echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
 
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
