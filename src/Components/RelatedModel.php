@@ -122,9 +122,8 @@ class RelatedModel extends Entity
         if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Studly->transform($this->getRemoteBoundSchema()) .
                     $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
-        } else {
-            return  $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
         }
+        return  $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
     }
 
     public function getRemoteVariable()
@@ -132,9 +131,8 @@ class RelatedModel extends Entity
         if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Camel->transform($this->getRemoteBoundSchema()) .
                     $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
-        } else {
-            return  $this->transCamel2Camel->transform($this->getRemoteTableSanitised());
         }
+        return  $this->transCamel2Camel->transform($this->getRemoteTableSanitised());
     }
 
     public function getLocalClass()
@@ -142,9 +140,8 @@ class RelatedModel extends Entity
         if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Studly->transform($this->getLocalBoundSchema()) .
                     $this->transCamel2Studly->transform($this->getLocalTableSanitised());
-        } else {
-            return  $this->transCamel2Studly->transform($this->getLocalTableSanitised());
         }
+        return  $this->transCamel2Studly->transform($this->getLocalTableSanitised());
     }
 
     public function getLocalVariable()
@@ -152,9 +149,8 @@ class RelatedModel extends Entity
         if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Camel->transform($this->getLocalBoundSchema()) .
                     $this->transCamel2Studly->transform($this->getLocalTableSanitised());
-        } else {
-            return  $this->transCamel2Camel->transform($this->getLocalTableSanitised());
         }
+        return  $this->transCamel2Camel->transform($this->getLocalTableSanitised());
     }
 
     public function getLocalFunctionName()
@@ -164,9 +160,8 @@ class RelatedModel extends Entity
                 Inflect::singularize($this->getLocalClass()) .
                 "By" .
                 $this->transCamel2Studly->transform($this->getLocalBoundColumn());
-        } else {
-            return Inflect::singularize($this->getLocalClass());
         }
+        return Inflect::singularize($this->getLocalClass());
     }
 
     public function getRemoteFunctionName()
@@ -176,9 +171,8 @@ class RelatedModel extends Entity
                 Inflect::singularize($this->getRemoteClass()) .
                 "By" .
                 $this->transCamel2Studly->transform($this->getLocalBoundColumn());
-        } else {
-            return Inflect::singularize($this->getRemoteClass());
         }
+        return Inflect::singularize($this->getRemoteClass());
     }
 
     public function getLocalBoundColumnGetter()
