@@ -604,7 +604,7 @@ class Zenderator
         $sharedRenderData = [
             'app_name'         => APP_NAME,
             'app_container'    => APP_CORE_NAME,
-            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
+            'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
         ];
 
         $routes = $this->getRoutes();
