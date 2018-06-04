@@ -38,7 +38,7 @@ class Zenderator
     private $adapters;
     /** @var Metadata[] */
     private $metadatas;
-    private $ignoredTables = array();
+    private $ignoredTables = [];
     /** @var CaseTransformer */
     private $transSnake2Studly;
     /** @var CaseTransformer */
@@ -58,7 +58,7 @@ class Zenderator
 
     private $waitForKeypressEnabled = true;
 
-    private $pathsToPSR2 = array(
+    private $pathsToPSR2 = [
         APP_ROOT . "/src/Models/Base",
         APP_ROOT . "/src/Models",
         APP_ROOT . "/src/Controllers/Base",
@@ -71,61 +71,61 @@ class Zenderator
         APP_ROOT . "/public/index.php",
         APP_ROOT . "/vendor/segura/appcore",
         APP_ROOT . "/vendor/segura/zenderator",
-    );
-    private $phpCsFixerRules = array(
-        '@PSR2',
-        'braces',
-        'class_definition',
-        'elseif',
-        'function_declaration',
-        'array_indentation',
-        'blank_line_after_namespace',
-        'lowercase_constants',
-        'lowercase_keywords',
-        'method_argument_space',
-        'no_trailing_whitespace_in_comment',
-        'no_closing_tag',
-        'no_php4_constructor',
-        'single_line_after_imports',
-        'switch_case_semicolon_to_colon',
-        'switch_case_space',
-        'visibility_required',
-        'no_unused_imports',
-        'no_useless_else',
-        'no_useless_return',
-        'no_whitespace_before_comma_in_array',
-        'ordered_imports',
-        'ordered_class_elements',
-        'array_syntax',
-        'phpdoc_order',
-        'phpdoc_trim',
-        'phpdoc_scalar',
-        'phpdoc_separation',
-    );
+    ];
+    private $phpCsFixerRules = [
+        '@PSR2' => true,
+        'braces' => true,
+        'class_definition' => true,
+        'elseif'=> true,
+        'function_declaration'=> true,
+        'array_indentation'=> true,
+        'blank_line_after_namespace'=> true,
+        'lowercase_constants'=> true,
+        'lowercase_keywords'=> true,
+        'method_argument_space'=> true,
+        'no_trailing_whitespace_in_comment'=> true,
+        'no_closing_tag'=> true,
+        'no_php4_constructor'=> true,
+        'single_line_after_imports'=> true,
+        'switch_case_semicolon_to_colon'=> true,
+        'switch_case_space'=> true,
+        'visibility_required'=> true,
+        'no_unused_imports'=> true,
+        'no_useless_else'=> true,
+        'no_useless_return'=> true,
+        'no_whitespace_before_comma_in_array'=> true,
+        'ordered_imports'=> true,
+        'ordered_class_elements'=> true,
+        'array_syntax' => ['syntax' => 'short'],
+        'phpdoc_order'=> true,
+        'phpdoc_trim'=> true,
+        'phpdoc_scalar'=> true,
+        'phpdoc_separation'=> true,
+    ];
 
-    private $defaultEnvironment = array();
-    private $defaultHeaders     = array();
+    private $defaultEnvironment = [];
+    private $defaultHeaders     = [];
 
     private $coverageReport;
 
     public function __construct(string $rootOfApp, DbConfig $databaseConfigs = null)
     {
         $this->rootOfApp = $rootOfApp;
-        set_exception_handler(array($this, 'exception_handler'));
+        set_exception_handler([$this, 'exception_handler']);
         $this->setUp($databaseConfigs);
 
-        $this->defaultEnvironment = array(
+        $this->defaultEnvironment = [
             'SCRIPT_NAME' => '/index.php',
             'RAND'        => rand(0, 100000000),
-        );
-        $this->defaultHeaders = array();
+        ];
+        $this->defaultHeaders = [];
     }
 
     private function setUp(DbConfig $databaseConfigs)
     {
         self::$databaseConfigs = $databaseConfigs;
 
-        $customPathsToPSR2 = array();
+        $customPathsToPSR2 = [];
         if (isset($this->config['clean']) && isset($this->config['clean']['paths'])) {
             foreach ($this->config['clean']['paths'] as $path) {
                 $customPathsToPSR2[] = "/app/{$path}";
@@ -141,7 +141,7 @@ class Zenderator
         $this->namespace = rtrim($namespaces[0], '\\');
 
         $this->loader = new \Twig_Loader_Filesystem(__DIR__ . "/../generator/templates");
-        $this->twig   = new \Twig_Environment($this->loader, array('debug' => true));
+        $this->twig   = new \Twig_Environment($this->loader, ['debug' => true]);
         $this->twig->addExtension(new \Twig_Extension_Debug());
         $this->twig->addExtension(new TransformExtension());
 
@@ -266,7 +266,7 @@ class Zenderator
     {
         $sql     = "SHOW columns FROM `{$table}` WHERE extra LIKE '%auto_increment%'";
         $query   = $adapter->query($sql);
-        $columns = array();
+        $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
             $columns[] = $aiColumn['Field'];
@@ -294,7 +294,7 @@ class Zenderator
         return $this;
     }
 
-    public function cleanCodePHPCSFixer(array $pathsToPSR2 = array())
+    public function cleanCodePHPCSFixer(array $pathsToPSR2 = [])
     {
         $begin = microtime(true);
         echo "Cleaning... \n";
@@ -373,7 +373,7 @@ class Zenderator
     {
         $composerJson = json_decode(file_get_contents(APP_ROOT . "/composer.json"), true);
         $dependencies = array_merge($composerJson['require'], $composerJson['require-dev']);
-        $toUpdate     = array();
+        $toUpdate     = [];
         foreach ($dependencies as $dependency => $version) {
             if (substr($dependency, 0, strlen("segura/")) == "segura/") {
                 $toUpdate[] = $dependency;
@@ -527,7 +527,7 @@ class Zenderator
             //->purgeSDK($sdkOutputPath)
             //->checkGitSDK($sdkOutputPath)
             ->makeSDK($sdkOutputPath, false)
-            ->cleanCodePHPCSFixer(array($sdkOutputPath))
+            ->cleanCodePHPCSFixer([$sdkOutputPath])
             //->runSDKTests($sdkOutputPath)
             //->sendSDKToGit($sdkOutputPath)
         ;
@@ -548,7 +548,7 @@ class Zenderator
     private function makeModelSchemas()
     {
         /** @var Model[] $models */
-        $models = array();
+        $models = [];
         foreach ($this->adapters as $dbName => $adapter) {
             echo "Adaptor: {$dbName}\n";
             /**
@@ -580,7 +580,7 @@ class Zenderator
         }
 
         // Check for Conflicts.
-        $conflictCheck = array();
+        $conflictCheck = [];
         foreach ($models as $oModel) {
             if (count($oModel->getRemoteObjects()) > 0) {
                 foreach ($oModel->getRemoteObjects() as $remoteObject) {
@@ -610,7 +610,7 @@ class Zenderator
 
     private function removeCoreGeneratedFiles()
     {
-        $generatedPaths = array(
+        $generatedPaths = [
             APP_ROOT . "/src/Controllers/Base/",
             APP_ROOT . "/src/Models/Base/",
             APP_ROOT . "/src/Routes/Generated/",
@@ -619,7 +619,7 @@ class Zenderator
             APP_ROOT . "/tests/Api/Generated/",
             APP_ROOT . "/tests/Models/Generated/",
             APP_ROOT . "/tests/Services/Generated/",
-        );
+        ];
         foreach ($generatedPaths as $generatedPath) {
             if (file_exists($generatedPath)) {
                 foreach (new \DirectoryIterator($generatedPath) as $file) {
@@ -640,7 +640,7 @@ class Zenderator
     private function makeCoreFiles(array $models)
     {
         echo "Generating Core files for " . count($models) . " models... \n";
-        $allModelData = array();
+        $allModelData = [];
         foreach ($models as $model) {
             $allModelData[$model->getClassName()] = $model->getRenderDataset();
             // "Model" suite
@@ -686,10 +686,10 @@ class Zenderator
         // "Routes" suit
         if (in_array("Routes", $this->config['templates'])) {
             echo "Generating Router:";
-            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", array(
+            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", [
                 'models'        => $allModelData,
                 'app_container' => APP_CORE_NAME,
-            ));
+            ]);
             echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
         }
         return $this;
@@ -726,10 +726,12 @@ class Zenderator
     private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
     {
         ob_start();
-        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --allow-risky=yes --rules=\"" . implode(",", $phpCsFixerRules) . "\" {$pathToPSR2}" ;
+        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --allow-risky=yes --rules='" . json_encode($phpCsFixerRules) . "' {$pathToPSR2}" ;
         echo " > {$pathToPSR2} ... ";
         $begin = microtime(true);
+        //echo $command."\n\n";
         system($command, $junk);
+        //exit;
         $time = microtime(true) - $begin;
         ob_end_clean();
         echo " [" . ConsoleHelper::COLOR_GREEN . "Complete" . ConsoleHelper::COLOR_RESET . " in " . number_format($time, 2) . "]\n";
@@ -741,13 +743,13 @@ class Zenderator
 
     private function makeSDKFiles($models, $outputPath = APP_ROOT)
     {
-        $packs            = array();
+        $packs            = [];
         $routeCount       = 0;
-        $sharedRenderData = array(
+        $sharedRenderData = [
             'app_name'         => APP_NAME,
             'app_container'    => APP_CORE_NAME,
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.dev"),
-        );
+        ];
 
         $routes = $this->getRoutes();
         echo "Found " . count($routes) . " routes.\n";
@@ -768,11 +770,11 @@ class Zenderator
         // "SDK" suite
         foreach ($packs as $packName => $routes) {
             echo " > Pack: {$packName}...\n";
-            $routeRenderData = array(
+            $routeRenderData = [
                 'pack_name' => $packName,
                 'routes'    => $routes,
-            );
-            $properties = array();
+            ];
+            $properties = [];
             foreach ($routes as $route) {
                 if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
@@ -804,10 +806,10 @@ class Zenderator
 
         $renderData = array_merge(
             $sharedRenderData,
-            array(
+            [
                 'packs'  => $packs,
                 'config' => $this->config
-            )
+            ]
         );
 
         echo "Generating Abstract Objects:";
@@ -844,12 +846,12 @@ class Zenderator
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         echo "Generating Exceptions:";
-        $derivedExceptions = array(
+        $derivedExceptions = [
             'ObjectNotFoundException',
             'FilterConditionNotFoundException',
-        );
+        ];
         foreach ($derivedExceptions as $derivedException) {
-            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, array('ExceptionName' => $derivedException)));
+            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
         }
         $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "SDK/Exceptions/SDKException.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
@@ -908,16 +910,16 @@ class Zenderator
         #$app = Router::Instance()->populateRoutes($app);
 
         $envArray = array_merge($this->defaultEnvironment, $this->defaultHeaders);
-        $envArray = array_merge($envArray, array(
+        $envArray = array_merge($envArray, [
             'REQUEST_URI'    => $path,
             'REQUEST_METHOD' => $method,
-        ));
+        ]);
 
         $env     = Environment::mock($envArray);
         $uri     = Uri::createFromEnvironment($env);
         $headers = Headers::createFromEnvironment($env);
 
-        $cookies      = array();
+        $cookies      = [];
         $serverParams = $env->all();
         $body         = new RequestBody();
         if (!is_array($post) && $post != null) {
