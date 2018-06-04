@@ -18,10 +18,10 @@ class Model extends Entity
     /** @var string */
     protected $table;
     /** @var Column[] */
-    protected $columns        = array();
-    protected $constraints    = array();
-    protected $relatedObjects = array();
-    protected $primaryKeys    = array();
+    protected $columns        = [];
+    protected $constraints    = [];
+    protected $relatedObjects = [];
+    protected $primaryKeys    = [];
     protected $autoIncrements;
 
     /**
@@ -99,7 +99,7 @@ class Model extends Entity
 
     public function getRelatedObjectsSharedAssets()
     {
-        $sharedAssets = array();
+        $sharedAssets = [];
         foreach ($this->getRelatedObjects() as $relatedObject) {
             $sharedAssets[$relatedObject->getRemoteClass()] = $relatedObject;
         }
@@ -120,7 +120,7 @@ class Model extends Entity
 
     public function getPrimaryParameters(): array
     {
-        $parameters = array();
+        $parameters = [];
         foreach ($this->getPrimaryKeys() as $primaryKey) {
             foreach ($this->getColumns() as $column) {
                 if ($primaryKey == $column->getField()) {
@@ -303,7 +303,7 @@ class Model extends Entity
      */
     public function getRemoteObjects(): array
     {
-        $remoteObjects = array();
+        $remoteObjects = [];
         foreach ($this->getColumns() as $column) {
             if (count($column->getRemoteObjects()) > 0) {
                 foreach ($column->getRemoteObjects() as $remoteObject) {
@@ -342,7 +342,7 @@ class Model extends Entity
     {
         $sql     = "SHOW columns FROM `{$this->getTable()}` WHERE extra LIKE '%auto_increment%'";
         $query   = $this->getAdaptor()->query($sql);
-        $columns = array();
+        $columns = [];
 
         foreach ($query->execute() as $aiColumn) {
             $columns[] = $aiColumn['Field'];
@@ -386,7 +386,7 @@ class Model extends Entity
             /**
              * Calculate Max Length for field.
              */
-            if (in_array($column->getDataType(), array('int', 'bigint', 'tinyint'))) {
+            if (in_array($column->getDataType(), ['int', 'bigint', 'tinyint'])) {
                 $oColumn->setMaxLength($column->getNumericPrecision());
             } else {
                 $oColumn->setMaxLength($column->getCharacterMaximumLength());
@@ -417,7 +417,7 @@ class Model extends Entity
 
     public function getRenderDataset()
     {
-        return array(
+        return [
             'namespace'              => $this->getNamespace(),
             'database'               => $this->getDatabase(),
             'table'                  => $this->getTable(),
@@ -440,7 +440,7 @@ class Model extends Entity
             'autoincrement_keys' => $this->getAutoIncrements(),
             // @todo: work out why there are two.
             'autoincrement_parameters' => $this->getAutoIncrements()
-        );
+        ];
     }
 
     /**
