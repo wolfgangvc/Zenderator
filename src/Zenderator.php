@@ -743,7 +743,7 @@ class Zenderator
     {
         $packs            = array();
         $routeCount       = 0;
-        $sharedRenderData = array(
+        $sharedRenderData = [
             'app_name'         => APP_NAME,
             'app_container'    => APP_CORE_NAME,
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
