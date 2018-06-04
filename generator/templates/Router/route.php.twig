@@ -4,21 +4,18 @@ $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }
 
 // @todo This badly needs refactoring to be less insane/db heavy
 /** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleExistingObject */
-try {
-    $exampleExistingObject = $tableGateway->fetchRandom();
-}catch(\Segura\AppCore\Exceptions\TableGatewayException $exception){
-    $exampleExistingObject = false;
-}
-if(!$exampleExistingObject){
-    $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
-#    $exampleExistingObject->destroy();
-}
+$exampleExistingObject = $tableGateway->fetchRandom();
+
+/** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
+$exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+
 if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
-    $exampleExistingObject = $DIContainer->get('{{ class_name }}MockModel')->save();
-#    $exampleExistingObject->destroy();
+    $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance()->save();
+    #$exampleExistingObject->destroy();
 }
+
 /** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleObjectToCreate */
-$exampleObjectToCreate = $DIContainer->get('{{ class_name }}MockModel');
+$exampleObjectToCreate = $exampleExistingObjectTableGateway->getNewMockModelInstance();
 
 // Router proper begins
 

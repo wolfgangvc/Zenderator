@@ -29,7 +29,9 @@
 
 {% if route.callbackProperties %}
 {% for callbackProperty in route.callbackProperties %}
-        $endpoint = str_replace('{' . '{{ callbackProperty.name }}' . '}', ${{ callbackProperty.name }}, $endpoint);
+        if (is_string(${{ callbackProperty.name }})) {
+            $endpoint = str_replace('{' . '{{ callbackProperty.name }}' . '}', ${{ callbackProperty.name }}, $endpoint);
+        }
 {% endfor %}
 {% endif %}
 

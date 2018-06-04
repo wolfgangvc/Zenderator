@@ -8,8 +8,6 @@ use Zenderator\Zenderator;
 
 class Entity
 {
-    /** @var Zenderator */
-    private $zenderator;
     /** @var CaseTransformer */
     protected $transSnake2Studly;
     /** @var CaseTransformer */
@@ -28,18 +26,8 @@ class Entity
     protected $transCamel2Snake;
     /** @var CaseTransformer */
     protected $transField2Property;
-
-    /**
-     * @return self
-     */
-    public static function Factory(Zenderator $zenderator)
-    {
-        $class = get_called_class();
-        /** @var self $instance */
-        $instance = new $class;
-        $instance->setZenderator($zenderator);
-        return $instance;
-    }
+    /** @var Zenderator */
+    private $zenderator;
 
     public function __construct()
     {
@@ -53,6 +41,18 @@ class Entity
         $this->transCamel2Snake   = new CaseTransformer(new Format\CamelCase(), new Format\SnakeCase());
 
         $this->transField2Property = $this->transCamel2Camel;
+    }
+
+    /**
+     * @return self
+     */
+    public static function Factory(Zenderator $zenderator)
+    {
+        $class = get_called_class();
+        /** @var self $instance */
+        $instance = new $class;
+        $instance->setZenderator($zenderator);
+        return $instance;
     }
 
     /**
