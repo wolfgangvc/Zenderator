@@ -30,7 +30,7 @@ abstract class Base{{ class_name }}Model
 {% for column in columns %}
 {% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
 {% for permittedValue in column.getPermittedValues %}
-    const {{ column.getField|upper }}_{{ permittedValue|upper }} = '{{ permittedValue }}';
+    const {{ column.getField|upper }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
 {% endfor %}
 {% endif %}
 {% endfor %}
