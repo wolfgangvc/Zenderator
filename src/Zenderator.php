@@ -678,20 +678,7 @@ class Zenderator
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
         }
-
-        //echo "Generating App Container:";
-        //$this->renderToFile(true, APP_ROOT . "/src/AppContainer.php", "DependencyInjector/appcontainer.php.twig", ['models' => $allModelData, 'config' => $this->config]);
-        //echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
-
-        // "Routes" suit
-        if (in_array("Routes", $this->config['templates'])) {
-            echo "Generating Router:";
-            $this->renderToFile(true, APP_ROOT . "/src/Routes.php", "Router/routes.php.twig", [
-                'models'        => $allModelData,
-                'app_container' => APP_CORE_NAME,
-            ]);
-            echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n\n";
-        }
+        
         return $this;
     }
 
