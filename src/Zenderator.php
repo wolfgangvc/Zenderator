@@ -121,7 +121,7 @@ class Zenderator
         $this->defaultHeaders = [];
     }
 
-    private function setUp(DbConfig $databaseConfigs)
+    private function setUp(DbConfig $databaseConfigs = null)
     {
         self::$databaseConfigs = $databaseConfigs;
 
