@@ -19,5 +19,6 @@ $zenderator = new \Zenderator\Zenderator(
     $databaseConfigs
 );
 $sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+$remoteApiUri = isset($argv[2]) ? $argv[2] : null;
 
-$zenderator->runSdkifier($sdkOutputPath);
+$zenderator->runSdkifier($sdkOutputPath, $remoteApiUri);

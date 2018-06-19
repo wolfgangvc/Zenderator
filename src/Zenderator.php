@@ -4,6 +4,7 @@ namespace Zenderator;
 use Camel\CaseTransformer;
 use Camel\Format;
 use Gone\Twig\TransformExtension;
+use GuzzleHttp\Client;
 use Segura\AppCore\App;
 use Segura\AppCore\DbConfig;
 use Segura\AppCore\Router\Router;
@@ -393,10 +394,9 @@ class Zenderator
         return $this;
     }
 
-    public function makeSDK($outputPath = APP_ROOT, $cleanByDefault = true)
+    public function makeSDK($outputPath = APP_ROOT, $remoteApiUri = false, $cleanByDefault = true)
     {
-        $models = $this->makeModelSchemas();
-        $this->makeSDKFiles($models, $outputPath);
+        $this->makeSDKFiles($outputPath, $remoteApiUri);
         $this->removePHPVCRCassettes($outputPath);
         if ($cleanByDefault) {
             $this->cleanCode();
@@ -517,7 +517,7 @@ class Zenderator
         return $this;
     }
 
-    public function runSdkifier($sdkOutputPath = false)
+    public function runSdkifier($sdkOutputPath = false, $remoteApiUri = false)
     {
         if (!$sdkOutputPath) {
             $sdkOutputPath = APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
@@ -529,7 +529,7 @@ class Zenderator
         $this
             //->purgeSDK($sdkOutputPath)
             //->checkGitSDK($sdkOutputPath)
-            ->makeSDK($sdkOutputPath, false)
+            ->makeSDK($sdkOutputPath, $remoteApiUri, false)
             ->cleanCodePHPCSFixer([$sdkOutputPath])
             //->runSDKTests($sdkOutputPath)
             //->sendSDKToGit($sdkOutputPath)
@@ -548,31 +548,36 @@ class Zenderator
         return $this;
     }
 
-    private function makeModelSchemas()
+    /**
+     * @return Model[]
+     */
+    private function makeModelSchemas() : array
     {
         /** @var Model[] $models */
         $models = [];
-        foreach ($this->adapters as $dbName => $adapter) {
-            echo "Adaptor: {$dbName}\n";
-            /**
-             * @var $tables \Zend\Db\Metadata\Object\TableObject[]
-             */
-            $tables = $this->metadatas[$dbName]->getTables();
+        if(is_array($this->adapters)) {
+            foreach ($this->adapters as $dbName => $adapter) {
+                echo "Adaptor: {$dbName}\n";
+                /**
+                 * @var $tables \Zend\Db\Metadata\Object\TableObject[]
+                 */
+                $tables = $this->metadatas[$dbName]->getTables();
 
-            echo "Collecting " . count($tables) . " entities data.\n";
+                echo "Collecting " . count($tables) . " entities data.\n";
 
-            foreach ($tables as $table) {
-                if (in_array($table->getName(), $this->ignoredTables)) {
-                    continue;
+                foreach ($tables as $table) {
+                    if (in_array($table->getName(), $this->ignoredTables)) {
+                        continue;
+                    }
+                    $oModel = Components\Model::Factory($this)
+                        ->setNamespace($this->namespace)
+                        ->setAdaptor($adapter)
+                        ->setDatabase($dbName)
+                        ->setTable($table->getName())
+                        ->computeColumns($table->getColumns())
+                        ->computeConstraints($table->getConstraints());
+                    $models[$oModel->getClassName()] = $oModel;
                 }
-                $oModel = Components\Model::Factory($this)
-                    ->setNamespace($this->namespace)
-                    ->setAdaptor($adapter)
-                    ->setDatabase($dbName)
-                    ->setTable($table->getName())
-                    ->computeColumns($table->getColumns())
-                    ->computeConstraints($table->getConstraints());
-                $models[$oModel->getClassName()] = $oModel;
             }
         }
 
@@ -731,7 +736,7 @@ class Zenderator
 
 
 
-    private function makeSDKFiles($models, $outputPath = APP_ROOT)
+    private function makeSDKFiles($outputPath = APP_ROOT, $remoteApiUri = false)
     {
         $packs            = [];
         $routeCount       = 0;
@@ -741,7 +746,7 @@ class Zenderator
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
         ];
 
-        $routes = $this->getRoutes();
+        $routes = $this->getRoutes($remoteApiUri);
         echo "Found " . count($routes) . " routes.\n";
         if (count($routes) > 0) {
             foreach ($routes as $route) {
@@ -850,12 +855,25 @@ class Zenderator
         return $this;
     }
 
-    private function getRoutes()
+    private function getRoutes($remoteApiUri = false)
     {
-        $response = $this->makeRequest("GET", "/v1");
-        $body     = (string)$response->getBody();
-        $body     = json_decode($body, true);
-        return $body['Routes'];
+        if($remoteApiUri){
+            $client = new Client([
+                'base_uri' => $remoteApiUri,
+                'timeout'  => 30.0,
+                'headers' => [
+                    'Accept' => 'application/json'
+                ]
+            ]);
+            $result = $client->get("/v1")->getBody()->getContents();
+            $body = json_decode($result, true);
+            return $body['Routes'];
+        }else {
+            $response = $this->makeRequest("GET", "/v1");
+            $body = (string)$response->getBody();
+            $body = json_decode($body, true);
+            return $body['Routes'];
+        }
     }
 
     /**

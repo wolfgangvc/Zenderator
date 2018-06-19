@@ -1,0 +1,4 @@
+FROM index.segurasystems.com/base/cli:2018-06-01
+RUN rm /app
+ADD .
+CMD /app/generator/sdkifier
