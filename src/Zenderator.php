@@ -54,17 +54,20 @@ class Zenderator
     /** @var CaseTransformer */
     private $transCamel2Snake;
 
-    private $vpnCheckUrl = "http://hub.segurasystems.com/home";
+    private $vpnCheckUrl = "http://registry.segurasystems.com";
 
     private $waitForKeypressEnabled = true;
 
     private $pathsToPSR2 = [
-        APP_ROOT . "/src/Models/Base",
-        APP_ROOT . "/src/Models",
         APP_ROOT . "/src/Controllers/Base",
         APP_ROOT . "/src/Controllers",
+        APP_ROOT . "/src/Models/Base",
+        APP_ROOT . "/src/Models",
+        APP_ROOT . "/src/Routes",
         APP_ROOT . "/src/Services/Base",
         APP_ROOT . "/src/Services",
+        APP_ROOT . "/src/TableGateways/Base",
+        APP_ROOT . "/src/TableGateways",
         APP_ROOT . "/src/*.php",
         APP_ROOT . "/tests/Api/Generated",
         APP_ROOT . "/tests/Models/Generated",

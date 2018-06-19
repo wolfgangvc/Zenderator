@@ -123,9 +123,16 @@ abstract class Base{{ class_name }}Model
      *****************************************************/
 {% for related_object in related_objects %}
     /**
-     * @returns Models\{{ related_object.getRemoteClass }}Model
+     * @return null|Models\{{ related_object.getRemoteClass }}Model
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
+{% if related_object.getRemoteFunctionName != class_name %}
     public function fetch{{ related_object.getRemoteFunctionName }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
+{% else %}
+    public function fetchRelated{{ related_object.getRemoteFunctionName }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
+{% endif %}
     {
         /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
         ${{ related_object.getRemoteClass }}Service = App::Container()->get(Services\{{ related_object.getRemoteClass }}Service::class);
@@ -147,7 +154,10 @@ abstract class Base{{ class_name }}Model
      * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
      * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
      *
-     * @returns Models\{{ remote_object.getLocalClass }}Model
+     * @return null|Models\{{ related_object.getRemoteClass }}Model
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function fetch{{ remote_object.getLocalFunctionName }}Object(
 {% if remote_object.local_model_key != 'id' %}
@@ -169,7 +179,10 @@ abstract class Base{{ class_name }}Model
      * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
      * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
      *
-     * @returns Models\{{ remote_object.getLocalClass }}Model[]
+     * @return Models\{{ remote_object.getLocalClass }}Model[]
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function fetch{{ remote_object.getLocalFunctionName }}Objects(
         int $limit = null,
@@ -186,7 +199,10 @@ abstract class Base{{ class_name }}Model
     }
 
     /**
-     * @returns int Number of objects found.
+     * @return int Number of objects found.
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function count{{ remote_object.getLocalFunctionName }}Objects() : int {
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
@@ -202,7 +218,10 @@ abstract class Base{{ class_name }}Model
 {% endif %}
 
     /**
-     * @returns {{ class_name }}Model
+     * @return {{ class_name }}Model
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function save()
     {
@@ -215,6 +234,9 @@ abstract class Base{{ class_name }}Model
      * Destroy the current record.
      *
      * @return int Number of affected rows.
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function destroy()
     {
@@ -227,6 +249,9 @@ abstract class Base{{ class_name }}Model
      * Destroy the current record, and any dependencies upon it, recursively.
      *
      * @return int Number of affected models.
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function destroyThoroughly(){
         $countOfThingsDestroyed = 0;

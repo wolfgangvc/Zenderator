@@ -40,17 +40,25 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
      * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
 {% endfor %}
      * @param Db $databaseConnector
+     *
+     * @throws Exceptions\DbException
      */
     public function __construct(
 {% for related_object in related_objects_shared|sort|unique %}
+        {% if related_object.getRemoteClass != class_name %}
         TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
+        {% endif %}
 {% endfor %}
         \Faker\Generator $faker,
         Db $databaseConnector
     )
     {
 {% for related_object in related_objects_shared|sort|unique %}
+{% if related_object.getRemoteClass != class_name %}
         $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
+{% else %}
+        $this->{{ related_object.getRemoteVariable }}TableGateway = $this;
+{% endif %}
 {% endfor %}
         $this->faker = $faker;
         $this->databaseConnector = $databaseConnector;
@@ -86,12 +94,15 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% for column in columns|sort %}
         // {{ column.getField }}. Type = {{ column.getDbType }}. PHPType = {{ column.getPhpType }}. {% if(column.hasRelatedObjects) %}Has{% else %}Has no{% endif %} related objects.
 {% if column.isAutoIncrement %}
-        '{{ column.getField }}' => null,
 {% elseif column.hasRelatedObjects %}
-        '{{ column.getField }}' =>
-            $random{{ column.getRelatedObjects()[0].getRemoteClass }} instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
+{% if class_name|capitalize != column.getRelatedObjects()[0].getRemoteVariable|capitalize %}
+    '{{ column.getField }}' =>
+        $random{{ column.getRelatedObjects()[0].getRemoteClass }} instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
             ? $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}()
             : $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+{% else %}
+    '{{ column.getField }}' => null, // This is a circular reference - We'd just be creating elements for eternity if we don't stop the madness.
+{% endif %}
 
 {% elseif column.getPhpType == 'int' and 'max_field_length' in column|keys %}
         '{{ column.getField }}' => $this->faker->numberBetween(1, {{ 10 ** (column.getMaxLength - 1) < column.getMaxFieldLength ? 10 ** (column.getMaxLength - 1) : column.getMaxFieldLength}}),
