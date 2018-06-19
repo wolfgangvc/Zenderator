@@ -3,7 +3,7 @@ $DIContainer = \{{ app_container }}::Instance()->getContainer();
 $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 
 // @todo This badly needs refactoring to be less insane/db heavy
-/** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleExistingObject */
+/** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
 $exampleExistingObject = $tableGateway->fetchRandom();
 
 /** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
@@ -14,7 +14,7 @@ if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Mo
     #$exampleExistingObject->destroy();
 }
 
-/** @var \Segura\Reporting\Models\{{ class_name }}Model $exampleObjectToCreate */
+/** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleObjectToCreate */
 $exampleObjectToCreate = $exampleExistingObjectTableGateway->getNewMockModelInstance();
 
 // Router proper begins
