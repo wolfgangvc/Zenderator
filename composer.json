@@ -19,7 +19,7 @@
     }
   ],
   "require": {
-    "php": "^7.0",
+    "php": "^7.1",
     "segura/appcore": "*",
     "segura/sessions": "*",
     "slim/slim": "^3.2",

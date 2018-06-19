@@ -3,10 +3,24 @@
 
 $rootOfApp = __DIR__ . "/../../../../";
 
-require_once($rootOfApp . "/bootstrap.php");
+#require_once($rootOfApp . "/bootstrap.php");
 ini_set("memory_limit", "256M");
 
-$scope = APP_CORE_NAME;
+$sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
+$appName       = isset($argv[2]) ? $argv[2] : null;
+$remoteApiUri  = isset($argv[3]) ? $argv[3] : null;
+
+if(defined("APP_CORE_NAME")) {
+    $scope = APP_CORE_NAME;
+}else{
+    $rootOfApp = __DIR__ . "/../";
+    require_once("{$rootOfApp}/vendor/autoload.php");
+    define("APP_ROOT", __DIR__ . "/../");
+    $scope = Segura\AppCore\App::class;
+
+    define("APP_NAME", $appName);
+    define("APP_CORE_NAME", "Segura\\{$appName}");
+}
 
 try {
     $databaseConfigs = $scope::Container()->get(\Segura\AppCore\DbConfig::class);
@@ -18,7 +32,5 @@ $zenderator = new \Zenderator\Zenderator(
     $rootOfApp,
     $databaseConfigs
 );
-$sdkOutputPath = isset($argv[1]) ? $argv[1] : APP_ROOT . "/vendor/segura/lib" . strtolower(APP_NAME) . "/";
-$remoteApiUri = isset($argv[2]) ? $argv[2] : null;
 
 $zenderator->runSdkifier($sdkOutputPath, $remoteApiUri);

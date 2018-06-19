@@ -8,4 +8,4 @@ formatting:
   - clean
 clean:
   paths:
-    - "/vendor/segura/appcore",
+    - "/vendor/segura/appcore"

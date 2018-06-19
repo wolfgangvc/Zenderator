@@ -681,7 +681,7 @@ class Zenderator
                 $this->renderToFile(true, APP_ROOT . "/tests/Api/Generated/{$model->getClassName()}EndpointTest.php", "ApiEndpoints/tests.endpoints.php.twig", $model->getRenderDataset());
             }
 
-            // "Routes" suit
+            // "Routes" suite
             if (in_array("Routes", $this->config['templates'])) {
                 $this->renderToFile(true, APP_ROOT . "/src/Routes/Generated/{$model->getClassName()}Route.php", "Router/route.php.twig", $model->getRenderDataset());
             }
@@ -721,7 +721,7 @@ class Zenderator
     private function cleanCodePHPCSFixer_FixFile($pathToPSR2, $phpCsFixerRules)
     {
         ob_start();
-        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --allow-risky=yes --rules='" . json_encode($phpCsFixerRules) . "' {$pathToPSR2}" ;
+        $command = APP_ROOT . "/vendor/bin/php-cs-fixer fix -q --allow-risky=yes --cache-file=/tmp/php_cs_fixer.cache --rules='" . json_encode($phpCsFixerRules) . "' {$pathToPSR2}" ;
         echo " > {$pathToPSR2} ... ";
         $begin = microtime(true);
         //echo $command."\n\n";
@@ -733,8 +733,6 @@ class Zenderator
 
         return $this;
     }
-
-
 
     private function makeSDKFiles($outputPath = APP_ROOT, $remoteApiUri = false)
     {
@@ -834,7 +832,7 @@ class Zenderator
         $this->renderToFile(true, $outputPath . "/phpunit.xml.dist", "SDK/phpunit.xml.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/Readme.md", "SDK/readme.md.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/.gitignore", "SDK/gitignore.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/Dockerfile", "SDK/Dockerfile.twig", $renderData);
+        $this->renderToFile(true, $outputPath . "/Dockerfile.tests", "SDK/Dockerfile.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/test-compose.yml", "SDK/docker-compose.yml.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/run-tests.sh", "SDK/run-tests.sh.twig", $renderData);
         chmod($outputPath . "/run-tests.sh", 0755);
