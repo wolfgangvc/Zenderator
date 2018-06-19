@@ -34,4 +34,6 @@ run: clean
 		http://dal.segurasystems.test/
 
 test:
-	cd SDK && ./run-tests.sh
+	cd SDK && \
+	composer install && \
+	./run-tests.sh
