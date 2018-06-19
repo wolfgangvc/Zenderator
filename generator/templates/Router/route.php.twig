@@ -37,6 +37,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntity($exampleExistingObject->__toArray())
     )
     ->addRoute(
@@ -56,6 +57,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntity($exampleObjectToCreate->__toArray())
     )
     ->addRoute(
@@ -75,6 +77,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntity($exampleExistingObject->__toArray())
     )
     ->addRoute(
@@ -94,6 +97,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
+            ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
     );
 
 
