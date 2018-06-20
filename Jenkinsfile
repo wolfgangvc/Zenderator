@@ -3,12 +3,12 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                 sh 'make build-work'
+                 sh 'make build'
             }
         }
         stage('Push') {
             steps {
-                sh 'make push-work'
+                sh 'make push'
             }
         }
     }
