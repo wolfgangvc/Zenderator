@@ -34,6 +34,7 @@ run: clean
 		http://dal.segurasystems.test/
 
 test:
+	docker pull php:7.0-cli
 	cd SDK && \
-	composer install && \
+	composer install --dev && \
 	./run-tests.sh

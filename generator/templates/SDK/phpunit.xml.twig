@@ -8,19 +8,8 @@
          convertWarningsToExceptions="true">
 
     <php>
-        <ini name="memory_limit" value="3000M"/>
+        <ini name="memory_limit" value="128M"/>
     </php>
-
-    <testsuites>
-        <testsuite name="access_layer">
-{% for pack in packs|keys %}
-            <file>tests/AccessLayer/{{ pack }}Test.php</file>
-{% endfor %}
-        </testsuite>
-        <testsuite name="custom">
-            <directory>tests/Custom</directory>
-        </testsuite>
-    </testsuites>
 
     <logging>
         <log type="coverage-clover" target="build/clover.xml"/>
@@ -37,7 +26,17 @@
     </filter>
 
     <listeners>
-        <listener class="PHPUnit_Util_Log_VCR" file="vendor/php-vcr/phpunit-testlistener-vcr/PHPUnit/Util/Log/VCR.php" />
+        <listener class="VCR\PHPUnit\TestListener\VCRTestListener" file="vendor/php-vcr/phpunit-testlistener-vcr/src/VCRTestListener.php" />
     </listeners>
 
+    <testsuites>
+        <testsuite name="access_layer">
+{% for pack in packs|keys %}
+            <file>tests/AccessLayer/{{ pack }}Test.php</file>
+{% endfor %}
+        </testsuite>
+        <testsuite name="custom">
+            <directory>tests/Custom</directory>
+        </testsuite>
+    </testsuites>
 </phpunit>

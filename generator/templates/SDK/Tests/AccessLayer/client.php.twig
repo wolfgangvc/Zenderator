@@ -1,12 +1,13 @@
 <?php
 namespace Segura\SDK\{{ app_name }}\Test\AccessLayer;
 
+use PHPUnit\Framework\TestCase;
 use Segura\SDK\{{ app_name }}\AccessLayer\{{ pack_name }}AccessLayer;
 use Segura\SDK\{{ app_name }}\Client as SDKClient;
 use Segura\SDK\{{ app_name }}\Models;
 use Segura\SDK\{{ app_name }}\Filters\Filter;
 
-class {{ pack_name }}Test extends \PHPUnit_Framework_TestCase{
+class {{ pack_name }}Test extends TestCase{
     /** @var SDKClient */
     private $client;
 
