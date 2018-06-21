@@ -10,11 +10,8 @@ class Client extends Abstracts\AbstractClient
     public ${{ pack|transform_studly_to_camel }};
 
 {% endfor %}
-    /** @var GuzzleClient */
-    protected $guzzle;
-
     public function __construct(){
-        $this->guzzle = new GuzzleClient();
+        parent::__construct();
 {% for pack in packs|keys %}
         $this->{{ pack|transform_studly_to_camel }} = new AccessLayer\{{ pack }}AccessLayer(
             $this->guzzle,

@@ -1,9 +1,16 @@
 <?php
 namespace Segura\SDK\{{ app_name }}\Abstracts;
 
+use GuzzleHttp\Client as GuzzleClient;
+
 abstract class AbstractClient
 {
+    /** @var GuzzleClient */
+    protected $guzzle;
+
+    /** @var string */
     protected $baseUrl = "{{ default_base_url }}";
+
     /**
      * Set the Base URL for requests.
      * @param string $baseUrl
@@ -12,6 +19,8 @@ abstract class AbstractClient
     public function setBaseUrl($baseUrl)
     {
         $this->baseUrl = $baseUrl;
+        $this->setUpGuzzle();
+
         return $this;
     }
 
@@ -19,4 +28,21 @@ abstract class AbstractClient
     {
         return $this->baseUrl;
     }
+
+    public function __construct()
+    {
+        $this->setUpGuzzle();
+    }
+
+    private function setUpGuzzle()
+    {
+        $this->guzzle = new GuzzleClient([
+            'base_uri' => $this->getBaseUrl(),
+            'timeout'  => 30.0,
+            'headers' => [
+                'Accept' => 'application/json'
+            ]
+        ]);
+    }
+
 }

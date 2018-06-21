@@ -1,3 +1,7 @@
+{% for property in route.properties %}
+    const FIELD_{{ property|transform_studly_to_screamingsnake }} = '{{ property }}';
+{% endfor %}
+
     /**
      * @param $filter Filter instance
      * @return Models\{{ route.singular }}Model[]
