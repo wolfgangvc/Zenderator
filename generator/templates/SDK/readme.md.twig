@@ -35,10 +35,9 @@ to your composer.json:
     use \Segura\SDK\{{ app_name }}\Client as SDKClient;
     use \Segura\SDK\{{ app_name }}\Models;
     $sdkClient      = new SDKClient();
-    ${{ class }} = $sdkClient->get{{ class }}();
 
     // Listing all elements
-    $listOf{{ class }} = ${{ class }}->list();
+    $listOf{{ class }} = $sdkClient->{{ class|transform_studly_to_camel }}->list();
 
     // Creating a new element
     $new{{ class }} = Models\{{ class }}Model::factory()
@@ -48,13 +47,13 @@ to your composer.json:
 {% endfor %}
 
     // Storing that new element
-    $stored{{ class }} = ${{ class }}->createFromObject($new{{ class }});
+    $stored{{ class }} = $sdkClient->{{ class|transform_studly_to_camel }}->createFromObject($new{{ class }});
 
     // Getting a specific element by ID
-    $fetched{{ class }} = ${{ class }}->get($new{{ class }}->getId());
+    $fetched{{ class }} = $sdkClient->{{ class|transform_studly_to_camel }}->get($new{{ class }}->getId());
 
     // Deleting that element
-    ${{ class }}->delete($fetched{{ class }}->getId());
+    $sdkClient->{{ class|transform_studly_to_camel }}->delete($fetched{{ class }}->getId());
 
 ```
 

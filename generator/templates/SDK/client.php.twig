@@ -5,25 +5,21 @@ use \GuzzleHttp\Client as GuzzleClient;
 
 class Client extends Abstracts\AbstractClient
 {
-    /**
-     * @returns GuzzleClient
-     */
-    public function getGuzzleClient() : GuzzleClient
-    {
-        return new GuzzleClient();
-    }
-
 {% for pack in packs|keys %}
-    /**
-     * @returns AccessLayer\{{ pack }}AccessLayer
-     */
-    public function get{{ pack }}()
-    {
-        return new AccessLayer\{{ pack }}AccessLayer(
-            $this->getGuzzleClient(),
-            $this
-        );
-    }
+    /** @var AccessLayer\{{ pack }}AccessLayer */
+    public ${{ pack|transform_studly_to_camel }};
 
 {% endfor %}
+    /** @var GuzzleClient */
+    protected $guzzle;
+
+    public function __construct(){
+        $this->guzzle = new GuzzleClient();
+{% for pack in packs|keys %}
+        $this->{{ pack|transform_studly_to_camel }} = new AccessLayer\{{ pack }}AccessLayer(
+            $this->guzzle,
+            $this
+        );
+{% endfor %}
+    }
 }
