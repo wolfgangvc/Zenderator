@@ -2,14 +2,42 @@
 namespace Segura\SDK\{{ app_name }}\Models\Base;
 
 use Segura\SDK\{{ app_name }}\Abstracts\AbstractModel;
+use Segura\SDK\Dal\AccessLayer\{{ pack_name }}AccessLayer;
+use Segura\SDK\Dal\Models\{{ pack_name }}Model;
 
 abstract class Base{{ pack_name }}Model extends AbstractModel
 {
+
+{% for property in properties %}
+    const FIELD_{{ property|transform_studly_to_screamingsnake }} = '{{ property }}';
+{% endfor %}
 
     // Properties
 {% for property in properties %}
     protected ${{ property }};
 {% endfor %}
+
+    public function __toArray() : array
+    {
+        return [
+{% for property in properties %}
+            "{{ property }}" => $this->get{{ property }}(),
+{% endfor %}
+        ];
+    }
+
+    protected function getAccessLayer() : {{ pack_name }}AccessLayer
+    {
+        return new {{ pack_name }}AccessLayer($this->sdkClient);
+    }
+
+    /**
+     * Convenience function to create/update the current model.
+     */
+    public function save() : {{ pack_name }}Model
+    {
+        return $this->getAccessLayer()->createFromObject($this);
+    }
 
     // Getters and Setters
 {% for property in properties %}
@@ -18,19 +46,11 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
         return $this->{{ property }};
     }
 
-    public function set{{ property }}(${{ property }})
+    public function set{{ property }}(${{ property }}) : {{ pack_name }}Model
     {
         $this->{{ property }} = ${{ property }};
         return $this;
     }
 
 {% endfor %}
-
-    public function __toArray(){
-        return [
-{% for property in properties %}
-            "{{ property }}" => $this->get{{ property }}(),
-{% endfor %}
-        ];
-    }
 }

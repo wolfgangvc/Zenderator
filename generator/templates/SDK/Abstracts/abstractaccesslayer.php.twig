@@ -8,9 +8,6 @@ use Segura\SDK\{{ app_name }}\Exceptions;
 
 abstract class AbstractAccessLayer
 {
-    /** @var GuzzleClient */
-    protected $guzzleClient;
-
     /** @var SDKClient **/
     protected $sdkClient;
 
@@ -20,28 +17,9 @@ abstract class AbstractAccessLayer
      * @param SDKClient $sdkClient
      */
     public function __construct(
-        GuzzleClient $guzzleClient,
         SDKClient $sdkClient
     ){
-        $this->guzzleClient = $guzzleClient;
         $this->sdkClient = $sdkClient;
-        $this->setBaseUrl($sdkClient->getBaseUrl());
-    }
-
-    /**
-     * Set the Base URL for requests.
-     * @param string $baseUrl
-     * @returns self
-     */
-    public function setBaseUrl($baseUrl)
-    {
-        $this->baseUrl = $baseUrl;
-        return $this;
-    }
-
-    public function getBaseUrl()
-    {
-        return $this->baseUrl;
     }
 
     /**
@@ -59,11 +37,10 @@ abstract class AbstractAccessLayer
         $options = []
     ) {
         $endpoint = ltrim($endpoint, "/");
-        $url = "{$this->baseUrl}/{$endpoint}";
         try{
-            return $this->guzzleClient->request(
+            return $this->sdkClient->getGuzzle()->request(
                 $method,
-                $url,
+                $endpoint,
                 array_merge_recursive(
                     [
                         'headers' => [
@@ -78,7 +55,7 @@ abstract class AbstractAccessLayer
         }catch(\GuzzleHttp\Exception\ConnectException $connectException){
             throw new Exceptions\SDKException(
                 "Method: {$method}\n" .
-                "URL: {$url}\n" .
+                "URL: {$endpoint}\n" .
                 $connectException->getMessage()
             );
         }

@@ -1,7 +1,8 @@
     /**
-     *
+     * Delete a Models\{{ routes['create'].singular }}Model by ID. Returns true on success, false on failure.
+     * @return bool
      **/
-    public function {{ route.function }}($id)
+    public function {{ route.function }}($id) : bool
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = $this->replaceUrlElements(

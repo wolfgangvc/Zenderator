@@ -13,10 +13,7 @@ class Client extends Abstracts\AbstractClient
     public function __construct(){
         parent::__construct();
 {% for pack in packs|keys %}
-        $this->{{ pack|transform_studly_to_camel }} = new AccessLayer\{{ pack }}AccessLayer(
-            $this->guzzle,
-            $this
-        );
+        $this->{{ pack|transform_studly_to_camel }} = new AccessLayer\{{ pack }}AccessLayer($this);
 {% endfor %}
     }
 }

@@ -1,4 +1,8 @@
 
+    /**
+     *
+     * @return Models\{{ routes['create'].singular }}Model|Models\{{ routes['create'].singular }}Model[]
+     */
     private function hydrate($raw{{ routes['create'].singular }})
     {
         // if the entity is an array and is empty, return false. Nothing to hydrate.
@@ -21,6 +25,6 @@
             }
             return $array;
         }else{
-            return new Models\{{ routes['create'].singular }}Model($raw{{ routes['create'].singular }});
+            return new Models\{{ routes['create'].singular }}Model($this->sdkClient, $raw{{ routes['create'].singular }});
         }
     }

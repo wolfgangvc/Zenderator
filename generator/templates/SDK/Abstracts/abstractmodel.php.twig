@@ -3,8 +3,11 @@ namespace Segura\SDK\{{ app_name }}\Abstracts;
 
 abstract class AbstractModel
 {
-    public function __construct(array $raw = null)
+    protected $sdkClient;
+
+    public function __construct(AbstractClient $sdkClient, array $raw = null)
     {
+        $this->sdkClient = $sdkClient;
         if($raw) {
             foreach ($raw as $key => $value) {
                 $this->$key = $value;

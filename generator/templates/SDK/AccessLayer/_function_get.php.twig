@@ -1,7 +1,12 @@
     /**
+     * Return a single Models\{{ routes['create'].singular }}Model by ID
      *
+     * @return Models\{{ routes['create'].singular }}Model
+     *
+     * @throws Exceptions\ObjectNotFoundException
+     * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}($id)
+    public function {{ route.function }}($id) : Models\{{ routes['create'].singular }}Model
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = $this->replaceUrlElements(
