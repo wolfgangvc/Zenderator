@@ -52,8 +52,16 @@ abstract class AbstractAccessLayer
                     $options
                 )
             );
-        }catch(\GuzzleHttp\Exception\ConnectException $connectException){
+        } catch (ServerException $serverException) {
             throw new Exceptions\SDKException(
+                "Server Exception:\n" .
+                "Method: {$method}\n" .
+                "URL: {$endpoint}\n" .
+                $serverException->getMessage()
+            );
+        } catch (ConnectException $connectException) {
+            throw new Exceptions\SDKException(
+                "Connect Exception:\n" .
                 "Method: {$method}\n" .
                 "URL: {$endpoint}\n" .
                 $connectException->getMessage()
