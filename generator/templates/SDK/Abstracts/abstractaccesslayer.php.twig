@@ -23,18 +23,19 @@ abstract class AbstractAccessLayer
     }
 
     /**
-    * @param string $method
-    * @param string $endpoint
-    * @param array  $options
-    *
-    * @return mixed|ResponseInterface
-    *
-    * @throws Exceptions\SDKException
-    */
+     * @param string $method
+     * @param string $endpoint
+     * @param array  $options
+     *
+     * @throws Exceptions\SDKException
+     * @throws GuzzleException\ClientException
+     *
+     * @return mixed|ResponseInterface
+     */
     protected function request(
-        $method = "GET",
-        $endpoint = "/",
-        $options = []
+        string $method = "GET",
+        string $endpoint = "/",
+        array $options = []
     ) {
         $endpoint = ltrim($endpoint, "/");
         try{
@@ -69,7 +70,8 @@ abstract class AbstractAccessLayer
         }
     }
 
-    protected function replaceUrlElements(string $endpoint, array $replacements = null){
+    protected function replaceUrlElements(string $endpoint, array $replacements = null) : string
+    {
         if (count($replacements) > 0) {
             foreach($replacements as $key => $value){
                 $endpoint = str_replace('{' . $key . '}', $value, $endpoint);

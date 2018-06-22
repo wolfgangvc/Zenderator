@@ -21,14 +21,13 @@
             }
             $body = json_decode($body, true);
             return $this->hydrate($body['{{ route.singular }}']);
-        }catch(\GuzzleHttp\Exception\ServerException $serverException){
-            $requestBody = $serverException->getRequest()->getBody()->getContents();
-            $responseBody = $serverException->getResponse()->getBody()->getContents();
-            throw new Exceptions\SDKException("Server error: {$method} {$endpoint}\nRequest:\n{$requestBody}Response:\n{$responseBody}");
-        }catch(\GuzzleHttp\Exception\ClientException $clientException){
-            $requestBody  = $clientException->getRequest()->getBody()->getContents();
-            $responseBody = $clientException->getResponse()->getBody()->getContents();
-            throw new Exceptions\SDKException("Server error:  {$method} {$endpoint}\nRequest:\n{$requestBody}Response:\n{$responseBody}");
+        } catch (GuzzleExceptions\ClientException $clientException) {
+            $body = $clientException->getResponse()->getBody()->getContents();
+            if (json_decode($body) === null) {
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
+            return $body;
         }
     }
 

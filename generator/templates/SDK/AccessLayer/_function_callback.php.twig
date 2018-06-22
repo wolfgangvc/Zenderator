@@ -34,23 +34,38 @@
         }
 {% endfor %}
 {% endif %}
-
-        $response = $this->request(
-            $method,
-            $endpoint,
-            [
-                'headers' => [
-                    'Accept' => 'application/json',
-                ],
+        try {
+            $response = $this->request(
+                $method,
+                $endpoint,
+                [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                    ],
 {% if route.callbackProperties %}
-                'body' => json_encode($propertyArray),
+                    'body' => json_encode($propertyArray),
 {% endif %}
-            ]
-        );
-        $body = $response->getBody()->getContents();
-        if(json_decode($body) === null){
-            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+                ]
+            );
+            $body = $response->getBody()->getContents();
+            if(json_decode($body) === null){
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
+            return $body;
+        } catch (GuzzleExceptions\ClientException $clientException) {
+            $body = $clientException->getResponse()->getBody()->getContents();
+            if (json_decode($body) === null) {
+                throw new Exceptions\SDKException(
+                    "Response from API ({$endpoint}) was not expected JSON:\n" .
+                    "Method: {$method}\n" .
+                    "GuzzleConfig: " . var_export($this->sdkClient->getGuzzle()->getConfig(), true) . "\n".
+                    "URL: {$endpoint}\n" .
+                    "Request: " .  json_encode($propertyArray, JSON_PRETTY_PRINT) . "\n\n" .
+                    var_export($body, true)
+                );
+            }
+            $body = json_decode($body, true);
+            return $body;
         }
-        $body = json_decode($body, true);
-        return $body;
     }

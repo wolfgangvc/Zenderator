@@ -11,20 +11,28 @@
                 'id' => $id
             ]
         );
-        $response = $this->request(
-            "{{ route.method }}",
-            $endpoint,
-            [
-                'headers' => [
-                    'Accept' => 'application/json',
-                ],
-            ]
-        );
-        $body = $response->getBody()->getContents();
-        if(json_decode($body) === null){
-            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+        try {
+            $response = $this->request(
+                "{{ route.method }}",
+                $endpoint,
+                [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                    ],
+                ]
+            );
+            $body = $response->getBody()->getContents();
+            if(json_decode($body) === null){
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
+        } catch (GuzzleExceptions\ClientException $clientException) {
+            $body = $clientException->getResponse()->getBody()->getContents();
+            if (json_decode($body) === null) {
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
         }
-        $body = json_decode($body, true);
         if($body['Status'] == 'OKAY'){
             return true;
         }else{

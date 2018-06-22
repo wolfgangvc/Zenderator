@@ -4,10 +4,10 @@
 
     /**
      * @param $filter Filter instance
-     * @return Models\{{ route.singular }}Model[]
+     * @return null|Models\{{ route.singular }}Model[]
      * @throws Exceptions\SDKException
      **/
-    public function {{ route.function }}(Filter $filter = null)
+    public function {{ route.function }}(Filter $filter = null) : ?array
     {
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
@@ -17,27 +17,39 @@
             'Accept' => 'application/json',
         ];
         //\Kint::dump($endpoint, $method, $headers);
-        $response = $this->request(
-            $method,
-            $endpoint,
-            [
-                'headers' => $headers
-            ]
-        );
-        $body = $response->getBody()->getContents();
-        if(json_decode($body) === null){
-            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
-        }
-        $body = json_decode($body, true);
-        if(!isset($body['{{ route.plural }}'])){
-            // @todo make exception less generic - MB
-            throw new Exceptions\SDKException(
-                "Could not find element '{{ route.plural }}' in response from API.\n" .
-                "Endpoint: {$endpoint}\n" .
-                "Method: {$method}\n" .
-                "Available Keys were: ['" . implode("', '", array_keys($body)) . "'].\n"
+        try{
+            $response = $this->request(
+                $method,
+                $endpoint,
+                [
+                    'headers' => $headers
+                ]
             );
+            $body = $response->getBody()->getContents();
+            if(json_decode($body) === null){
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
+        } catch (GuzzleExceptions\ClientException $clientException) {
+            $body = $clientException->getResponse()->getBody()->getContents();
+            if (json_decode($body) === null) {
+                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
+            }
+            $body = json_decode($body, true);
         }
-        return $this->hydrate($body['{{ route.plural }}']);
+
+        if (strtolower($body['Status']) == strtolower('Okay')) {
+            if(!isset($body['{{ route.plural }}'])){
+                // @todo make exception less generic - MB
+                throw new Exceptions\SDKException(
+                    "Could not find element '{{ route.plural }}' in response from API.\n" .
+                    "Endpoint: {$endpoint}\n" .
+                    "Method: {$method}\n" .
+                    "Available Keys were: ['" . implode("', '", array_keys($body)) . "'].\n"
+                );
+            }
+            return $this->hydrate($body['{{ route.plural }}']);
+        }
+        return null;
     }
 

@@ -46,17 +46,34 @@
     }
 
     /**
+     * Get a single result with an optional filter.
+     *
      * @param Filter|null $filter
      *
-     * @return Models\{{ route.singular }}Model|false
+     * @return Models\{{ route.singular }}Model|null
      */
-    public function getFiltered(Filter $filter = null)
+    public function getFiltered(Filter $filter = null) : ?Models\{{ route.singular }}Model
     {
-        $list = $this->list(
-                    $filter
-                      ->setLimit(1)
-        );
+        $singular = $this->list($filter->setLimit(1));
 
-        return count($list) > 0 ? reset($list) : false;
+        return (is_array($singular) && count($singular) == 1)
+            ? reset($singular)
+            : null;
+    }
+
+    /**
+     * Get many results with an optional filter
+     *
+     * @param Filter|null $filter
+     *
+     * @return Models\{{ route.singular }}Model|null
+     */
+    public function getManyFiltered(Filter $filter = null) : ?array
+    {
+        $list = $this->list($filter);
+
+        return (is_array($list) && count($list) > 0)
+            ? $list
+            : null;
     }
 
