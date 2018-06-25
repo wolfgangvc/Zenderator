@@ -1,11 +1,11 @@
 <?php
 namespace Segura\SDK\{{ app_name }}\AccessLayer\Base;
 
-use Segura\SDK\{{ app_name }}\Abstracts\AbstractAccessLayer;
-use Segura\SDK\{{ app_name }}\Exceptions;
+use Segura\SDK\Common\Abstracts\AbstractAccessLayer;
+use Segura\SDK\Common\Exceptions;
 use Segura\SDK\{{ app_name }}\Models;
-use Segura\SDK\{{ app_name }}\Filters\Filter;
-use GuzzleHttp\Exception as GuzzleExceptions;
+use Segura\SDK\Common\Filters\Filter;
+use GuzzleHttp\Exception as GuzzleException;
 
 abstract class Base{{ pack_name }}AccessLayer extends AbstractAccessLayer
 {

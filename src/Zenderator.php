@@ -805,17 +805,6 @@ class Zenderator
             ]
         );
 
-        echo "Generating Abstract Objects:";
-        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractAccessLayer.php", "SDK/Abstracts/abstractaccesslayer.php.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractClient.php", "SDK/Abstracts/abstractclient.php.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/src/Abstracts/AbstractModel.php", "SDK/Abstracts/abstractmodel.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        echo "Generating Filter Objects:";
-        $this->renderToFile(true, $outputPath . "/src/Filters/Filter.php", "SDK/Filters/filter.php.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/src/Filters/FilterCondition.php", "SDK/Filters/filtercondition.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
         echo "Generating Client Container:";
         $this->renderToFile(true, $outputPath . "/src/Client.php", "SDK/client.php.twig", $renderData);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
@@ -838,18 +827,6 @@ class Zenderator
         chmod($outputPath . "/run-tests.sh", 0755);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
-        echo "Generating Exceptions:";
-        $derivedExceptions = [
-            'ObjectNotFoundException',
-            'FilterConditionNotFoundException',
-        ];
-        foreach ($derivedExceptions as $derivedException) {
-            $this->renderToFile(true, $outputPath . "/src/Exceptions/{$derivedException}.php", "SDK/Exceptions/DerivedException.php.twig", array_merge($renderData, ['ExceptionName' => $derivedException]));
-        }
-        $this->renderToFile(true, $outputPath . "/src/Exceptions/SDKException.php", "SDK/Exceptions/SDKException.php.twig", $renderData);
-        echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
-
-        #\Kint::dump($renderData);
         return $this;
     }
 

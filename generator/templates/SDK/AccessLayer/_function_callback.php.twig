@@ -53,7 +53,7 @@
             }
             $body = json_decode($body, true);
             return $body;
-        } catch (GuzzleExceptions\ClientException $clientException) {
+        } catch (GuzzleException\ClientException $clientException) {
             $body = $clientException->getResponse()->getBody()->getContents();
             if (json_decode($body) === null) {
                 throw new Exceptions\SDKException(

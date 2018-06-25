@@ -1,5 +1,7 @@
     /**
      * @return Models\{{ route.singular }}Model
+     * @throws Exceptions\SDKException
+     * @throws GuzzleException\ClientException
      **/
     public function {{ route.function }}($propertyArray)
     {
@@ -12,7 +14,6 @@
                 $endpoint,
                 [
                     'body' => json_encode($propertyArray),
-
                 ]
             );
             $body = $response->getBody()->getContents();
@@ -21,7 +22,7 @@
             }
             $body = json_decode($body, true);
             return $this->hydrate($body['{{ route.singular }}']);
-        } catch (GuzzleExceptions\ClientException $clientException) {
+        } catch (GuzzleException\ClientException $clientException) {
             $body = $clientException->getResponse()->getBody()->getContents();
             if (json_decode($body) === null) {
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
