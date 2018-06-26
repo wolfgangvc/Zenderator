@@ -555,7 +555,7 @@ class Zenderator
     {
         /** @var Model[] $models */
         $models = [];
-        if(is_array($this->adapters)) {
+        if (is_array($this->adapters)) {
             foreach ($this->adapters as $dbName => $adapter) {
                 echo "Adaptor: {$dbName}\n";
                 /**
@@ -832,7 +832,7 @@ class Zenderator
 
     private function getRoutes($remoteApiUri = false)
     {
-        if($remoteApiUri){
+        if ($remoteApiUri) {
             $client = new Client([
                 'base_uri' => $remoteApiUri,
                 'timeout'  => 30.0,
@@ -843,12 +843,11 @@ class Zenderator
             $result = $client->get("/v1")->getBody()->getContents();
             $body = json_decode($result, true);
             return $body['Routes'];
-        }else {
-            $response = $this->makeRequest("GET", "/v1");
-            $body = (string)$response->getBody();
-            $body = json_decode($body, true);
-            return $body['Routes'];
         }
+        $response = $this->makeRequest("GET", "/v1");
+        $body = (string)$response->getBody();
+        $body = json_decode($body, true);
+        return $body['Routes'];
     }
 
     /**
