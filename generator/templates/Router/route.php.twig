@@ -3,7 +3,7 @@ $exampleExistingObjectFindFunction = function()
 {
     $DIContainer = \{{ app_container }}::Instance()->getContainer();
     $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
-    // @todo This badly needs refactoring to be less insane/db heavy
+
     /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
     $exampleExistingObject = $tableGateway->fetchRandom();
 
@@ -12,11 +12,7 @@ $exampleExistingObjectFindFunction = function()
 
     if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
         $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance()->save();
-        #$exampleExistingObject->destroy();
     }
-
-    /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleObjectToCreate */
-    $exampleObjectToCreate = $exampleExistingObjectTableGateway->getNewMockModelInstance();
 
     return $exampleExistingObject;
 };
