@@ -1,24 +1,27 @@
 <?php
-$DIContainer = \{{ app_container }}::Instance()->getContainer();
-$tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+$exampleExistingObjectFindFunction = function()
+{
+    $DIContainer = \{{ app_container }}::Instance()->getContainer();
+    $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+    // @todo This badly needs refactoring to be less insane/db heavy
+    /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
+    $exampleExistingObject = $tableGateway->fetchRandom();
 
-// @todo This badly needs refactoring to be less insane/db heavy
-/** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
-$exampleExistingObject = $tableGateway->fetchRandom();
+    /** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
+    $exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 
-/** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
-$exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
+    if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
+        $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance()->save();
+        #$exampleExistingObject->destroy();
+    }
 
-if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
-    $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance()->save();
-    #$exampleExistingObject->destroy();
-}
+    /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleObjectToCreate */
+    $exampleObjectToCreate = $exampleExistingObjectTableGateway->getNewMockModelInstance();
 
-/** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleObjectToCreate */
-$exampleObjectToCreate = $exampleExistingObjectTableGateway->getNewMockModelInstance();
+    return $exampleExistingObject;
+};
 
 // Router proper begins
-
 $router = \Segura\AppCore\Router\Router::Instance()
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()
@@ -38,7 +41,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setExampleEntity($exampleExistingObject->__toArray())
+            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
     )
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()
@@ -58,7 +61,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setExampleEntity($exampleObjectToCreate->__toArray())
+            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
     )
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()
@@ -78,7 +81,7 @@ $router = \Segura\AppCore\Router\Router::Instance()
 {% endfor %}
             ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
-            ->setExampleEntity($exampleExistingObject->__toArray())
+            ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
     )
     ->addRoute(
         \Segura\AppCore\Router\Route::Factory()
