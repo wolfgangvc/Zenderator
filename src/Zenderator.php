@@ -171,7 +171,9 @@ class Zenderator
 
         // Decide if we're gonna use class prefixes. You don't want to do this if you have a single DB,
         // or you'll get classes called DefaultThing instead of just Thing.
-        if (isset($databaseConfigs['Default']) && count($databaseConfigs) == 1) {
+        if (!is_array($databaseConfigs)) {
+            self::classPrefixesOff();
+        } elseif (isset($databaseConfigs['Default']) && count($databaseConfigs) == 1) {
             self::classPrefixesOff();
         } else {
             self::classPrefixesOn();

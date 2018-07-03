@@ -17,9 +17,9 @@ class Column extends Entity
     protected $defaultValue;
     protected $isAutoIncrement = false;
     /** @var RelatedModel[] */
-    protected $relatedObjects;
+    protected $relatedObjects = [];
     /** @var RelatedModel[] */
-    protected $remoteObjects;
+    protected $remoteObjects = [];
 
     /**
      * @return self
@@ -279,7 +279,7 @@ class Column extends Entity
     /**
      * @return RelatedModel[]
      */
-    public function getRelatedObjects()
+    public function getRelatedObjects() : array
     {
         return $this->relatedObjects;
     }
@@ -287,7 +287,7 @@ class Column extends Entity
     /**
      * @return RelatedModel[]
      */
-    public function getRemoteObjects()
+    public function getRemoteObjects() : array
     {
         return $this->remoteObjects;
     }
