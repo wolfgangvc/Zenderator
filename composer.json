@@ -45,7 +45,7 @@
     "lstrojny/phpunit-clever-and-smart": "0.*",
     "brianium/paratest": "^0.14.0",
     "fzaninotto/Faker": "^1.6.0",
-    "phpunit/phpunit": "5.*",
+    "phpunit/phpunit": ">5.0",
     "deweller/cliopts": "^1.0",
     "gone.io/twig-extension-transform": "^1.0"
   },
