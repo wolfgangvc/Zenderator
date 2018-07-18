@@ -744,6 +744,7 @@ class Zenderator
             'app_name'         => APP_NAME,
             'app_container'    => APP_CORE_NAME,
             'default_base_url' => strtolower("http://" . APP_NAME . ".segurasystems.test"),
+            'release_time'     => date("Y-m-d H:i:s"),
         ];
 
         $routes = $this->getRoutes($remoteApiUri);
