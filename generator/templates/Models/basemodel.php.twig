@@ -238,7 +238,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function destroy()
+    public function destroy() : int
     {
         /** @var $tableGateway TableGateways\{{ class_name }}TableGateway */
         $tableGateway = App::Container()->get(TableGateways\{{ class_name }}TableGateway::class);
@@ -253,7 +253,9 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function destroyThoroughly(){
+    public function destroyThoroughly() : int
+    {
+{% if remote_objects.length > 0 %}
         $countOfThingsDestroyed = 0;
         $thingsToDestroy = [];
 {% for remote_object in remote_objects %}
@@ -271,6 +273,9 @@ abstract class Base{{ class_name }}Model
         $this->destroy();
         $countOfThingsDestroyed++;
         return $countOfThingsDestroyed;
+{% else %}
+        return $this->destroy();
+{% endif %}
     }
 
 
