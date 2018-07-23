@@ -8,7 +8,19 @@ use \{{ namespace }}\Models;
 
 class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {
+    /** @var {{ class_name }}TableGateway */
+    protected $testTableGateway;
+
+    /** @var {{ class_name }}Model */
     protected $testInstance;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->testTableGateway = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
+        $this->testInstance = $this->testTableGateway->getNewMockModelInstance();
+
+    }
 
     public function testExchangeArray()
     {
@@ -182,6 +194,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
         /** @var Models\{{ class_name }}Model $destroyableModel */
         $destroyableModel = $table->getNewMockModelInstance();
+        $destroyableModel->save();
         $this->assertTrue(true, $destroyableModel->destroy());
     }
 
@@ -191,6 +204,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
         /** @var Models\{{ class_name }}Model $destroyableModel */
         $destroyableModel = $table->getNewMockModelInstance();
+        $destroyableModel->save();
         $this->assertGreaterThan(0, $destroyableModel->destroyThoroughly());
     }
 
@@ -266,6 +280,14 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 
 {% endfor %}
 {% endif %}
-
+    public function testGetPropertyMeta()
+    {
+        $propertyMeta = $this->testInstance->getPropertyMeta();
+        $this->assertTrue(is_array($propertyMeta));
+        $this->assertGreaterThan(0, count($propertyMeta));
+{% for column in columns %}
+        $this->assertArrayHasKey('{{ column.getField }}', $propertyMeta);
+{% endfor %}
+    }
 
 }
