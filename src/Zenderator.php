@@ -5,6 +5,7 @@ use Camel\CaseTransformer;
 use Camel\Format;
 use Gone\Twig\TransformExtension;
 use GuzzleHttp\Client;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Segura\AppCore\App;
 use Segura\AppCore\DbConfig;
 use Segura\AppCore\Router\Router;
@@ -341,9 +342,8 @@ class Zenderator
         echo "Running phpunit... \n";
 
         if ($withCoverage && file_exists(APP_ROOT . "/build/clover.xml")) {
-            $coverageReport   = simplexml_load_file(APP_ROOT . "/build/clover.xml");
-            $metrics          = $coverageReport->project->metrics;
-            $previousCoverage = floatval((100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc);
+            $previousCoverageReport = require(APP_ROOT . "/build/coverage_report.php");
+            $previousCoverage = floatval((100/$previousCoverageReport->getReport()->getNumExecutableLines()) * $previousCoverageReport->getReport()->getNumExecutedLines());
         }
 
         $phpunitCommand = "" .
@@ -355,9 +355,10 @@ class Zenderator
         passthru($phpunitCommand, $returnCode);
 
         if ($withCoverage) {
-            $coverageReport = simplexml_load_file(APP_ROOT . "/build/clover.xml");
-            $metrics        = $coverageReport->project->metrics;
-            $coverage       = floatval((100/$metrics->attributes()->loc) * $metrics->attributes()->ncloc);
+            /** @var CodeCoverage $coverageReport */
+            $coverageReport = require(APP_ROOT . "/build/coverage_report.php");
+            $coverage = floatval((100/$coverageReport->getReport()->getNumExecutableLines()) * $coverageReport->getReport()->getNumExecutedLines());
+
             echo "\nCoverage: ";
             printf(
                 "There is %s%% coverage. ",
@@ -633,6 +634,7 @@ class Zenderator
             APP_ROOT . "/tests/Api/Generated/",
             APP_ROOT . "/tests/Models/Generated/",
             APP_ROOT . "/tests/Services/Generated/",
+            APP_ROOT . "/tests/",
         ];
         foreach ($generatedPaths as $generatedPath) {
             if (file_exists($generatedPath)) {

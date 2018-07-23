@@ -208,8 +208,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $this->assertGreaterThan(0, $destroyableModel->destroyThoroughly());
     }
 
-{% if related_object %}
-
+{% if related_objects > 0 %}
 {% for related_object in related_objects %}
     /**
      * @depends testNewMockModelInstance
@@ -222,7 +221,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         // Call the function on it
         ${{ class_name }}Model = ${{ class_name }}->fetch{{ related_object.getRemoteFunctionName }}Object();
 
-        $this->assertInstanceOf(Models\{{ class_name }}Model::class, ${{ class_name }}Model);
+        $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class_name }}Model);
     }
 
 {% endfor %}
@@ -260,7 +259,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
+        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Objects"));
 
         /** @var TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway $tableGateway */
         $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway::class);
@@ -276,6 +275,24 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         ${{ remote_object.getLocalFunctionName }}Models = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
 
         $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalFunctionName }}sModel::class, ${{ remote_object.getLocalFunctionName }}Models);
+
+        return [${{ class_name }}, ${{ remote_object.getLocalFunctionName }}Models];
+    }
+
+    /**
+     * @depends test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects
+     */
+    public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName }}Objects($list)
+    {
+        list(${{ class_name }}, ${{ remote_object.getLocalFunctionName }}Models) = $list;
+
+        // Verify the function exists
+        $this->assertTrue(method_exists(${{ class_name }}, "count{{ remote_object.getLocalFunctionName }}Objects"));
+
+        // Call the function on it
+        $count = ${{ class_name }}->count{{ remote_object.getLocalFunctionName }}Objects();
+
+        $this->assertEquals(count(${{ remote_object.getLocalFunctionName }}Models), $count);
     }
 
 {% endfor %}

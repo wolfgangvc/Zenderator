@@ -5,9 +5,13 @@ use \{{ app_container }} as App;
 use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
 use \{{ namespace }}\Services\{{ class_name }}Service;
 use \{{ namespace }}\Models\{{ class_name }}Model;
+use \Zend\Db\Sql\Select;
 
 class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {
+    /** @var {{ variable_name }}Service */
+    protected ${{ variable_name }}Service;
+
     public static function setUpBeforeClass()
     {
         ${{ variable_name }}TableGateway = App::Container()->get({{ class_name }}TableGateway::class);
@@ -20,12 +24,18 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         }
     }
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->{{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+    }
+
     public function testGetNewModelInstance()
     {
-        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
         $this->assertInstanceOf(
             {{ class_name }}Model::class,
-            ${{ variable_name }}Service->getNewModelInstance()
+            $this->{{ variable_name }}Service->getNewModelInstance()
         );
     }
 
@@ -147,6 +157,47 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
             $found
         );
 {% endfor %}
+    }
+
+    /**
+     * @depends testGetRandom
+     */
+    public function testGetManyMatching({{ class_name }}Model $random)
+    {
+        $all = $this->{{ variable_name }}Service->getManyMatching([]);
+        $this->assertGreaterThan(0, count($all));
+        $this->assertContainsOnlyInstancesOf({{ class_name }}Model::class, $all);
+
+        $one = $this->{{ variable_name }}Service->getManyMatching([], null, Select::ORDER_ASCENDING, 1);
+        $this->assertEquals(1, count($one));
+        $this->assertContainsOnlyInstancesOf({{ class_name }}Model::class, $one);
+
+        $asc  = $this->{{ variable_name }}Service->getManyMatching([], '{{ primary_keys[0] }}', Select::ORDER_ASCENDING);
+        $desc = $this->{{ variable_name }}Service->getManyMatching([], '{{ primary_keys[0] }}', Select::ORDER_DESCENDING);
+        $this->assertContainsOnlyInstancesOf({{ class_name }}Model::class, $asc);
+        $this->assertEquals(count($asc), count($desc));
+        $this->assertEquals($asc, array_reverse($desc));
+
+        $keyValue = $this->{{ variable_name }}Service->getManyMatching(['{{ primary_keys[0] }}' => $random->get{{ primary_keys[0] }}()]);
+        $this->assertEquals($random, reset($keyValue));
+    }
+
+    /**
+     * @depends testGetRandom
+     */
+    public function testGetMatching({{ class_name }}Model $random)
+    {
+        $all = $this->{{ variable_name }}Service->getMatching([]);
+        $this->assertEquals({{ variable_name }}Model::class, get_class($all));
+
+        $asc  = $this->{{ variable_name }}Service->getMatching([], '{{ primary_keys[0] }}', Select::ORDER_ASCENDING);
+        $desc = $this->{{ variable_name }}Service->getMatching([], '{{ primary_keys[0] }}', Select::ORDER_DESCENDING);
+        $this->assertEquals({{ variable_name }}Model::class, get_class($asc));
+        $this->assertEquals({{ variable_name }}Model::class, get_class($desc));
+        $this->assertNotEquals($asc, $desc);
+
+        $keyValue = $this->{{ variable_name }}Service->getMatching(['{{ primary_keys[0] }}' => $random->get{{ primary_keys[0] }}()]);
+        $this->assertEquals($random, $keyValue);
     }
 
     public function testDeleteById()
