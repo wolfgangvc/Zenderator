@@ -370,6 +370,7 @@ class Model extends Entity
         foreach ($columns as $column) {
             $typeFragments = explode(" ", $column->getDataType());
             $oColumn       = Column::Factory($this->getZenderator())
+                ->setModel($this)
                 ->setField($column->getName())
                 ->setDbType(reset($typeFragments))
                 ->setPermittedValues($column->getErrata('permitted_values'))

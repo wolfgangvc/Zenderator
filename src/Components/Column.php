@@ -7,6 +7,9 @@ use Zenderator\Zenderator;
 
 class Column extends Entity
 {
+    /** @var Model */
+    protected $model;
+    
     protected $field;
     protected $dbType;
     protected $phpType;
@@ -27,6 +30,25 @@ class Column extends Entity
     public static function Factory(Zenderator $zenderator)
     {
         return parent::Factory($zenderator);
+    }
+
+    /**
+     * @return Model
+     */
+    public function getModel() : Model
+    {
+        return $this->model;
+    }
+
+    /**
+     * @param Model $model
+     *
+     * @return Column
+     */
+    public function setModel(Model $model)
+    {
+        $this->model = $model;
+        return $this;
     }
 
     /**
