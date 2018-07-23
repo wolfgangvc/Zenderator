@@ -113,6 +113,26 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /**
      * @depends testGetRandom
      */
+    public function testCountByField({{ class_name }}Model $random)
+    {
+        ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
+{% for column in columns %}
+{% if column.getDbType == 'json' %}
+            // @todo Write a set of lookups that use MySQL 5.7 JSON field shizzle.
+{% else %}
+        $found = ${{ variable_name }}Service->countByField('{{ column.field }}', $random->get{{ column.field }}());
+{% endif %}
+        $this->assertGreaterThanOrEqual(
+            1,
+            $found,
+            "Calling {{ class_name }}Service->countByField('{{ column.field }}') failed to count a {{ class_name }}Model"
+        );
+{% endfor %}
+    }
+
+    /**
+     * @depends testGetRandom
+     */
     public function testGetManyByField({{ class_name }}Model $random)
     {
         ${{ variable_name }}Service = App::Container()->get({{ class_name }}Service::class);
@@ -145,7 +165,6 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 
     /**
      * @depends testDeleteById
-
      */
     public function testDeleteByIdVerify({{ class_name }}Model $deleted)
     {
