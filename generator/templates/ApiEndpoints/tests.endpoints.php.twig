@@ -64,7 +64,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $responseJson = json_decode($body, true);
         $this->waypoint("JSON DECODE");
         $this->assertArrayHasKey('Status', $responseJson);
-        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to PUT /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertEquals("Okay", $responseJson['Status'], "Verify that request to PUT /v1/{{ controller_route }} returns an \"Status: Okay\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
         $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
         $this->waypoint("Some assertions");
 
@@ -104,7 +104,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $responseJson = json_decode((string)$body, true);
         $this->waypoint("JSON DECODE");
         $this->assertArrayHasKey('Status', $responseJson);
-        $this->assertEquals("FAIL", $responseJson['Status'], "Object was created, when failure was expected.");
+        $this->assertEquals("Fail", $responseJson['Status'], "Object was created, when failure was expected.");
         $this->waypoint("Some assertions");
     }
 
@@ -125,7 +125,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $responseJson = json_decode((string)$body, true);
         $this->waypoint("JSON DECODE");
         $this->assertArrayHasKey('Status', $responseJson);
-        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to GET /v1/{{ controller_route }}/{$id} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertEquals("Okay", $responseJson['Status'], "Verify that request to GET /v1/{{ controller_route }}/{$id} returns an \"Status: Okay\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
         $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
         $this->waypoint("Some assertions");
 
@@ -150,7 +150,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         $responseJson = json_decode((string)$body, true);
         $this->waypoint("JSON DECODE");
         $this->assertArrayHasKey('Status', $responseJson);
-        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to GET /v1/{{ controller_route }} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertEquals("Okay", $responseJson['Status'], "Verify that request to GET /v1/{{ controller_route }} returns an \"Status: Okay\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
         $this->assertArrayHasKey('{{ object_name_plural }}', $responseJson);
         $this->waypoint("Some assertions");
         $this->validate{{ class_name }}Object(reset($responseJson['{{ object_name_plural }}']));
@@ -171,7 +171,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
         );
         $responseJson = json_decode((string)$body, true);
         $this->assertArrayHasKey('Status', $responseJson);
-        $this->assertEquals("OKAY", $responseJson['Status'], "Verify that request to DELETE /v1/{{ controller_route }}/{$id} returns an \"Status: OKAY\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
+        $this->assertEquals("Okay", $responseJson['Status'], "Verify that request to DELETE /v1/{{ controller_route }}/{$id} returns an \"Status: Okay\" response.  This failed. " . (isset($responseJson['Reason']) ? "Reason: " . $responseJson['Reason'] : "No Reason Given"));
         $this->assertEquals("DELETE", $responseJson['Action']);
         $this->assertArrayHasKey('{{ object_name_singular }}', $responseJson);
         $this->validate{{ class_name }}Object($responseJson['{{ class_name }}']);
@@ -190,7 +190,7 @@ class {{ class_name }}EndpointTest extends \Segura\AppCore\Test\RoutesTestCase
             "Assert that the JSON response is actually JSON that is parsable failed. Response was: \"". (string) $body . "\""
         );
         $responseJson = json_decode((string)$body, true);
-        $this->assertEquals("FAIL", $responseJson['Status']);
+        $this->assertEquals("Fail", $responseJson['Status']);
     }
 
     private function validate{{ class_name }}Object(${{ class_name }}Object)
