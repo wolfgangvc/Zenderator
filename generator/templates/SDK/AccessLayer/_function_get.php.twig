@@ -37,7 +37,7 @@
                 throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON and it was a " . $clientException->getResponse()->getStatusCode());
             }
             $json = json_decode($body, true);
-            if($json['Status'] == 'FAIL'){
+            if($json['Status'] == 'Fail'){
                 throw new Exceptions\ObjectNotFoundException($json['Reason']);
             }else{
                 throw new Exceptions\ObjectNotFoundException("A bad thing happened: " . $body);
