@@ -353,18 +353,25 @@ class Zenderator
             ($debug ? "--debug" : "")
         ;
         echo " > {$phpunitCommand}\n\n";
+        $startTime = microtime(true);
         passthru($phpunitCommand, $returnCode);
+        $executionTimeTotal = microtime(true) - $startTime;
 
         if ($withCoverage) {
             /** @var CodeCoverage $coverageReport */
             $coverageReport = require(APP_ROOT . "/build/coverage_report.php");
             $coverage = floatval((100/$coverageReport->getReport()->getNumExecutableLines()) * $coverageReport->getReport()->getNumExecutedLines());
 
-            echo "\nCoverage: ";
             printf(
-                "There is %s%% coverage. ",
+                "\nComplete in %s seconds. ",
+                number_format($executionTimeTotal, 2)
+            );
+
+            printf(
+                "\nCoverage: There is %s%% coverage. ",
                 number_format($coverage, 2)
             );
+
             if (isset($previousCoverage)) {
                 if ($coverage != $previousCoverage) {
                     printf(
