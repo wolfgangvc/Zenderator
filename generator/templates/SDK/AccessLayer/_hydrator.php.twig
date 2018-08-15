@@ -1,4 +1,3 @@
-
     /**
      *
      * @return Models\{{ routes['create'].singular }}Model|Models\{{ routes['create'].singular }}Model[]
@@ -7,7 +6,7 @@
     {
         // if the entity is an array and is empty, return false. Nothing to hydrate.
         if(is_array($raw{{ routes['create'].singular }}) && empty($raw{{ routes['create'].singular }})){
-            return false;
+            return null;
         }
 
         if(
