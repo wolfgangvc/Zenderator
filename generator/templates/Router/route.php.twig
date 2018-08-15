@@ -4,15 +4,11 @@ $exampleExistingObjectFindFunction = function()
     $DIContainer = \{{ app_container }}::Instance()->getContainer();
     $tableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 
-    /** @var \{{ namespace }}\Models\{{ class_name }}Model $exampleExistingObject */
-    $exampleExistingObject = $tableGateway->fetchRandom();
-
     /** @var \{{ namespace }}\TableGateways\{{ class_name }}TableGateway $exampleExistingObjectTableGateway */
     $exampleExistingObjectTableGateway = $DIContainer->get(\{{ namespace }}\TableGateways\{{ class_name }}TableGateway::class);
 
-    if(!$exampleExistingObject instanceof \{{ namespace }}\Models\{{ class_name }}Model){
-        $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance()->save();
-    }
+    $exampleExistingObject = $exampleExistingObjectTableGateway->getNewMockModelInstance();
+    $exampleExistingObject->setId(rand(1000000,9999999));
 
     return $exampleExistingObject;
 };
