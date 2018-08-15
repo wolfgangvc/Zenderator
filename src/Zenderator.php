@@ -840,8 +840,6 @@ class Zenderator
         $this->renderToFile(true, $outputPath . "/.gitignore", "SDK/gitignore.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/Dockerfile.tests", "SDK/Dockerfile.twig", $renderData);
         $this->renderToFile(true, $outputPath . "/test-compose.yml", "SDK/docker-compose.yml.twig", $renderData);
-        $this->renderToFile(true, $outputPath . "/run-tests.sh", "SDK/run-tests.sh.twig", $renderData);
-        chmod($outputPath . "/run-tests.sh", 0755);
         echo " [" . ConsoleHelper::COLOR_GREEN . "DONE" . ConsoleHelper::COLOR_RESET . "]\n";
 
         return $this;
