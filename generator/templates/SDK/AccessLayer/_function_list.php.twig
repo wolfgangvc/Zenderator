@@ -16,27 +16,19 @@
             'Filter' => $filter instanceof Filter ? $filter->getHeaderJson() : null ,
             'Accept' => 'application/json',
         ];
-        //\Kint::dump($endpoint, $method, $headers);
-        try{
-            $response = $this->request(
-                $method,
-                $endpoint,
-                [
-                    'headers' => $headers
-                ]
-            );
-            $body = $response->getBody()->getContents();
-            if(json_decode($body) === null){
-                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
-            }
-            $body = json_decode($body, true);
-        } catch (GuzzleException\ClientException $clientException) {
-            $body = $clientException->getResponse()->getBody()->getContents();
-            if (json_decode($body) === null) {
-                throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
-            }
-            $body = json_decode($body, true);
+
+        $response = $this->request(
+            $method,
+            $endpoint,
+            [
+                'headers' => $headers
+            ]
+        );
+        $body = $response->getBody()->getContents();
+        if(json_decode($body) === null){
+            throw new Exceptions\SDKException("Response from API ({$endpoint}) was not expected JSON: " . var_export($body, true));
         }
+        $body = json_decode($body, true);
 
         if (strtolower($body['Status']) == strtolower('Okay')) {
             if(!isset($body['{{ route.plural }}'])){
