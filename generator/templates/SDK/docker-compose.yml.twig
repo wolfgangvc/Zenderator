@@ -5,3 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.tests
+    volumes:
+      - ./:/app
+    network_mode: "host"
+

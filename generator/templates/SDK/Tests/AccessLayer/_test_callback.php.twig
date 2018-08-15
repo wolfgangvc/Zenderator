@@ -1,13 +1,11 @@
     /**
      * @vcr unittest_{{ pack_name|lower }}_{{ route.function|lower }}.cassette
      **/
-    public function test{{ route.function|capitalize }}()
+    public function test{{ route.function }}()
     {
-        // @todo: I need to think about how I want to autogenerate these. -MB
         $this->markTestIncomplete("I need to think about how I want to autogenerate these.");
 
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}();
+        $response = $this->client->{{ scope_name }}->{{ route.function }}();
 
         $this->assertEquals("Okay", $response->Status);
     }
-

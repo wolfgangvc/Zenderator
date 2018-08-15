@@ -1,18 +1,16 @@
 <?php
+{% set priorities = [ "create", "get", "list", "delete" ] %}
 namespace Segura\SDK\{{ app_name }}\Test\AccessLayer;
 
 use PHPUnit\Framework\TestCase;
 use Segura\SDK\{{ app_name }}\AccessLayer\{{ pack_name }}AccessLayer;
 use Segura\SDK\{{ app_name }}\Client as SDKClient;
 use Segura\SDK\{{ app_name }}\Models;
-use Segura\SDK\{{ app_name }}\Filters\Filter;
+use Segura\SDK\Common\Filters\Filter;
 
 class {{ pack_name }}Test extends TestCase{
     /** @var SDKClient */
     private $client;
-
-    /** @var {{ pack_name }}AccessLayer */
-    private ${{ pack_name|lower }};
 
     public function setUp()
     {
@@ -21,11 +19,20 @@ class {{ pack_name }}Test extends TestCase{
         if(isset($_ENV['API_HOST'])){
             $this->client->setBaseUrl($_ENV['API_HOST']);
         }
-        $this->{{ pack_name|lower }} = $this->client->get{{ pack_name }}();
     }
+{% for order in priorities %}
+{% for route in routes %}
+{% if route.template == order %}
+{% set test_file = "SDK/Tests/AccessLayer/" ~ "_test_" ~ order ~ ".php.twig" %}
+{% include test_file %}
+{% endif %}
+{% endfor %}
+{% endfor %}
 
 {% for route in routes %}
+{% if route.template not in priorities %}
 {% set test_file = "SDK/Tests/AccessLayer/" ~ "_test_" ~ route.template ~ ".php.twig" %}
 {% include test_file %}
+{% endif %}
 {% endfor %}
 }

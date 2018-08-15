@@ -10,8 +10,6 @@ clean:
 
 prepare:
 	composer install
-
-build-work:
 	docker pull index.segurasystems.com/$(BASE)
 
 build: prepare clean

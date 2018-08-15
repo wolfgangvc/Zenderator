@@ -3,7 +3,7 @@
      **/
     public function test{{ route.function|capitalize }}()
     {
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}();
+        $response = $this->client->{{ scope_name }}->{{ route.function }}();
         if($response == false){
             $this->markTestSkipped("There was no data returned calling {{ route.function }}() on {{ pack_name|lower }}.");
         }
@@ -17,7 +17,7 @@
      **/
     public function test{{ route.function|capitalize }}LimitOne()
     {
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}(
+        $response = $this->client->{{ scope_name }}->{{ route.function }}(
                         Filter::Factory()
                             ->setLimit(1)
                             ->setOffset(0)
@@ -28,22 +28,22 @@
         $element = $response[rand(0,count($response) - 1)];
         $this->assertEquals('Segura\SDK\{{ app_name }}\Models\{{ route.singular }}Model', get_class($element));
         $this->assertEquals(1, count($response));
-        return $response;
+        return $response[0];
     }
 
     /**
+     * @depends test{{ route.function|capitalize }}LimitOne
      * @vcr unittest_{{ pack_name|lower }}_list.cassette
      **/
-    public function test{{ route.function|capitalize }}Wheres()
+    public function test{{ route.function|capitalize }}Wheres(\Segura\SDK\{{ app_name }}\Models\{{ route.singular }}Model $toFind)
     {
-        $response = $this->{{ pack_name|lower }}->{{ route.function }}(
-                        Filter::Factory()
+        $filter = Filter::Factory();
 {% for key, value in route.example %}
-{% if value %}
-                            ->addWhere('{{ key }}', '{{ value }}', '=')
-{% endif %}
+        if(is_string($toFind->get{{ key }}()) || is_numeric($toFind->get{{ key }}())){
+            $filter->addWhere('{{ key }}', $toFind->get{{ key }}(), '=');
+        }
 {% endfor %}
-                    );
+        $response = $this->client->{{ scope_name }}->{{ route.function }}($filter);
         //\Kint::dump($response);
         /** @var $element \Segura\SDK\{{ app_name }}\Models\{{ route.singular }}Model */
         $element = $response[rand(0,count($response) - 1)];
@@ -51,7 +51,7 @@
         $this->assertEquals(1, count($response));
 {% for key, value in route.example %}
 {% if value %}
-        $this->assertEquals('{{ value }}', $element->get{{ key }}());
+        $this->assertEquals($toFind->get{{ key }}(), $element->get{{ key }}());
 {% endif %}
 {% endfor %}
         return $response;
@@ -62,10 +62,10 @@
     **/
     public function test{{ route.function|capitalize }}OrderBy()
     {
-        $responseAsc = $this->{{ pack_name|lower }}->{{ route.function }}(
+        $responseAsc = $this->client->{{ scope_name }}->{{ route.function }}(
             Filter::Factory()->setOrder('Id', 'ASC')
         );
-        $responseDsc = $this->{{ pack_name|lower }}->{{ route.function }}(
+        $responseDsc = $this->client->{{ scope_name }}->{{ route.function }}(
             Filter::Factory()->setOrder('Id', 'DESC')
         );
         $responseAscIds = [];

@@ -780,9 +780,12 @@ class Zenderator
         // "SDK" suite
         foreach ($packs as $packName => $routes) {
             echo " > Pack: {$packName}...\n";
+            $scopeName = $packName;
+            $scopeName[0] = strtolower($scopeName[0]);
             $routeRenderData = [
-                'pack_name' => $packName,
-                'routes'    => $routes,
+                'pack_name'  => $packName,
+                'scope_name' => $scopeName,
+                'routes'     => $routes,
             ];
             $properties = [];
             foreach ($routes as $route) {
