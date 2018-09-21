@@ -43,7 +43,8 @@
     "johnkary/phpunit-speedtrap": "^3.0.0",
     "brianium/paratest": "^2.0",
     "fzaninotto/Faker": "^1.7.1",
-    "phpunit/phpunit": ">5.0",
+    "phpunit/phpunit": "^7.0",
+    "phpunit/phpcov": "^5.0",
     "deweller/cliopts": "^1.0",
     "gone.io/twig-extension-transform": "^1.0"
   },
