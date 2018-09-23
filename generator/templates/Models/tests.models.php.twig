@@ -5,6 +5,7 @@ use \{{ namespace }}\TableGateways;
 use \{{ namespace }}\TableGateways\{{ class_name }}TableGateway;
 use \{{ namespace }}\Models\{{ class_name }}Model;
 use \{{ namespace }}\Models;
+use \Gone\UUID\UUID;
 
 class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {
@@ -19,7 +20,6 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         parent::setUp();
         $this->testTableGateway = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
         $this->testInstance = $this->testTableGateway->getNewMockModelInstance();
-
     }
 
     public function testExchangeArray()
@@ -244,11 +244,24 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 
         /** @var Models\{{ remote_object.getLocalFunctionName }}Model $new{{ remote_object.getLocalFunctionName }}Model */
         $new{{ remote_object.getLocalFunctionName }}Model = $tableGateway->getNewMockModelInstance();
-        $new{{ remote_object.getLocalFunctionName }}Model->set{{ remote_object.getLocalFunctionName|transform_camel_to_studly  }}Id(${{ class_name|singularize|transform_studly_to_camel }}->getId());
+        $new{{ remote_object.getLocalFunctionName }}Model->{{ remote_object.getLocalBoundColumnSetter }}(${{ class_name|singularize|transform_studly_to_camel }}->getId());
+
+        // Alas, some non-generic business logic has snuck in here.
+        // If this model has a field called UUID, make it an actual UUID
+        if(method_exists($new{{ remote_object.getLocalFunctionName }}Model, 'setUuid')) {
+            $new{{ remote_object.getLocalFunctionName }}Model->setUuid(UUID::v4());
+        }
+
+        // If this model has a 'deleted' column, set it to no.
+        if(method_exists($new{{ remote_object.getLocalFunctionName }}Model, 'setDeleted')) {
+            $new{{ remote_object.getLocalFunctionName }}Model->setDeleted(Models\{{ remote_object.getLocalFunctionName }}Model::DELETED_NO);
+        }
+
+        // Save our new model. Make offerings to the gods of phpunit & transaction rollback to clean it up afterwards.
         $new{{ remote_object.getLocalFunctionName }}Model->save();
 
         // Call the function on it
-        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName }}Object();
+        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName|singularize }}Object();
 
         $this->assertInstanceOf(Models\{{ remote_object.getLocalFunctionName }}Model::class, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model);
     }
@@ -256,7 +269,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
+    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize }}Objects({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
         $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize }}Objects"));
@@ -264,39 +277,56 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         /** @var TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway $tableGateway */
         $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway::class);
 
-        ${{ class_name|singularize|transform_studly_to_camel }} = ${{ class_name|singularize|transform_studly_to_camel }}->save();
+        ${{ class_name|singularize|transform_studly_to_camel }}->save();
+
+        $this->assertNotNull(${{ class_name|singularize|transform_studly_to_camel }}->getId());
 
         /** @var Models\{{ remote_object.getLocalFunctionName }}Model $new{{ remote_object.getLocalFunctionName }}Model */
         $new{{ remote_object.getLocalFunctionName }}Model = $tableGateway->getNewMockModelInstance();
-        $new{{ remote_object.getLocalFunctionName }}Model->set{{ remote_object.getLocalFunctionName|transform_camel_to_studly }}Id(${{ class_name|singularize|transform_studly_to_camel }}->getId());
+        $new{{ remote_object.getLocalFunctionName }}Model->{{ remote_object.getLocalBoundColumnSetter }}(${{ class_name|singularize|transform_studly_to_camel }}->getId());
+
+        // Alas, some non-generic business logic has snuck in here.
+        // If this model has a field called UUID, make it an actual UUID
+        if(method_exists($new{{ remote_object.getLocalFunctionName }}Model, 'setUuid')) {
+            $new{{ remote_object.getLocalFunctionName }}Model->setUuid(UUID::v4());
+        }
+
+        // If this model has a 'deleted' column, set it to no.
+        if(method_exists($new{{ remote_object.getLocalFunctionName }}Model, 'setDeleted')) {
+            $new{{ remote_object.getLocalFunctionName }}Model->setDeleted(Models\{{ remote_object.getLocalFunctionName }}Model::DELETED_NO);
+        }
+
+        // Save our new model. Make offerings to the gods of phpunit & transaction rollback to clean it up afterwards.
         $new{{ remote_object.getLocalFunctionName }}Model->save();
+        $this->assertNotNull($new{{ remote_object.getLocalFunctionName }}Model->getId());
 
         // Call the function on it
-        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
+        ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName|singularize }}Objects();
 
-        $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalFunctionName }}Model::class, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models);
+        $this->assertGreaterThanOrEqual(1, count(${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models), "fetch{{ remote_object.getLocalFunctionName|singularize }}Objects() failed to return atleast 1 Models\{{ remote_object.getLocalFunctionName }}Model.");
+        $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalFunctionName }}Model::class, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models);
 
-        return [${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models];
+        return [${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models];
     }
 
     /**
-     * @depends test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects
+     * @depends test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize }}Objects
      */
-    public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName }}Objects($list)
+    public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName|singularize }}Objects($list)
     {
         /**
-         * @var ${{ class_name|singularize|transform_studly_to_camel }} Models\{{ class_name|transform_camel_to_studly }}Model[]
-         * @var ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models Models\{{ remote_object.getLocalFunctionName }}Model
+         * @var ${{ class_name|singularize|transform_studly_to_camel }} Models\{{ class_name|transform_camel_to_studly }}Model
+         * @var ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models Models\{{ remote_object.getLocalFunctionName }}Model[]
          */
-        list(${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models) = $list;
+        list(${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models) = $list;
 
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "count{{ remote_object.getLocalFunctionName }}Objects"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "count{{ remote_object.getLocalFunctionName|singularize }}Objects"));
 
         // Call the function on it
-        $count = ${{ class_name|singularize|transform_studly_to_camel }}->count{{ remote_object.getLocalFunctionName }}Objects();
+        $count = ${{ class_name|singularize|transform_studly_to_camel }}->count{{ remote_object.getLocalFunctionName|singularize }}Objects();
 
-        $this->assertEquals(count(${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models), $count);
+        $this->assertCount($count, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models);
     }
 
 {% endfor %}

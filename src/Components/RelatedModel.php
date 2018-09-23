@@ -164,31 +164,31 @@ class RelatedModel extends Entity
                     $this->transCamel2Studly->transform($this->getLocalBoundColumn())
 #                )
             ;
-        } else {
-            return $this->transCamel2Studly->transform(
+        }
+        return $this->transCamel2Studly->transform(
 #               self::singulariseCamelCaseSentence(
                 $this->getLocalClass()
 #               )
             );
+    }
+
+    public function getRemoteFunctionName()
+    {
+        if ($this->hasClassConflict()) {
+            return
+                self::singulariseCamelCaseSentence($this->getRemoteClass()) .
+                "By" .
+                $this->transCamel2Studly->transform($this->getLocalBoundColumn());
         }
+        return
+                self::singulariseCamelCaseSentence(
+                    $this->getRemoteClass()
+                );
     }
 
     public function hasClassConflict() : bool
     {
         return $this->hasClassConflict;
-    }
-
-    /**
-     * Singularise the very last word of a camelcase sentence: bigSmellyHorses => bigSmellyHorse
-     *
-     * @param string $camel
-     * @return string
-     */
-    private function singulariseCamelCaseSentence(string $camel): string
-    {
-        $snake = explode("_", $this->transCamel2Snake->transform($camel));
-        $snake[count($snake) - 1] = Inflect::singularize($snake[count($snake) - 1]);
-        return $this->transSnake2Camel->transform(implode("_",$snake));
     }
 
     public function getLocalClass()
@@ -197,10 +197,9 @@ class RelatedModel extends Entity
             return
                 $this->transCamel2Studly->transform($this->getLocalBoundSchema()) .
                 $this->transCamel2Studly->transform($this->getLocalTableSanitised());
-        } else {
-            return
-                $this->transCamel2Studly->transform($this->getLocalTableSanitised());
         }
+        return
+                $this->transCamel2Studly->transform($this->getLocalTableSanitised());
     }
 
     /**
@@ -222,24 +221,13 @@ class RelatedModel extends Entity
         return $this;
     }
 
-    public function getRemoteFunctionName()
-    {
-        if ($this->hasClassConflict()) {
-            return
-                self::singulariseCamelCaseSentence($this->getRemoteClass()) .
-                "By" .
-                $this->transCamel2Studly->transform($this->getLocalBoundColumn());
-        }
-        return self::singulariseCamelCaseSentence($this->getRemoteClass());
-    }
-
     public function getRemoteClass()
     {
         if (Zenderator::isUsingClassPrefixes()) {
             return  $this->transCamel2Studly->transform($this->getRemoteBoundSchema()) .
                     $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
         }
-        return  $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
+        return $this->transCamel2Studly->transform($this->getRemoteTableSanitised());
     }
 
     public function getLocalBoundColumnGetter()
@@ -250,6 +238,16 @@ class RelatedModel extends Entity
     public function getRemoteBoundColumnGetter()
     {
         return "get" . $this->transCamel2Studly->transform($this->getRemoteBoundColumn());
+    }
+
+    public function getLocalBoundColumnSetter()
+    {
+        return "set" . $this->transCamel2Studly->transform($this->getLocalBoundColumn());
+    }
+
+    public function getRemoteBoundColumnSetter()
+    {
+        return "set" . $this->transCamel2Studly->transform($this->getRemoteBoundColumn());
     }
 
     /**
@@ -290,5 +288,19 @@ class RelatedModel extends Entity
             ->setLocalBoundColumn($localColumn)
             ->setRemoteBoundSchema($remoteSchema)
             ->setRemoteBoundColumn($remoteColumn);
+    }
+
+    /**
+     * Singularise the very last word of a camelcase sentence: bigSmellyHorses => bigSmellyHorse
+     *
+     * @param string $camel
+     *
+     * @return string
+     */
+    private function singulariseCamelCaseSentence(string $camel): string
+    {
+        $snake = explode("_", $this->transCamel2Snake->transform($camel));
+        $snake[count($snake) - 1] = Inflect::singularize($snake[count($snake) - 1]);
+        return $this->transSnake2Camel->transform(implode("_", $snake));
     }
 }
