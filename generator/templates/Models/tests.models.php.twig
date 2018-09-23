@@ -216,7 +216,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName }}Object"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName|singularize }}Object"));
 
         // Call the function on it
         ${{ class_name|singularize|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ related_object.getRemoteFunctionName }}Object();
@@ -235,7 +235,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize }}Object"));
 
         /** @var TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway $tableGateway */
         $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway::class);
@@ -259,7 +259,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName }}Objects"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize }}Objects"));
 
         /** @var TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway $tableGateway */
         $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway::class);
