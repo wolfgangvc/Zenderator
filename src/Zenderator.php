@@ -3,6 +3,7 @@ namespace Zenderator;
 
 use Camel\CaseTransformer;
 use Camel\Format;
+use Gone\Twig\InflectionExtension;
 use Gone\Twig\TransformExtension;
 use GuzzleHttp\Client;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
@@ -149,6 +150,7 @@ class Zenderator
         $this->twig   = new \Twig_Environment($this->loader, ['debug' => true]);
         $this->twig->addExtension(new \Twig_Extension_Debug());
         $this->twig->addExtension(new TransformExtension());
+        $this->twig->addExtension(new InflectionExtension());
 
         $this->twig->addExtension(
             new \Segura\AppCore\Twig\Extensions\ArrayUniqueTwigExtension()

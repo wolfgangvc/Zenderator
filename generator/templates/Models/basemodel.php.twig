@@ -129,9 +129,9 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
 {% if related_object.getRemoteFunctionName != class_name %}
-    public function fetch{{ related_object.getRemoteFunctionName }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
+    public function fetch{{ related_object.getRemoteFunctionName|singularize }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
 {% else %}
-    public function fetchRelated{{ related_object.getRemoteFunctionName }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
+    public function fetchRelated{{ related_object.getRemoteFunctionName|singularize }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
 {% endif %}
     {
         /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
@@ -154,12 +154,12 @@ abstract class Base{{ class_name }}Model
      * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
      * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
      *
-     * @return null|Models\{{ related_object.getRemoteClass }}Model
+     * @return null|Models\{{ remote_object.getLocalClass }}Model
      *
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function fetch{{ remote_object.getLocalFunctionName }}Object(
+    public function fetch{{ remote_object.getLocalFunctionName|singularize }}Object(
 {% if remote_object.local_model_key != 'id' %}
         $orderBy = null,
         $orderDirection='ASC'
@@ -184,7 +184,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function fetch{{ remote_object.getLocalFunctionName }}Objects(
+    public function fetch{{ remote_object.getLocalFunctionName|singularize }}Objects(
         int $limit = null,
         string $orderBy = null,
         string $orderDirection='ASC'
@@ -204,7 +204,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function count{{ remote_object.getLocalFunctionName }}Objects() : int {
+    public function count{{ remote_object.getLocalFunctionName|singularize }}Objects() : int {
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
         ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
 {% if remote_object.local_model_key == 'id' %}

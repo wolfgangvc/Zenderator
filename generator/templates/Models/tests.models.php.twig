@@ -49,24 +49,24 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
             $table->save($dummyObject);
         }
 
-        ${{ class_name|lower }} = $table->fetchRandom();
-        $this->assertTrue(${{ class_name|lower }} instanceof {{ class_name }}Model, "Make sure that \"" . get_class(${{ class_name|lower }}) . "\" matches \"{{ class_name }}Model\"") ;
+        ${{ class_name|singularize|transform_studly_to_camel }} = $table->fetchRandom();
+        $this->assertTrue(${{ class_name|singularize|transform_studly_to_camel }} instanceof {{ class_name }}Model, "Make sure that \"" . get_class(${{ class_name|singularize|transform_studly_to_camel }}) . "\" matches \"{{ class_name }}Model\"") ;
 
-        return ${{ class_name|lower }};
+        return ${{ class_name|singularize|transform_studly_to_camel }};
     }
 
     public function testNewMockModelInstance()
     {
         /** @var {{ class_name }}TableGateway $table */
         $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
-        $newMockModel = $table->getNewMockModelInstance();
+        $new{{ remote_object.getLocalFunctionName }}Model = $table->getNewMockModelInstance();
 
         $this->assertInstanceOf(
             Models\{{ class_name }}Model::class,
-            $newMockModel
-            );
+            $new{{ remote_object.getLocalFunctionName }}Model
+        );
 
-        return $newMockModel;
+        return $new{{ remote_object.getLocalFunctionName }}Model;
     }
 
     public function testNewModelFactory()
@@ -143,7 +143,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {% else %}
         $input = self::getFaker()->word;
 {% endif %}
-        $test{{ class_name }}->set{{ column.field }}($input);
+        $test{{ class_name }}->set{{ column.field|transform_camel_to_studly }}($input);
         $this->assertEquals($input, $test{{ class_name }}->get{{ column.field }}());
 {% endfor %}
     }
@@ -153,11 +153,11 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /**
     * @depends testGetRandom
     */
-    public function testFetch{{ column.field }}Object({{ class_name }}Model ${{ class_name|lower }})
+    public function testFetch{{ column.field }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
-        $this->assertTrue(method_exists(${{ class_name|lower }}, "fetch{{ column.field }}Object"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ column.field }}Object"));
 
-        ${{ column.field }}Object = ${{ class_name|lower }}->fetch{{ column.field }}Object();
+        ${{ column.field }}Object = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ column.field }}Object();
         $this->assertInstanceOf(
             Models\{{ column.constraints.remote_model_class }}Model::class,
             ${{ column.field }}Object
@@ -171,19 +171,19 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     {
         /** @var {{ class_name }}TableGateway $table */
         $table = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
-        $newMockModel = $table->getNewMockModelInstance();
+        $new{{ remote_object.getLocalFunctionName }}Model = $table->getNewMockModelInstance();
 
         // Set primary keys to null.
 {% for primary_parameter in autoincrement_parameters %}
-        $newMockModel->set{{ primary_parameter }}(null);
+        $new{{ remote_object.getLocalFunctionName }}Model->set{{ primary_parameter }}(null);
 {% endfor %}
 
         // Save the object
-        $newMockModel->save();
+        $new{{ remote_object.getLocalFunctionName }}Model->save();
 
         // verify that the AI keys have been set.
 {% for primary_parameter in primary_parameters %}
-        $this->assertNotNull($newMockModel->get{{ primary_parameter }}());
+        $this->assertNotNull($new{{ remote_object.getLocalFunctionName }}Model->get{{ primary_parameter }}());
 {% endfor %}
     }
 {% endif %}
@@ -213,15 +213,15 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName }}Object({{ class_name }}Model ${{ class_name }})
+    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ related_object.getRemoteFunctionName }}Object"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName }}Object"));
 
         // Call the function on it
-        ${{ class_name }}Model = ${{ class_name }}->fetch{{ related_object.getRemoteFunctionName }}Object();
+        ${{ class_name|singularize|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ related_object.getRemoteFunctionName }}Object();
 
-        $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class_name }}Model);
+        $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class_name|singularize|transform_studly_to_camel }}Model);
     }
 
 {% endfor %}
@@ -232,51 +232,51 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Object({{ class_name }}Model ${{ class_name }})
+    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName }}Object"));
 
-        /** @var TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway $tableGateway */
-        $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway::class);
+        /** @var TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway $tableGateway */
+        $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway::class);
 
-        ${{ class_name }} = ${{ class_name }}->save();
+        ${{ class_name|singularize|transform_studly_to_camel }} = ${{ class_name|singularize|transform_studly_to_camel }}->save();
 
-        /** @var Models\{{ remote_object.getLocalFunctionName }}sModel $newMockModel */
-        $newMockModel = $tableGateway->getNewMockModelInstance();
-        $newMockModel->set{{ remote_object.getRemoteFunctionName }}Id(${{ class_name }}->getId());
-        $newMockModel->save();
+        /** @var Models\{{ remote_object.getLocalFunctionName }}Model $new{{ remote_object.getLocalFunctionName }}Model */
+        $new{{ remote_object.getLocalFunctionName }}Model = $tableGateway->getNewMockModelInstance();
+        $new{{ remote_object.getLocalFunctionName }}Model->set{{ remote_object.getLocalFunctionName|transform_camel_to_studly  }}Id(${{ class_name|singularize|transform_studly_to_camel }}->getId());
+        $new{{ remote_object.getLocalFunctionName }}Model->save();
 
         // Call the function on it
-        ${{ remote_object.getLocalFunctionName }}Model = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Object();
+        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName }}Object();
 
-        $this->assertInstanceOf(Models\{{ remote_object.getLocalFunctionName }}sModel::class, ${{ remote_object.getLocalFunctionName }}Model);
+        $this->assertInstanceOf(Models\{{ remote_object.getLocalFunctionName }}Model::class, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Model);
     }
 
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name }})
+    public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName }}Objects({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name }}, "fetch{{ remote_object.getLocalFunctionName }}Objects"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName }}Objects"));
 
-        /** @var TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway $tableGateway */
-        $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}sTableGateway::class);
+        /** @var TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway $tableGateway */
+        $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalFunctionName }}TableGateway::class);
 
-        ${{ class_name }} = ${{ class_name }}->save();
+        ${{ class_name|singularize|transform_studly_to_camel }} = ${{ class_name|singularize|transform_studly_to_camel }}->save();
 
-        /** @var Models\{{ remote_object.getLocalFunctionName }}sModel $newMockModel */
-        $newMockModel = $tableGateway->getNewMockModelInstance();
-        $newMockModel->set{{ remote_object.getRemoteFunctionName }}Id(${{ class_name }}->getId());
-        $newMockModel->save();
+        /** @var Models\{{ remote_object.getLocalFunctionName }}Model $new{{ remote_object.getLocalFunctionName }}Model */
+        $new{{ remote_object.getLocalFunctionName }}Model = $tableGateway->getNewMockModelInstance();
+        $new{{ remote_object.getLocalFunctionName }}Model->set{{ remote_object.getLocalFunctionName|transform_camel_to_studly }}Id(${{ class_name|singularize|transform_studly_to_camel }}->getId());
+        $new{{ remote_object.getLocalFunctionName }}Model->save();
 
         // Call the function on it
-        ${{ remote_object.getLocalFunctionName }}Models = ${{ class_name }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
+        ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ remote_object.getLocalFunctionName }}Objects();
 
-        $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalFunctionName }}sModel::class, ${{ remote_object.getLocalFunctionName }}Models);
+        $this->assertContainsOnlyInstancesOf(Models\{{ remote_object.getLocalFunctionName }}Model::class, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models);
 
-        return [${{ class_name }}, ${{ remote_object.getLocalFunctionName }}Models];
+        return [${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models];
     }
 
     /**
@@ -284,15 +284,19 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
      */
     public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName }}Objects($list)
     {
-        list(${{ class_name }}, ${{ remote_object.getLocalFunctionName }}Models) = $list;
+        /**
+         * @var ${{ class_name|singularize|transform_studly_to_camel }} Models\{{ class_name|transform_camel_to_studly }}Model[]
+         * @var ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models Models\{{ remote_object.getLocalFunctionName }}Model
+         */
+        list(${{ class_name|singularize|transform_studly_to_camel }}, ${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models) = $list;
 
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name }}, "count{{ remote_object.getLocalFunctionName }}Objects"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "count{{ remote_object.getLocalFunctionName }}Objects"));
 
         // Call the function on it
-        $count = ${{ class_name }}->count{{ remote_object.getLocalFunctionName }}Objects();
+        $count = ${{ class_name|singularize|transform_studly_to_camel }}->count{{ remote_object.getLocalFunctionName }}Objects();
 
-        $this->assertEquals(count(${{ remote_object.getLocalFunctionName }}Models), $count);
+        $this->assertEquals(count(${{ remote_object.getLocalFunctionName|transform_studly_to_camel }}Models), $count);
     }
 
 {% endfor %}
