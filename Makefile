@@ -3,7 +3,7 @@ NAME = utils/sdkifier
 DATE=`date +%Y-%m-%d`
 USERID=$(shell id -u)
 
-all: build
+all: build push
 
 clean:
 	rm SDK/ -Rf
@@ -18,21 +18,12 @@ build: prepare clean
 push:
 	docker push index.segurasystems.com/$(NAME):latest
 
-run: clean
-	mkdir SDK;
-	docker run \
-		-ti \
-		-u $(USERID) \
-		--rm \
-		-v `pwd`/SDK:/SDK \
-		--network="host" \
-		index.segurasystems.com/utils/sdkifier \
-		/SDK \
-		DAL \
-		http://dal.segurasystems.test/
+test-prepare:
+	composer update -d tests/example-app
+	rm -Rf tests/example-app/vendor/segura/zenderator
+	rsync -ar --exclude vendor/ --exclude .git/ . tests/example-app/vendor/segura/zenderator
+	docker-compose -f tests/docker-compose.yml -p zenderator-example build sut
 
-test:
-	docker pull php:7.0-cli
-	cd SDK && \
-	composer install --dev && \
-	./run-tests.sh
+test: test-prepare
+	docker-compose -f tests/docker-compose.yml -p zenderator-example run sut ls -lah
+	docker-compose -f tests/docker-compose.yml -p zenderator-example run sut vendor/bin/automize -h

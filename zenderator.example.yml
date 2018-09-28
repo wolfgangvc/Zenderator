@@ -6,6 +6,8 @@ templates:
   - Routes
 formatting:
   - clean
+sql:
+  - SQL
 clean:
   paths:
-    - "/vendor/segura/appcore"
+  - "/vendor/segura/appcore"
