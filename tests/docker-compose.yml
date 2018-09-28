@@ -1,0 +1,29 @@
+version: '2.3'
+
+volumes:
+  mysql:
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=ESD9ttNo7GdqOlt
+      - MYSQL_USER=readthat
+      - MYSQL_PASSWORD=uwJS6mkkmW99IIx
+      - MYSQL_DATABASE=readthat
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 127.0.0.49:3306:3306
+
+  sut:
+    build: example-app
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=readthat
+      - MYSQL_PASSWORD=uwJS6mkkmW99IIx
+      - MYSQL_DATABASE=readthat
+    volumes:
+      - ./example-app/:/app
+    ports:
+      - 127.0.0.49:80:80

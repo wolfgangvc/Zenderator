@@ -1,0 +1,11 @@
+templates:
+  - Models
+  - Services
+  - Controllers
+  - Endpoints
+  - Routes
+formatting:
+  - psr2
+  - clean
+sql:
+  - SQL
