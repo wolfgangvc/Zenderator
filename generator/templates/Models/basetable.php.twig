@@ -96,10 +96,15 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% if column.isAutoIncrement %}
 {% elseif column.hasRelatedObjects %}
 {% if class_name|capitalize != column.getRelatedObjects()[0].getRemoteVariable|capitalize %}
-    '{{ column.getField }}' =>
-        $random{{ column.getRelatedObjects()[0].getRemoteClass }} instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
-            ? $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}()
-            : $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+{% if column.isUnique == false %}
+        '{{ column.getField }}' =>
+            $random{{ column.getRelatedObjects()[0].getRemoteClass }} instanceof Models\{{ column.getRelatedObjects()[0].getRemoteClass }}Model
+                ? $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->fetchRandom()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}()
+                : $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+{% else %}
+        '{{ column.getField }}' =>
+            $this->{{ column.getRelatedObjects()[0].getRemoteVariable }}TableGateway->getNewMockModelInstance()->save()->{{ column.getRelatedObjects()[0].getRemoteBoundColumnGetter }}(),
+{% endif %}
 {% else %}
     '{{ column.getField }}' => null, // This is a circular reference - We'd just be creating elements for eternity if we don't stop the madness.
 {% endif %}
@@ -113,7 +118,7 @@ abstract class Base{{ class_name }}TableGateway extends AbstractTableGateway
 {% elseif column.getDbType == 'datetime' and column.getPhpType == 'string' %}
         '{{ column.getField }}' => $this->faker->dateTime()->format("Y-m-d H:i:s"), // @todo: Make datetime fields accept DateTime objects instead of strings. - MB
 {% elseif column.getPhpType == 'float' %}
-        '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, -5, 5),
+        '{{ column.getField }}' => $this->faker->randomFloat({{ column.getMaxDecimalPlaces }}, {{ column.isUnsigned ? 0 : -5 }}, 5),
 {% elseif column.getMaxLength %}
         '{{ column.getField }}' => substr($this->faker->text({{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} >= 5 ? {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }} : 5), 0, {{ column.getMaxLength < 500 ? column.getMaxLength : 500 }}),
 {% elseif column.getDbType == 'json' %}

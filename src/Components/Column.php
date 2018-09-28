@@ -14,11 +14,13 @@ class Column extends Entity
     protected $dbType;
     protected $phpType;
     protected $maxLength;
+    protected $isUnsigned = false;
     protected $maxFieldLength;
     protected $maxDecimalPlaces;
     protected $permittedValues;
     protected $defaultValue;
     protected $isAutoIncrement = false;
+    protected $isUnique = false;
     /** @var RelatedModel[] */
     protected $relatedObjects = [];
     /** @var RelatedModel[] */
@@ -54,6 +56,24 @@ class Column extends Entity
     /**
      * @return bool
      */
+    public function isUnsigned(): bool
+    {
+        return $this->isUnsigned;
+    }
+
+    /**
+     * @param bool $isUnsigned
+     * @return Column
+     */
+    public function setIsUnsigned(bool $isUnsigned): Column
+    {
+        $this->isUnsigned = $isUnsigned;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
     public function isAutoIncrement(): bool
     {
         return $this->isAutoIncrement;
@@ -67,6 +87,24 @@ class Column extends Entity
     public function setIsAutoIncrement(bool $isAutoIncrement): Column
     {
         $this->isAutoIncrement = $isAutoIncrement;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUnique(): bool
+    {
+        return $this->isUnique;
+    }
+
+    /**
+     * @param bool $isUnique
+     * @return Column
+     */
+    public function setIsUnique(bool $isUnique): Column
+    {
+        $this->isUnique = $isUnique;
         return $this;
     }
 

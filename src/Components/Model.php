@@ -192,6 +192,17 @@ class Model extends Entity
             if ($zendConstraint->getType() == "PRIMARY KEY") {
                 $this->primaryKeys = $zendConstraint->getColumns();
             }
+            if ($zendConstraint->getType() == "UNIQUE"){
+                if($this->getClassName() == 'PermissionGroup') {
+                    foreach ($this->columns as $column) {
+                        foreach ($zendConstraint->getColumns() as $affectedColumn) {
+                            if ($column->getPropertyName() == $affectedColumn) {
+                                $column->setIsUnique(true);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Sort related objects into their column objects also
@@ -375,6 +386,7 @@ class Model extends Entity
                 ->setDbType(reset($typeFragments))
                 ->setPermittedValues($column->getErrata('permitted_values'))
                 ->setMaxDecimalPlaces($column->getNumericScale())
+                ->setIsUnsigned($column->getNumericUnsigned())
                 ->setDefaultValue($column->getColumnDefault());
 
             /**
