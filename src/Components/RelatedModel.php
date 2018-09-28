@@ -154,6 +154,38 @@ class RelatedModel extends Entity
         return $this;
     }
 
+    public function getLocalTableGatewayName()
+    {
+        return $this->transCamel2Studly->transform(
+            $this->getLocalClass()
+            ."TableGateway"
+        );
+    }
+
+    public function getRemoteTableGatewayName()
+    {
+        return $this->transCamel2Studly->transform(
+            $this->getRemoteClass()
+            ."TableGateway"
+        );
+    }
+
+    public function getLocalModelName()
+    {
+        return $this->transCamel2Studly->transform(
+            $this->getLocalClass()
+            ."Model"
+        );
+    }
+
+    public function getRemoteModelName()
+    {
+        return $this->transCamel2Studly->transform(
+            $this->getRemoteClass()
+            ."Model"
+        );
+    }
+
     public function getLocalFunctionName()
     {
         if ($this->hasClassConflict()) {

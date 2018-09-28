@@ -150,6 +150,7 @@ abstract class Base{{ class_name }}Model
      * "Referenced By" Remote Constraint Object Fetchers *
      *****************************************************/
 {% for remote_object in remote_objects %}
+{% if remote_object.getLocalClass != class_name %}
     /**
      * @param $orderBy string Column to order by. Recommended to use the Constants in Models\{{ remote_object.getLocalClass }}Model::
      * @param $orderDirection string Either "DESC" or "ASC". Recommend using Select::ORDER_ASCENDING or Select::ORDER_DESCENDING
@@ -159,7 +160,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function fetch{{ remote_object.getLocalFunctionName|singularize }}Object(
+    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Object(
 {% if remote_object.local_model_key != 'id' %}
         $orderBy = null,
         $orderDirection='ASC'
@@ -184,7 +185,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function fetch{{ remote_object.getLocalFunctionName|singularize }}Objects(
+    public function fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects(
         int $limit = null,
         string $orderBy = null,
         string $orderDirection='ASC'
@@ -204,7 +205,7 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function count{{ remote_object.getLocalFunctionName|singularize }}Objects() : int {
+    public function count{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects() : int {
         /** @var ${{ remote_object.getLocalVariable }}Service Services\{{ remote_object.getLocalClass }}Service */
         ${{ remote_object.getLocalVariable }}Service = App::Container()->get(Services\{{ remote_object.getLocalClass }}Service::class);
 {% if remote_object.local_model_key == 'id' %}
@@ -213,7 +214,7 @@ abstract class Base{{ class_name }}Model
         return ${{ remote_object.getLocalVariable }}Service->countByField('{{ remote_object.getLocalBoundColumn }}', $this->{{ remote_object.getRemoteBoundColumnGetter }}());
 {% endif %}
     }
-
+{% endif %}
 {% endfor %}
 {% endif %}
 
