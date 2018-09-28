@@ -18,14 +18,18 @@ abstract class Base{{ class_name }}Service
 
     // Related Objects Table Gateways
 {% for related_object in related_objects_shared|sort|unique %}
+{% if related_object.getRemoteClass != class_name %}
     /** @var TableGateways\{{ related_object.getRemoteClass }}TableGateway */
     protected ${{ related_object.getRemoteVariable }}TableGateway;
+{% endif %}
 {% endfor %}
 
     // Remote Constraints Table Gateways
 {% for remote_constraint in remote_constraints %}
+{% if remote_contraint.getRemoteClass != class_name %}
     /** @var TableGateways\{{ remote_constraint.getLocalClass }}TableGateway */
     protected ${{ remote_constraint.getLocalVariable }}TableGateway;
+{% endif %}
 {% endfor %}
 
     // Self Table Gateway
@@ -36,28 +40,40 @@ abstract class Base{{ class_name }}Service
      * Constructor.
      *
 {% for related_object in related_objects_shared|sort|unique %}
+{% if related_object.getRemoteClass != class_name %}
      * @param TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway
+{% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
+{% if remote_contraint.getRemoteClass != class_name %}
      * @param TableGateways\{{ remote_constraint.getLocalClass }}TableGateway ${{ remote_constraint.getLocalVariable }}TableGateway
+{% endif %}
 {% endfor %}
      * @param TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
      */
     public function __construct(
 {% for related_object in related_objects_shared|sort|unique %}
+{% if related_object.getRemoteClass != class_name %}
         TableGateways\{{ related_object.getRemoteClass }}TableGateway ${{ related_object.getRemoteVariable }}TableGateway,
+{% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
+{% if remote_contraint.getRemoteClass != class_name %}
         TableGateways\{{ remote_constraint.getLocalClass }}TableGateway ${{ remote_constraint.getLocalVariable }}TableGateway,
+{% endif %}
 {% endfor %}
         TableGateways\{{ class_name }}TableGateway ${{ variable_name }}TableGateway
     )
     {
 {% for related_object in related_objects_shared|sort|unique %}
+{% if related_object.getRemoteClass != class_name %}
         $this->{{ related_object.getRemoteVariable }}TableGateway = ${{ related_object.getRemoteVariable }}TableGateway;
+{% endif %}
 {% endfor %}
 {% for remote_constraint in remote_constraints %}
-        $this->{{ remote_constraint.getLocalVariable }}TableGateway = ${{ remote_constraint.getLocalVariable }}TableGateway;
+{% if remote_contraint.getRemoteClass != class_name %}
+    $this->{{ remote_constraint.getLocalVariable }}TableGateway = ${{ remote_constraint.getLocalVariable }}TableGateway;
+{% endif %}
 {% endfor %}
         $this->{{ variable_name }}TableGateway = ${{ variable_name }}TableGateway;
     }

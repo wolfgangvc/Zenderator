@@ -129,9 +129,9 @@ abstract class Base{{ class_name }}Model
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
 {% if related_object.getRemoteFunctionName != class_name %}
-    public function fetch{{ related_object.getRemoteFunctionName|singularize }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
+    public function fetch{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
 {% else %}
-    public function fetchRelated{{ related_object.getRemoteFunctionName|singularize }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
+    public function fetchRelated{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object() : ?Models\{{ related_object.getRemoteClass }}Model
 {% endif %}
     {
         /** @var ${{ related_object.getRemoteClass }}Service Services\{{ related_object.getRemoteClass }}Service */
@@ -144,7 +144,6 @@ abstract class Base{{ class_name }}Model
     }
 
 {% endfor %}
-
 {% if remote_objects %}
     /*****************************************************
      * "Referenced By" Remote Constraint Object Fetchers *

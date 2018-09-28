@@ -15,11 +15,22 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /** @var {{ class_name }}Model */
     protected $testInstance;
 
+    /** @var Model[] */
+    static private $cleanupList;
+
     public function setUp()
     {
         parent::setUp();
         $this->testTableGateway = $this->getDIContainer()->get({{ class_name }}TableGateway::class);
         $this->testInstance = $this->testTableGateway->getNewMockModelInstance();
+    }
+
+    public static function tearDownAfterClass()
+    {
+        foreach(self::$cleanupList as $model){
+            $model->destroy();
+        }
+        parent::tearDownAfterClass();
     }
 
     public function testExchangeArray()
@@ -65,6 +76,10 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
             Models\{{ class_name }}Model::class,
             $new{{ remote_object.getLocalModelName }}
         );
+
+        $new{{ remote_object.getLocalModelName }}->save();
+
+        self::$cleanupList[] = $new;
 
         return $new{{ remote_object.getLocalModelName }};
     }
@@ -217,13 +232,13 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     /**
      * @depends testNewMockModelInstance
      */
-    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
+    public function test_RelatedObjects_Fetch{{ related_object.getRemoteFunctionName|transform_camel_to_studly }}Object({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName|singularize }}Object"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ related_object.getRemoteFunctionName|singularize|transform_camel_to_studly }}Object"));
 
         // Call the function on it
-        ${{ class_name|singularize|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ related_object.getRemoteFunctionName }}Object();
+        ${{ class_name|singularize|transform_studly_to_camel }}Model = ${{ class_name|singularize|transform_studly_to_camel }}->fetch{{ related_object.getRemoteFunctionName|transform_camel_to_studly }}Object();
 
         $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class_name|singularize|transform_studly_to_camel }}Model);
     }
@@ -239,7 +254,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     public function test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize }}Objects({{ class_name }}Model ${{ class_name|singularize|transform_studly_to_camel }})
     {
         // Verify the function exists
-        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize }}Objects"));
+        $this->assertTrue(method_exists(${{ class_name|singularize|transform_studly_to_camel }}, "fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects"));
 
         /** @var TableGateways\{{ remote_object.getLocalTableGatewayName }} $tableGateway */
         $tableGateway = $this->getDIContainer()->get(TableGateways\{{ remote_object.getLocalTableGatewayName }}::class);
@@ -282,9 +297,9 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
     }
 
     /**
-     * @depends test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize }}Objects
+     * @depends test_RemoteObjects_Fetch{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects
      */
-    public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName|singularize }}Objects($list)
+    public function test_RemoteObjects_Count{{ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly }}Objects($list)
     {
         /**
          * @var ${{ class_name|singularize|transform_studly_to_camel }} Models\{{ class_name|transform_camel_to_studly }}Model
