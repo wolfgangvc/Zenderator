@@ -2,11 +2,13 @@
 namespace Segura\SDK\{{ app_name }}\Models\Base;
 
 use Segura\SDK\Common\Abstracts\AbstractModel;
+use Segura\SDK\Common\Traits\PresentableTrait;
 use Segura\SDK\{{ app_name }}\AccessLayer\{{ pack_name }}AccessLayer;
 use Segura\SDK\{{ app_name }}\Models\{{ pack_name }}Model;
 
 abstract class Base{{ pack_name }}Model extends AbstractModel
 {
+    use PresentableTrait;
 
 {% for property in properties %}
     const FIELD_{{ property|transform_studly_to_screamingsnake }} = '{{ property }}';
