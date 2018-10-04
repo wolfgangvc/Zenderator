@@ -24,16 +24,21 @@
         ];
 {% endif %}
         /** @var $response \GuzzleHttp\Psr7\Response */
-        $endpoint = "{{ route.pattern }}";
-        $method = "{{ route.method }}";
 
 {% if route.callbackProperties %}
+        $endpoint = $this->replaceUrlElements(
+            "{{ route.pattern }}",
+            [
 {% for callbackProperty in route.callbackProperties %}
-        if (is_numeric(${{ callbackProperty.name }}) || is_string(${{ callbackProperty.name }})) {
-            $endpoint = str_replace('{' . '{{ callbackProperty.name }}' . '}', ${{ callbackProperty.name }}, $endpoint);
-        }
+                '{{ '{' }}{{ callbackProperty.name }}{{ '}' }}' => ${{ callbackProperty.name }},
 {% endfor %}
+            ]
+        );
+{% else %}
+        $endpoint = "{{ route.pattern }}";
 {% endif %}
+        $method = "{{ route.method }}";
+
         try {
             $response = $this->request(
                 $method,
