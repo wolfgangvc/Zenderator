@@ -30,7 +30,7 @@
             "{{ route.pattern }}",
             [
 {% for callbackProperty in route.callbackProperties %}
-                '{{ '{' }}{{ callbackProperty.name }}{{ '}' }}' => ${{ callbackProperty.name }},
+                '{{ callbackProperty.name }}' => ${{ callbackProperty.name }},
 {% endfor %}
             ]
         );
