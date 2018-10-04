@@ -341,7 +341,7 @@ class Zenderator
         return $this;
     }
 
-    public function runTests($withCoverage = false, $haltOnError = false, $debug = false) : int
+    public function runTests(bool $withCoverage = false, bool$haltOnError = false, string $testSuite = '', bool $debug = false) : int
     {
         echo "Running phpunit... \n";
 
@@ -354,6 +354,7 @@ class Zenderator
             "./vendor/bin/phpunit " .
             ($withCoverage ? "--coverage-php=build/coverage_report.php --coverage-text" : "--no-coverage") . " " .
             ($haltOnError  ? "--stop-on-failure --stop-on-error --stop-on-warning" : "") . " " .
+            ($testSuite ? "--testsuite={$testSuite}" : "") . " " .
             ($debug ? "--debug" : "")
         ;
         echo " > {$phpunitCommand}\n\n";
