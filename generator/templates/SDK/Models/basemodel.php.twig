@@ -50,7 +50,10 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
 
     public function set{{ property }}(${{ property }}) : {{ pack_name }}Model
     {
-        $this->{{ property }} = ${{ property }};
+        if($this->{{ property }} != ${{ property }}){
+            $this->addDirtyKey('{{ property }}');
+            $this->{{ property }} = ${{ property }};
+        }
         return $this;
     }
 
