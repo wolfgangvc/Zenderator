@@ -63,6 +63,7 @@ class Column extends Entity
 
     /**
      * @param bool $isUnsigned
+     *
      * @return Column
      */
     public function setIsUnsigned(bool $isUnsigned): Column
