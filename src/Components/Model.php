@@ -192,8 +192,8 @@ class Model extends Entity
             if ($zendConstraint->getType() == "PRIMARY KEY") {
                 $this->primaryKeys = $zendConstraint->getColumns();
             }
-            if ($zendConstraint->getType() == "UNIQUE"){
-                if($this->getClassName() == 'PermissionGroup') {
+            if ($zendConstraint->getType() == "UNIQUE") {
+                if ($this->getClassName() == 'PermissionGroup') {
                     foreach ($this->columns as $column) {
                         foreach ($zendConstraint->getColumns() as $affectedColumn) {
                             if ($column->getPropertyName() == $affectedColumn) {

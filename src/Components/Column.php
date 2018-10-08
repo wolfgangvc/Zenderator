@@ -100,6 +100,7 @@ class Column extends Entity
 
     /**
      * @param bool $isUnique
+     *
      * @return Column
      */
     public function setIsUnique(bool $isUnique): Column

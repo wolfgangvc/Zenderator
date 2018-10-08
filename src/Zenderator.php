@@ -270,8 +270,8 @@ class Zenderator
     public function sanitiseTableName($tableName)
     {
         if (isset($this->config['database']) && isset($this->config['database']['remove_prefix'])) {
-            if(substr($tableName,0,strlen($this->config['database']['remove_prefix'])) == $this->config['database']['remove_prefix']){
-                return substr($tableName,2);
+            if (substr($tableName, 0, strlen($this->config['database']['remove_prefix'])) == $this->config['database']['remove_prefix']) {
+                return substr($tableName, 2);
             }
         }
         return $tableName;
