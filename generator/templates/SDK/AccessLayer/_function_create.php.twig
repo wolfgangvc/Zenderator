@@ -8,10 +8,14 @@
         /** @var $response \GuzzleHttp\Psr7\Response */
         $endpoint = "{{ route.pattern }}";
         $method = "{{ route.method }}";
+        $headers = [
+            'Accept' => 'application/json',
+        ];
         $response = $this->request(
             $method,
             $endpoint,
             [
+                'headers' => $headers,
                 'body' => json_encode($propertyArray),
             ]
         );
