@@ -793,16 +793,23 @@ class Zenderator
                 'routes'     => $routes,
             ];
             $properties = [];
+            $propertiesOptions = [];
             foreach ($routes as $route) {
                 if (isset($route['properties'])) {
                     foreach ($route['properties'] as $property) {
                         $properties[] = $property;
                     }
                 }
+                if(isset($route['propertiesOptions'])){
+                    foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
+                        $propertiesOptions[$propertyName] = $propertyOption;
+                    }
+                }
             }
+
             $properties                    = array_unique($properties);
             $routeRenderData['properties'] = $properties;
-
+            $routeRenderData['propertiesOptions'] = $propertiesOptions;
             $routeRenderData = array_merge($sharedRenderData, $routeRenderData);
             #\Kint::dump($routeRenderData);
 

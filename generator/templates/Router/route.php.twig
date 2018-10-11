@@ -35,6 +35,17 @@ $router = \Segura\AppCore\Router\Router::Instance()
                 '{{ column.getPropertyFunction }}',
 {% endfor %}
             ])
+            ->setPropertyOptions([
+{% for column in columns %}
+{% if column.getDbType == 'enum' and column.getPhpType == 'string' %}
+                '{{ column.getPropertyFunction }}' => [
+{% for permittedValue in column.getPermittedValues %}
+                    "{{ permittedValue }}",
+{% endfor %}
+                ],
+{% endif %}
+{% endfor %}
+            ])
             ->setAccess(DEFAULT_ROUTE_ACCESS_MODE)
             ->setExampleEntityFindFunction($exampleExistingObjectFindFunction)
     )

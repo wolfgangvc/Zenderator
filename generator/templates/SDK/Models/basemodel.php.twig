@@ -14,6 +14,12 @@ abstract class Base{{ pack_name }}Model extends AbstractModel
     const FIELD_{{ property|transform_studly_to_screamingsnake }} = '{{ property }}';
 {% endfor %}
 
+{% for propertyName, property in propertiesOptions %}
+{% for permittedValue in property %}
+    const {{ propertyName|transform_studly_to_screamingsnake }}_{{ permittedValue|upper|replace({'-':'_'}) }} = '{{ permittedValue }}';
+{% endfor %}
+{% endfor %}
+
     // Properties
 {% for property in properties %}
     protected ${{ property }};
