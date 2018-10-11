@@ -800,7 +800,7 @@ class Zenderator
                         $properties[] = $property;
                     }
                 }
-                if(isset($route['propertiesOptions'])){
+                if (isset($route['propertiesOptions'])) {
                     foreach ($route['propertiesOptions'] as $propertyName => $propertyOption) {
                         $propertiesOptions[$propertyName] = $propertyOption;
                     }
