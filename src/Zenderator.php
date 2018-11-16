@@ -341,7 +341,12 @@ class Zenderator
         return $this;
     }
 
-    public function runTests(bool $withCoverage = false, bool$haltOnError = false, string $testSuite = '', bool $debug = false) : int
+    public function runTests(
+        bool $withCoverage = false, 
+        bool$haltOnError = false, 
+        string $testSuite = '', 
+        bool $debug = false
+    ) : int
     {
         echo "Running phpunit... \n";
 
