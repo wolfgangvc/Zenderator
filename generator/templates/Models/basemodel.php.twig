@@ -69,7 +69,7 @@ abstract class Base{{ class_name }}Model
     }
 
     /**
-     * @returns array
+     * @return array
      */
     public function getPropertyMeta()
     {
@@ -107,7 +107,7 @@ abstract class Base{{ class_name }}Model
 
 {% for column in columns %}
     /**
-     * @returns {{ column.phptype }}
+     * @return {{ column.phptype }}
      */
     public function get{{ column.getPropertyFunction }}() {% if column.phptype %}: ?{{ column.phptype }}{% endif %}
     {
@@ -116,7 +116,7 @@ abstract class Base{{ class_name }}Model
 
     /**
      * @param {{ column.phptype }} ${{ column.getField }}
-     * @returns {{ class_name }}Model
+     * @return {{ class_name }}Model
      */
     public function set{{ column.getPropertyFunction }}({{ column.phptype }} ${{ column.getField }} = null) : {{ class_name }}Model
     {
@@ -299,7 +299,7 @@ abstract class Base{{ class_name }}Model
 
     /**
      * Provides an array of all properties in this model.
-     * @returns array
+     * @return array
      */
     public function getListOfProperties()
     {
