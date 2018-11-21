@@ -7,6 +7,8 @@ use \{{ namespace }}\Models\{{ class_name }}Model;
 use \{{ namespace }}\Models;
 use \Gone\UUID\UUID;
 
+{% set existingMethods = [] %}
+
 class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 {
     /** @var {{ class_name }}TableGateway */
@@ -229,6 +231,9 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
 
 {% if related_objects > 0 %}
 {% for related_object in related_objects %}
+
+{% if remote_object.getLocalFunctionName|singularize|transform_camel_to_studly not in existingMethods %}
+{% set existingMethods = existingMethods|merge([ remote_object.getLocalFunctionName|singularize|transform_camel_to_studly ]) %}
     /**
      * @depends testNewMockModelInstance
      */
@@ -243,11 +248,14 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $this->assertInstanceOf(Models\{{ related_object.getRemoteClass }}Model::class, ${{ class_name|singularize|transform_studly_to_camel }}Model);
     }
 
+{% endif %}
 {% endfor %}
 {% endif %}
 
 {% if remote_objects %}
 {% for remote_object in remote_objects %}
+{% if remote_object.getLocalFunctionName|singularize not in existingMethods %}
+{% set existingMethods = existingMethods|merge([ remote_object.getLocalFunctionName|singularize ]) %}
     /**
      * @depends testNewMockModelInstance
      */
@@ -316,6 +324,7 @@ class {{ class_name }}Test extends \Segura\AppCore\Test\BaseTestCase
         $this->assertCount($count, ${{ remote_object.getLocalFunctionName|singularize|transform_studly_to_camel }}Models);
     }
 
+{% endif %}
 {% endfor %}
 {% endif %}
     public function testGetPropertyMeta()
