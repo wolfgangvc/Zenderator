@@ -1,5 +1,5 @@
-BASE = base/cli
-NAME = utils/sdkifier
+BASE = gone/php:cli
+NAME = gone/sdkifier
 DATE=`date +%Y-%m-%d`
 USERID=$(shell id -u)
 
@@ -10,18 +10,18 @@ clean:
 
 prepare:
 	composer install
-	docker pull index.segurasystems.com/$(BASE)
+	docker pull $(BASE)
 
 build: prepare clean
-	docker build -t index.segurasystems.com/$(NAME):latest -f Dockerfile.SDKifier .
+	docker build -t $(NAME):latest -f Dockerfile.SDKifier .
 
 push:
-	docker push index.segurasystems.com/$(NAME):latest
+	docker push $(NAME):latest
 
 test-prepare:
 	composer update -d tests/example-app
-	rm -Rf tests/example-app/vendor/segura/zenderator
-	rsync -ar --exclude vendor/ --exclude .git/ . tests/example-app/vendor/segura/zenderator
+	rm -Rf tests/example-app/vendor/gone.io/zenderator
+	rsync -ar --exclude vendor/ --exclude .git/ . tests/example-app/vendor/gone.io/zenderator
 	docker-compose -f tests/docker-compose.yml -p zenderator-example build sut
 
 test: test-prepare
